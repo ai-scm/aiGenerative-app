@@ -532,6 +532,9 @@ const ChatPage: React.FC = () => {
                       botId={botId}
                     />
                   )}
+                  <div className="absolute mx-3 my-20 flex items-center justify-center text-4xl font-bold text-gray">
+                    {pageTitle}
+                  </div>
                 </div>
               ) : (
                 <>

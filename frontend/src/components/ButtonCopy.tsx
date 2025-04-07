@@ -3,6 +3,8 @@ import ButtonIcon from './ButtonIcon';
 import { BaseProps } from '../@types/common';
 import { PiCheck, PiClipboard } from 'react-icons/pi';
 import copy from 'copy-to-clipboard';
+import Tooltip from './Tooltip';
+import { useTranslation } from 'react-i18next';
 
 type Props = BaseProps & {
   text: string;
@@ -10,6 +12,7 @@ type Props = BaseProps & {
 
 const ButtonCopy: React.FC<Props> = (props) => {
   const [showsCheck, setshowsCheck] = useState(false);
+  const { t } = useTranslation();
 
   const copyMessage = useCallback((message: string) => {
     copy(message);
@@ -21,13 +24,18 @@ const ButtonCopy: React.FC<Props> = (props) => {
   }, []);
 
   return (
-    <ButtonIcon
-      className={props.className}
-      onClick={() => {
-        copyMessage(props.text);
-      }}>
-      {showsCheck ? <PiCheck /> : <PiClipboard />}
-    </ButtonIcon>
+    <Tooltip
+      message={t('tooltips.copyResponse')}
+      direction="right"
+      className="cursor-pointer">
+      <ButtonIcon
+        className={props.className}
+        onClick={() => {
+          copyMessage(props.text);
+        }}>
+        {showsCheck ? <PiCheck /> : <PiClipboard />}
+      </ButtonIcon>
+    </Tooltip>
   );
 };
 

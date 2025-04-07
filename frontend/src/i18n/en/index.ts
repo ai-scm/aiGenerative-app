@@ -930,6 +930,14 @@ How would you categorize this email?`,
         label: 'Reasoning Process',
       },
     },
+    tooltips: {
+      starredTooltip: 'Add this bot to your favorites for quick access',
+      positiveFeedback: 'Click to let us know if this response was helpful',
+      negativeFeedback: 'Click to let us know if this response was not helpful',
+      copyResponse: 'Click to copy the response',
+      editInput: 'Click to edit the message',
+      sendMessage: 'Send the message',
+    },
   },
 };
 

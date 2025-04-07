@@ -757,6 +757,16 @@ Las categorías de clasificación son:
         },
       },
     },
+    tooltips: {
+      starredTooltip:
+        'Agregar este bot a tus favoritos para acceder rápidamente',
+      positiveFeedback: 'Haz clic para decirnos si esta respuesta fue útil',
+      negativeFeedback:
+        'Haz clic para informarnos si esta respuesta no fue útil',
+      copyResponse: 'Haz clic para copiar la respuesta',
+      editInput: 'Haz clic para editar el mensaje',
+      sendMessage: 'Enviar el mensaje',
+    },
   },
 };
 
