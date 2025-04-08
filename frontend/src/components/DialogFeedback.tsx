@@ -17,9 +17,10 @@ type Props = BaseProps & {
 
 const DialogFeedback: React.FC<Props> = (props) => {
   const { t } = useTranslation();
-  const categoryOptions = t('feedbackDialog.categories', {
-    returnObjects: true,
-  });
+  const categoryOptions = props.thumbsUp
+    ? t('feedbackDialog.categories.positive', { returnObjects: true })
+    : t('feedbackDialog.categories.negative', { returnObjects: true });
+
   const [category, setCategory] = useState<string>(
     props.feedback?.category || categoryOptions[0].value
   );

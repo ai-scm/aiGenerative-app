@@ -366,14 +366,14 @@ const ChatMessage: React.FC<Props> = (props) => {
                 setChangedContent(textContent.body);
                 setIsEdit(true);
               }}>
-             <Tooltip message={t('tooltips.editInput')}>
+              <Tooltip message={t('tooltips.editInput')}>
                 <PiNotePencil />
               </Tooltip>
             </ButtonIcon>
           )}
           {chatContent?.role === 'assistant' && (
             <div className="flex">
-               <ButtonIcon
+              <ButtonIcon
                 className="text-dark-gray dark:text-light-gray"
                 onClick={() => {
                   setIsFeedbackOpen(true);
@@ -392,9 +392,11 @@ const ChatMessage: React.FC<Props> = (props) => {
               </ButtonIcon>
               <ButtonIcon
                 className="text-dark-gray dark:text-light-gray"
-                onClick={() => setIsFeedbackOpen(true)}>
-
-               <Tooltip message={t('tooltips.negativeFeedback')}>
+                onClick={() => {
+                  setIsFeedbackOpen(true);
+                  setFeedbackValue(false);
+                }}>
+                <Tooltip message={t('tooltips.negativeFeedback')}>
                   {chatContent.feedback && !chatContent.feedback.thumbsUp ? (
                     <PiThumbsDownFill />
                   ) : (
