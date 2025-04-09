@@ -4,7 +4,7 @@ import Select from './Select';
 
 export const Ideal = () => {
   const { t } = useTranslation();
-  const categoryOptions = t('feedbackDialog.categories', {
+  const categoryOptions = t('feedbackDialog.categories.positive', {
     returnObjects: true,
   });
   const [category, setCategory] = useState(categoryOptions[0].value);
@@ -21,7 +21,7 @@ export const Ideal = () => {
 
 export const IdealDisabled = () => {
   const { t } = useTranslation();
-  const categoryOptions = t('feedbackDialog.categories', {
+  const categoryOptions = t('feedbackDialog.categories.positive', {
     returnObjects: true,
   });
 
@@ -38,7 +38,7 @@ export const IdealDisabled = () => {
 
 export const Clearable = () => {
   const { t } = useTranslation();
-  const categoryOptions = t('feedbackDialog.categories', {
+  const categoryOptions = t('feedbackDialog.categories.positive', {
     returnObjects: true,
   });
   const [category, setCategory] = useState(categoryOptions[0].value);
@@ -56,7 +56,7 @@ export const Clearable = () => {
 
 export const ClearableDisabled = () => {
   const { t } = useTranslation();
-  const categoryOptions = t('feedbackDialog.categories', {
+  const categoryOptions = t('feedbackDialog.categories.positive', {
     returnObjects: true,
   });
 
