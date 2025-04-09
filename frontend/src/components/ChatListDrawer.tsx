@@ -8,7 +8,7 @@ import React, {
 } from 'react';
 import { BaseProps } from '../@types/common';
 import { useLocation, useParams } from 'react-router-dom';
-import { IoMoonSharp, IoSunnyOutline } from "react-icons/io5";
+import { IoMoonSharp, IoSunnyOutline } from 'react-icons/io5';
 import useDrawer from '../hooks/useDrawer';
 import ButtonIcon from './ButtonIcon';
 import {
@@ -36,13 +36,17 @@ import DrawerItem from './DrawerItem';
 import ExpandableDrawerGroup from './ExpandableDrawerGroup';
 import { usePageLabel } from '../routes';
 import Toggle from '../components/Toggle.tsx';
+import useUser from '../hooks/useUser.ts';
 
 type Props = BaseProps & {
   isAdmin: boolean;
   conversations?: ConversationMeta[];
   starredBots?: BotListItem[];
   recentlyUsedUnsterredBots?: BotListItem[];
-  updateConversationTitle: (conversationId: string, title: string) => Promise<void>;
+  updateConversationTitle: (
+    conversationId: string,
+    title: string
+  ) => Promise<void>;
   onSignOut: () => void;
   onDeleteConversation: (conversation: ConversationMeta) => void;
   onClearConversations: () => void;
@@ -193,7 +197,7 @@ const ChatListDrawer: React.FC<Props> = (props) => {
   const { getPageLabel } = usePageLabel();
   const { opened, switchOpen } = useDrawer();
   const { conversations, starredBots, recentlyUsedUnsterredBots } = props;
-
+  const { isAllowCreatingBot } = useUser();
   const [prevConversations, setPrevConversations] =
     useState<typeof conversations>();
   const [generateTitleIndex, setGenerateTitleIndex] = useState(-1);
@@ -203,10 +207,7 @@ const ChatListDrawer: React.FC<Props> = (props) => {
   const { newChat, conversationId } = useChat();
   const { botId } = useParams();
 
-  const [theme, setTheme] = useLocalStorage(
-    'theme',
-    'light'
-  );
+  const [theme, setTheme] = useLocalStorage('theme', 'light');
 
   useEffect(() => {
     setPrevConversations(conversations);
@@ -289,7 +290,7 @@ const ChatListDrawer: React.FC<Props> = (props) => {
 
   return (
     <>
-      <div className="relative h-full overflow-y-auto bg-aws-squid-ink-light dark:bg-aws-ui-color-dark scrollbar-thin scrollbar-track-white scrollbar-thumb-aws-squid-ink-light/30 dark:scrollbar-thumb-aws-ui-color-dark/30">
+      <div className="relative h-full overflow-y-auto bg-aws-squid-ink-light scrollbar-thin scrollbar-track-white scrollbar-thumb-aws-squid-ink-light/30 dark:bg-aws-ui-color-dark dark:scrollbar-thumb-aws-ui-color-dark/30">
         <nav
           className={`lg:visible lg:w-64 ${
             opened ? 'visible w-64' : 'invisible w-0'
@@ -302,13 +303,15 @@ const ChatListDrawer: React.FC<Props> = (props) => {
               onClick={onClickNewChat}
               labelComponent={t('button.newChat')}
             />
-            <DrawerItem
-              isActive={false}
-              icon={<PiCompass />}
-              to="/bot/explore"
-              labelComponent={getPageLabel('/bot/explore')}
-              onClick={closeSamllDrawer}
-            />
+            {isAllowCreatingBot && (
+              <DrawerItem
+                isActive={false}
+                icon={<PiCompass />}
+                to="/bot/explore"
+                labelComponent={getPageLabel('/bot/explore')}
+                onClick={closeSamllDrawer}
+              />
+            )}
             {props.isAdmin && (
               <ExpandableDrawerGroup
                 label={t('app.adminConsoles')}
@@ -388,7 +391,7 @@ const ChatListDrawer: React.FC<Props> = (props) => {
           <div
             className={`${
               opened ? 'w-64' : 'w-0'
-            } fixed bottom-0 flex h-12 items-center justify-between p-2 border-t bg-aws-squid-ink-light dark:bg-aws-ui-color-dark transition-width lg:w-64`}>
+            } fixed bottom-0 flex h-12 items-center justify-between border-t bg-aws-squid-ink-light p-2 transition-width dark:bg-aws-ui-color-dark lg:w-64`}>
             <Menu
               onSignOut={props.onSignOut}
               onSelectLanguage={props.onSelectLanguage}
@@ -400,7 +403,7 @@ const ChatListDrawer: React.FC<Props> = (props) => {
                 <>
                   <IoMoonSharp />
                 </>
-              ): (
+              ) : (
                 <>
                   <IoSunnyOutline />
                 </>
