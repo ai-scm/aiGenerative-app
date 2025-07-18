@@ -8,6 +8,8 @@ import {
   PiUserFill,
   PiThumbsDown,
   PiThumbsDownFill,
+  // PiThumbsUpFill,
+  // PiThumbsUp,
 } from 'react-icons/pi';
 import { BaseProps } from '../@types/common';
 import {
@@ -367,6 +369,17 @@ const ChatMessage: React.FC<Props> = (props) => {
           )}
           {chatContent?.role === 'assistant' && (
             <div className="flex">
+              {/* <ButtonIcon
+                className="text-dark-gray dark:text-light-gray"
+                onClick={() => {
+                  setIsFeedbackOpen(true);
+                }}>
+                  {chatContent.feedback && chatContent.feedback.thumbsUp ? (
+                    <PiThumbsUpFill />
+                  ) : (
+                    <PiThumbsUp />
+                  )}
+              </ButtonIcon> */}
               <ButtonIcon
                 className="text-dark-gray dark:text-light-gray"
                 onClick={() => setIsFeedbackOpen(true)}>
