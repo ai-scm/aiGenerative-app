@@ -423,20 +423,44 @@ Las categorías de clasificación son:
       categoryLabel: 'Categoría',
       commentLabel: 'Comentario',
       commentPlaceholder: '(Opcional) Introduce tu comentario',
-      categories: [
-        {
-          value: 'notFactuallyCorrect',
-          label: 'No es factualmente correcto',
-        },
-        {
-          value: 'notFullyFollowRequest',
-          label: 'No sigue completamente mi solicitud',
-        },
-        {
-          value: 'other',
-          label: 'Otro',
-        },
-      ],
+      categories: {
+        positive: [
+          {
+            value: 'helpful',
+            label: 'Útil',
+          },
+          {
+            value: 'accurate',
+            label: 'Información precisa',
+          },
+          {
+            value: 'wellExplained',
+            label: 'Bien explicado',
+          },
+          {
+            value: 'other',
+            label: 'Otro',
+          },
+        ],
+        negative: [
+          {
+            value: 'notFactuallyCorrect',
+            label: 'No es factualmente correcto',
+          },
+          {
+            value: 'notFullyFollowRequest',
+            label: 'No sigue completamente mi solicitud',
+          },
+          {
+            value: 'unclear',
+            label: 'Explicación poco clara',
+          },
+          {
+            value: 'other',
+            label: 'Otro',
+          },
+        ],
+      },
     },
     button: {
       newChat: 'Nuevo Chat',
@@ -739,6 +763,16 @@ Las categorías de clasificación son:
           hint: 'Valida si las respuestas del modelo son relevantes para la consulta del usuario y bloquea las respuestas que estén por debajo del umbral de relevancia definido. 0: no bloquea nada, 0.99: bloquea casi todo',
         },
       },
+    },
+    tooltips: {
+      starredTooltip:
+        'Agregar este bot a tus favoritos para acceder rápidamente',
+      positiveFeedback: 'Haz clic para decirnos si esta respuesta fue útil',
+      negativeFeedback:
+        'Haz clic para informarnos si esta respuesta no fue útil',
+      copyResponse: 'Haz clic para copiar la respuesta',
+      editInput: 'Haz clic para editar el mensaje',
+      sendMessage: 'Enviar el mensaje',
     },
   },
 };

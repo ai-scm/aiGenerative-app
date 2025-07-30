@@ -6,7 +6,7 @@ import DialogConfirmDeleteApi from './DialogConfirmDeleteApi';
 import DialogConfirmDeleteApiKey from './DialogConfirmDeleteApiKey';
 import DialogConfirmDeleteBot from './DialogConfirmDeleteBot';
 import DialogConfirmDeleteChat from './DialogConfirmDeleteChat';
-import DialogFeedback from './DialogFeedback';
+import { FeedbackDialog } from '../custom-components/organisms';
 import DialogInstructionsSamples from './DialogInstructionsSamples';
 import DialogSelectLanguage from './DialogSelectLanguage';
 import DialogShareBot from './DialogShareBot';
@@ -132,7 +132,7 @@ export const DeleteConversation = () => {
 export const Feedback = () => {
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(true);
   return (
-    <DialogFeedback
+    <FeedbackDialog
       isOpen={isFeedbackOpen}
       thumbsUp={false}
       onClose={() => {

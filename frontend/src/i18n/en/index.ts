@@ -638,20 +638,40 @@ How would you categorize this email?`,
       categoryLabel: 'Category',
       commentLabel: 'Comment',
       commentPlaceholder: '(Optional) Enter your comment',
-      categories: [
-        {
-          value: 'notFactuallyCorrect',
-          label: 'Not factually correct',
-        },
-        {
-          value: 'notFullyFollowRequest',
-          label: 'Not fully following my request',
-        },
-        {
-          value: 'other',
-          label: 'Other',
-        },
-      ],
+      categories: {
+        positive: [
+          {
+            value: 'helpful',
+            label: 'Helpful',
+          },
+          {
+            value: 'accurate',
+            label: 'Accurate information',
+          },
+          {
+            value: 'wellExplained',
+            label: 'Well explained',
+          },
+          {
+            value: 'other',
+            label: 'Other',
+          },
+        ],
+        negative: [
+          {
+            value: 'notFactuallyCorrect',
+            label: 'Not factually correct',
+          },
+          {
+            value: 'notFullyFollowRequest',
+            label: 'Not fully following my request',
+          },
+          {
+            value: 'other',
+            label: 'Other',
+          },
+        ],
+      },
     },
     button: {
       newChat: 'New Chat',
@@ -1048,6 +1068,14 @@ How would you categorize this email?`,
       card: {
         label: 'Reasoning Process',
       },
+    },
+    tooltips: {
+      starredTooltip: 'Add this bot to your favorites for quick access',
+      positiveFeedback: 'Click to let us know if this response was helpful',
+      negativeFeedback: 'Click to let us know if this response was not helpful',
+      copyResponse: 'Click to copy the response',
+      editInput: 'Click to edit the message',
+      sendMessage: 'Send the message',
     },
   },
 };

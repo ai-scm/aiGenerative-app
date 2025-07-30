@@ -7,9 +7,7 @@ import {
   PiNotePencil,
   PiUserFill,
   PiThumbsDown,
-  PiThumbsDownFill,
-  // PiThumbsUpFill,
-  // PiThumbsUp,
+  PiThumbsDownFill
 } from 'react-icons/pi';
 import { BaseProps } from '../@types/common';
 import {
@@ -24,7 +22,7 @@ import Textarea from './Textarea';
 import Button from './Button';
 import ModalDialog from './ModalDialog';
 import { useTranslation } from 'react-i18next';
-import DialogFeedback from './DialogFeedback';
+import { FeedbackDialog } from '../custom-components/organisms';
 import UploadedAttachedFile from './UploadedAttachedFile';
 import { TEXT_FILE_EXTENSIONS } from '../constants/supportedAttachedFiles';
 import AgentToolList from '../features/agent/components/AgentToolList';
@@ -33,6 +31,7 @@ import { convertThinkingLogToAgentToolProps } from '../features/agent/utils/Agen
 import { convertUsedChunkToRelatedDocument } from '../utils/MessageUtils';
 import ReasoningCard from '../features/reasoning/components/ReasoningCard';
 import { ReasoningContext } from '../features/reasoning/xstates/reasoningState';
+import { FeedbackButtonIcon } from '../custom-components/molecules';
 
 type Props = BaseProps & {
   tools?: AgentToolsProps[];
@@ -50,6 +49,7 @@ const ChatMessage: React.FC<Props> = (props) => {
   const [isEdit, setIsEdit] = useState(false);
   const [changedContent, setChangedContent] = useState('');
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const [feedbackValue, setFeedbackValue] = useState(false);
 
   const [firstTextContent, setFirstTextContent] = useState(0);
 
@@ -369,17 +369,14 @@ const ChatMessage: React.FC<Props> = (props) => {
           )}
           {chatContent?.role === 'assistant' && (
             <div className="flex">
-              {/* <ButtonIcon
-                className="text-dark-gray dark:text-light-gray"
+              <FeedbackButtonIcon
+                isActive={!!chatContent.feedback?.thumbsUp}
+                tooltipText={t('tooltips.positiveFeedback')}
                 onClick={() => {
                   setIsFeedbackOpen(true);
-                }}>
-                  {chatContent.feedback && chatContent.feedback.thumbsUp ? (
-                    <PiThumbsUpFill />
-                  ) : (
-                    <PiThumbsUp />
-                  )}
-              </ButtonIcon> */}
+                  setFeedbackValue(true);
+                }}
+              />
               <ButtonIcon
                 className="text-dark-gray dark:text-light-gray"
                 onClick={() => setIsFeedbackOpen(true)}>
@@ -405,9 +402,9 @@ const ChatMessage: React.FC<Props> = (props) => {
           )}
         </div>
       </div>
-      <DialogFeedback
+      <FeedbackDialog
         isOpen={isFeedbackOpen}
-        thumbsUp={false}
+        thumbsUp={feedbackValue}
         feedback={chatContent?.feedback ?? undefined}
         onClose={() => setIsFeedbackOpen(false)}
         onSubmit={(feedback) => {

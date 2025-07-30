@@ -13,7 +13,7 @@ import AppContent from './layouts/AppContent';
 import { ErrorBoundary } from 'react-error-boundary';
 import ErrorFallback from './pages/ErrorFallback';
 // Usar la versión segura temporalmente
-import useClearStorageOnUnloadSafe from './hooks/useClearStorageOnUnloadSafe';
+import { useClearStorageOnUnloadSafe } from './custom-components/hooks';
 
 const customProviderEnabled =
   import.meta.env.VITE_APP_CUSTOM_PROVIDER_ENABLED === 'true';
@@ -24,8 +24,7 @@ const socialProviderFromEnv = import.meta.env.VITE_APP_SOCIAL_PROVIDERS?.split(
 const App: React.FC = () => {
   const { t, i18n } = useTranslation();
 
-  // Hook para limpiar storage cuando se cierre la página (versión segura)
-  useClearStorageOnUnloadSafe();
+  
 
   useEffect(() => {
     // set header title
@@ -49,6 +48,8 @@ const App: React.FC = () => {
       },
     },
   });
+
+  useClearStorageOnUnloadSafe();
 
   I18n.putVocabularies(translations);
   I18n.setLanguage(i18n.language);

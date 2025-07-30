@@ -10,6 +10,7 @@ import { BaseProps } from '../@types/common';
 import { getCurrentUser, signInWithRedirect, signOut } from 'aws-amplify/auth';
 import { useTranslation } from 'react-i18next';
 import { PiCircleNotch } from 'react-icons/pi';
+import { useAddCustomUrl } from '../custom-components/hooks';
 
 type Props = BaseProps & {
   children: ReactNode;
@@ -19,21 +20,30 @@ const AuthCustom: React.FC<Props> = ({ children }) => {
   const [authenticated, setAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const { t } = useTranslation();
+  const { saveCurrentUrl } = useAddCustomUrl();
 
   useEffect(() => {
+    saveCurrentUrl();
     getCurrentUser()
-      .then(() => {
+      .then(async () => {
         setAuthenticated(true);
       })
-      .catch(() => {
+      .catch(async () => {
         setAuthenticated(false);
+        signInWithRedirect({
+          provider: {
+            custom: import.meta.env.VITE_APP_CUSTOM_PROVIDER_NAME,
+          },
+        });
       })
       .finally(() => {
         setLoading(false);
       });
   }, []);
 
-  const handleSignIn = () => {
+
+  const handleSignIn = async () => {
+    saveCurrentUrl()
     signInWithRedirect({
       provider: {
         custom: import.meta.env.VITE_APP_CUSTOM_PROVIDER_NAME,

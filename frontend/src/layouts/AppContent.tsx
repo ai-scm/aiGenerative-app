@@ -20,12 +20,14 @@ import DialogConfirmClearConversations from '../components/DialogConfirmClearCon
 import DialogSelectLanguage from '../components/DialogSelectLanguage';
 import useLocalStorage from '../hooks/useLocalStorage';
 import DialogDrawerOptions from '../components/DialogDrawerOptions';
+import { useRedirectToSavedUrl } from '../custom-components/hooks';
 
 type Props = BaseProps & {
   signOut?: () => void;
 };
 
 const AppContent: React.FC<Props> = (props) => {
+  useRedirectToSavedUrl(); 
   const { i18n } = useTranslation();
   const { getPageLabel } = usePageLabel();
   const { switchOpen: switchDrawer } = useDrawer();
