@@ -283,11 +283,11 @@ const Drawer: React.FC<Props> = (props) => {
 
   return (
     <>
-      <div className="scrollbar-thumb-aws-squid-ink-light/30 relative h-full overflow-y-auto bg-aws-squid-ink-light scrollbar-thin scrollbar-track-white dark:bg-aws-ui-color-dark dark:scrollbar-thumb-aws-ui-color-dark/30">
+      <div className="scrollbar-thumb-aws-squid-ink-light/30 relative h-full overflow-y-auto bg-white scrollbar-thin scrollbar-track-white dark:bg-aws-ui-color-dark dark:scrollbar-thumb-aws-ui-color-dark/30">
         <nav
           className={`lg:visible lg:w-64 ${
             opened ? 'visible w-64' : 'invisible w-0'
-          } text-sm  text-white transition-width`}>
+          } text-sm  aws-font-color transition-width`}>
           {!isAdminPanel && (
             <>
               <NadiaTitle />
@@ -315,7 +315,7 @@ const Drawer: React.FC<Props> = (props) => {
 
               <ExpandableDrawerGroup
                 label={t('app.starredBots')}
-                className="border-t bg-aws-squid-ink-light pt-1 dark:bg-aws-squid-ink-dark">
+                className="flex w-full cursor-pointer items-center transition hover:brightness-75">
                 {starredBots === undefined && (
                   <div className="flex flex-col gap-2 p-2">
                     <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
@@ -360,7 +360,7 @@ const Drawer: React.FC<Props> = (props) => {
 
               <ExpandableDrawerGroup
                 label={t('app.recentlyUsedBots')}
-                className="border-t bg-aws-squid-ink-light pt-1 dark:bg-aws-squid-ink-dark ">
+                className="flex w-full cursor-pointer items-center transition hover:brightness-75">
                 {recentlyUsedUnstarredBots === undefined && (
                   <div className="flex flex-col gap-2 p-2">
                     <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
@@ -406,7 +406,7 @@ const Drawer: React.FC<Props> = (props) => {
               <ExpandableDrawerGroup
                 label={t('app.conversationHistory')}
                 className={twMerge(
-                  'border-t bg-aws-squid-ink-light pt-1 dark:bg-aws-squid-ink-dark',
+                  'flex w-full cursor-pointer transition hover:brightness-75',
                   props.isAdmin ? 'mb-20' : 'mb-10'
                 )}>
                 {conversations === undefined && (
