@@ -32,6 +32,7 @@ import { convertUsedChunkToRelatedDocument } from '../utils/MessageUtils';
 import ReasoningCard from '../features/reasoning/components/ReasoningCard';
 import { ReasoningContext } from '../features/reasoning/xstates/reasoningState';
 import { FeedbackButtonIcon } from '../custom-components/molecules';
+import Tooltip from './Tooltip';
 
 type Props = BaseProps & {
   tools?: AgentToolsProps[];
@@ -364,7 +365,12 @@ const ChatMessage: React.FC<Props> = (props) => {
                 setChangedContent(textContent.body);
                 setIsEdit(true);
               }}>
-              <PiNotePencil />
+                <Tooltip
+                message={t('tooltips.editInput')}
+                direction="left"
+                className="cursor-pointer">
+                <PiNotePencil />
+              </Tooltip>
             </ButtonIcon>
           )}
           {chatContent?.role === 'assistant' && (
@@ -380,11 +386,16 @@ const ChatMessage: React.FC<Props> = (props) => {
               <ButtonIcon
                 className="text-dark-gray dark:text-light-gray"
                 onClick={() => setIsFeedbackOpen(true)}>
-                {chatContent.feedback && !chatContent.feedback.thumbsUp ? (
-                  <PiThumbsDownFill />
-                ) : (
-                  <PiThumbsDown />
-                )}
+                <Tooltip
+                  message={t('tooltips.negativeFeedback')}
+                  direction="right"
+                  className="cursor-pointer">
+                  {chatContent.feedback && !chatContent.feedback.thumbsUp ? (
+                    <PiThumbsDownFill />
+                  ) : (
+                    <PiThumbsDown />
+                  )}
+                </Tooltip>
               </ButtonIcon>
               <ButtonCopy
                 className="text-dark-gray dark:text-light-gray"

@@ -41,6 +41,8 @@ import Button from './Button';
 import Skeleton from './Skeleton';
 import { isPinnedBot } from '../utils/BotUtils';
 import IconPinnedBot from './IconPinnedBot';
+import { NadiaTitle } from '../custom-components/atoms';
+import { LogoContainer } from '../custom-components/molecules';
 
 type Props = BaseProps & {
   isAdmin: boolean;
@@ -281,13 +283,14 @@ const Drawer: React.FC<Props> = (props) => {
 
   return (
     <>
-      <div className="relative h-full overflow-y-auto bg-aws-squid-ink-light scrollbar-thin scrollbar-track-white scrollbar-thumb-aws-squid-ink-light/30 dark:bg-aws-ui-color-dark dark:scrollbar-thumb-aws-ui-color-dark/30">
+      <div className="scrollbar-thumb-aws-squid-ink-light/30 relative h-full overflow-y-auto bg-aws-squid-ink-light scrollbar-thin scrollbar-track-white dark:bg-aws-ui-color-dark dark:scrollbar-thumb-aws-ui-color-dark/30">
         <nav
           className={`lg:visible lg:w-64 ${
             opened ? 'visible w-64' : 'invisible w-0'
           } text-sm  text-white transition-width`}>
           {!isAdminPanel && (
             <>
+              <NadiaTitle />
               <DrawerItem
                 isActive={false}
                 icon={<PiNotePencil />}
@@ -315,11 +318,11 @@ const Drawer: React.FC<Props> = (props) => {
                 className="border-t bg-aws-squid-ink-light pt-1 dark:bg-aws-squid-ink-dark">
                 {starredBots === undefined && (
                   <div className="flex flex-col gap-2 p-2">
-                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
-                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
-                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
-                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
-                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
+                    <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
+                    <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
+                    <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
+                    <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
+                    <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
                   </div>
                 )}
                 {starredBots
@@ -360,11 +363,11 @@ const Drawer: React.FC<Props> = (props) => {
                 className="border-t bg-aws-squid-ink-light pt-1 dark:bg-aws-squid-ink-dark ">
                 {recentlyUsedUnstarredBots === undefined && (
                   <div className="flex flex-col gap-2 p-2">
-                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
-                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
-                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
-                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
-                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
+                    <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
+                    <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
+                    <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
+                    <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
+                    <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
                   </div>
                 )}
                 {recentlyUsedUnstarredBots
@@ -408,11 +411,11 @@ const Drawer: React.FC<Props> = (props) => {
                 )}>
                 {conversations === undefined && (
                   <div className="flex flex-col gap-2 p-2">
-                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
-                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
-                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
-                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
-                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
+                    <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
+                    <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
+                    <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
+                    <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
+                    <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
                   </div>
                 )}
                 {conversations
@@ -494,12 +497,16 @@ const Drawer: React.FC<Props> = (props) => {
                 onClick={closeSmallDrawer}
               />
             )}
-            <Menu
-              className="mx-2 flex h-10 w-60 justify-start"
-              onSignOut={props.onSignOut}
-              onSelectLanguage={props.onSelectLanguage}
-              onClearConversations={props.onClearConversations}
-              onClickDrawerOptions={props.onClickDrawerOptions}
+            <LogoContainer
+              body={
+                <Menu
+                  className="mx-2 flex h-10 justify-start"
+                  onSignOut={props.onSignOut}
+                  onSelectLanguage={props.onSelectLanguage}
+                  onClearConversations={props.onClearConversations}
+                  onClickDrawerOptions={props.onClickDrawerOptions}
+                />
+              }
             />
           </div>
         </nav>
