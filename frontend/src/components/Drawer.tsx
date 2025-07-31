@@ -317,7 +317,7 @@ const Drawer: React.FC<Props> = (props) => {
 
               <ExpandableDrawerGroup
                 label={t('app.starredBots')}
-                className="flex w-full cursor-pointer items-center transition hover:brightness-75">
+                className="flex w-full cursor-pointer items-left transition hover:brightness-75">
                 {starredBots === undefined && (
                   <div className="flex flex-col gap-2 p-2">
                     <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
@@ -362,7 +362,7 @@ const Drawer: React.FC<Props> = (props) => {
 
               <ExpandableDrawerGroup
                 label={t('app.recentlyUsedBots')}
-                className="flex w-full cursor-pointer items-center transition hover:brightness-75">
+                className="w-full cursor-pointer items-center transition hover:brightness-75">
                 {recentlyUsedUnstarredBots === undefined && (
                   <div className="flex flex-col gap-2 p-2">
                     <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
@@ -408,7 +408,7 @@ const Drawer: React.FC<Props> = (props) => {
               <ExpandableDrawerGroup
                 label={t('app.conversationHistory')}
                 className={twMerge(
-                  'flex w-full cursor-pointer transition hover:brightness-75',
+                  'w-full cursor-pointer transition hover:brightness-75',
                   props.isAdmin ? 'mb-20' : 'mb-10'
                 )}>
                 {conversations === undefined && (
