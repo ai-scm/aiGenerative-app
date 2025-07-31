@@ -15,7 +15,9 @@ import { excludeDockerImage } from "./constants/docker";
 
 interface ApiPublishmentStackProps extends StackProps {
   readonly bedrockRegion: string;
+  readonly enableBedrockCrossRegionInference: boolean;
   readonly conversationTableName: string;
+  readonly botTableName: string;
   readonly tableAccessRoleArn: string;
   readonly webAclArn: string;
   readonly usagePlan: apigateway.UsagePlanProps;
@@ -87,7 +89,8 @@ export class ApiPublishmentStack extends Stack {
       environment: {
         PUBLISHED_API_ID: id.replace("ApiPublishmentStack", ""),
         QUEUE_URL: chatQueue.queueUrl,
-        TABLE_NAME: props.conversationTableName,
+        CONVERSATION_TABLE_NAME: props.conversationTableName,
+        BOT_TABLE_NAME: props.botTableName,
         CORS_ALLOW_ORIGINS: (props.corsOptions?.allowOrigins ?? ["*"]).join(
           ","
         ),
@@ -120,12 +123,14 @@ export class ApiPublishmentStack extends Stack {
         environment: {
           PUBLISHED_API_ID: id.replace("ApiPublishmentStack", ""),
           QUEUE_URL: chatQueue.queueUrl,
-          TABLE_NAME: props.conversationTableName,
+          CONVERSATION_TABLE_NAME: props.conversationTableName,
+          BOT_TABLE_NAME: props.botTableName,
           CORS_ALLOW_ORIGINS: (props.corsOptions?.allowOrigins ?? ["*"]).join(
             ","
           ),
           ACCOUNT: Stack.of(this).account,
           REGION: Stack.of(this).region,
+          ENABLE_BEDROCK_CROSS_REGION_INFERENCE: props.enableBedrockCrossRegionInference.toString(),
           BEDROCK_REGION: props.bedrockRegion,
           TABLE_ACCESS_ROLE_ARN: props.tableAccessRoleArn,
         },

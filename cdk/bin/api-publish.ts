@@ -26,6 +26,9 @@ const webAclArn = cdk.Fn.importValue(
 const conversationTableName = cdk.Fn.importValue(
   `${params.envPrefix}${sepHyphen}BedrockClaudeChatConversationTableName`
 );
+const botTableName = cdk.Fn.importValue(
+  `${params.envPrefix}${sepHyphen}BedrockClaudeChatBotTableNameV3`
+);
 const tableAccessRoleArn = cdk.Fn.importValue(
   `${params.envPrefix}${sepHyphen}BedrockClaudeChatTableAccessRoleArn`
 );
@@ -39,7 +42,9 @@ new ApiPublishmentStack(app, `ApiPublishmentStack${params.publishedApiId}`, {
     region: process.env.CDK_DEFAULT_REGION,
   },
   bedrockRegion: params.bedrockRegion,
+  enableBedrockCrossRegionInference: params.enableBedrockCrossRegionInference,
   conversationTableName: conversationTableName,
+  botTableName: botTableName,
   tableAccessRoleArn: tableAccessRoleArn,
   webAclArn: webAclArn,
   largeMessageBucketName: largeMessageBucketName,

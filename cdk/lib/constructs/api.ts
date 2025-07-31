@@ -25,15 +25,15 @@ import * as codebuild from "aws-cdk-lib/aws-codebuild";
 import { UsageAnalysis } from "./usage-analysis";
 import { excludeDockerImage } from "../constants/docker";
 import { PythonFunction } from "@aws-cdk/aws-lambda-python-alpha";
+import { Database } from "./database";
 
 export interface ApiProps {
+  readonly database: Database;
   readonly envName: string;
   readonly envPrefix: string;
-  readonly database: ITable;
   readonly corsAllowOrigins?: string[];
   readonly auth: Auth;
   readonly bedrockRegion: string;
-  readonly tableAccessRole: iam.IRole;
   readonly documentBucket: IBucket;
   readonly largeMessageBucket: IBucket;
   readonly apiPublishProject: codebuild.IProject;
@@ -41,6 +41,7 @@ export interface ApiProps {
   readonly usageAnalysis?: UsageAnalysis;
   readonly enableBedrockCrossRegionInference: boolean;
   readonly enableLambdaSnapStart: boolean;
+  readonly openSearchEndpoint?: string;
 }
 
 export class Api extends Construct {
@@ -49,11 +50,8 @@ export class Api extends Construct {
   constructor(scope: Construct, id: string, props: ApiProps) {
     super(scope, id);
 
-    const {
-      database,
-      tableAccessRole,
-      corsAllowOrigins: allowOrigins = ["*"],
-    } = props;
+    const { database, corsAllowOrigins: allowOrigins = ["*"] } = props;
+    const { tableAccessRole } = database;
 
     const usageAnalysisOutputLocation =
       `s3://${props.usageAnalysis?.resultOutputBucket.bucketName}` || "";
@@ -168,8 +166,38 @@ export class Api extends Construct {
     handlerRole.addToPolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
-        actions: ["cognito-idp:AdminGetUser"],
+        actions: [
+          "cognito-idp:AdminGetUser",
+          "cognito-idp:AdminListGroupsForUser",
+          "cognito-idp:ListUsers",
+          "cognito-idp:ListGroups",
+        ],
         resources: [props.auth.userPool.userPoolArn],
+      })
+    );
+    handlerRole.addToPolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          "aoss:APIAccessAll",
+          "aoss:DescribeCollection",
+          "aoss:GetCollection",
+          "aoss:SearchCollections",
+          "aoss:BatchGetCollection",
+          "aoss:ListCollections",
+        ],
+        resources: ["*"],
+      })
+    );
+    handlerRole.addToPolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["aoss:DescribeIndex", "aoss:ReadDocument"],
+        resources: [
+          `arn:aws:aoss:${Stack.of(this).region}:${
+            Stack.of(this).account
+          }:collection/*`,
+        ],
       })
     );
     // For Firecrawl api key
@@ -206,14 +234,15 @@ export class Api extends Construct {
         assetExcludes: [...excludeDockerImage],
         buildArgs: { POETRY_VERSION: "1.8.3" },
       },
-      runtime: Runtime.PYTHON_3_12,
+      runtime: Runtime.PYTHON_3_13,
       architecture: Architecture.X86_64,
       memorySize: 1024,
       timeout: Duration.minutes(15),
       environment: {
+        CONVERSATION_TABLE_NAME: database.conversationTable.tableName,
+        BOT_TABLE_NAME: database.botTable.tableName,
         ENV_NAME: props.envName,
         ENV_PREFIX: props.envPrefix,
-        TABLE_NAME: database.tableName,
         CORS_ALLOW_ORIGINS: allowOrigins.join(","),
         USER_POOL_ID: props.auth.userPool.userPoolId,
         CLIENT_ID: props.auth.client.userPoolClientId,
@@ -234,6 +263,7 @@ export class Api extends Construct {
         USAGE_ANALYSIS_OUTPUT_LOCATION: usageAnalysisOutputLocation,
         ENABLE_BEDROCK_CROSS_REGION_INFERENCE:
           props.enableBedrockCrossRegionInference.toString(),
+        OPENSEARCH_DOMAIN_ENDPOINT: props.openSearchEndpoint || "",
         AWS_LAMBDA_EXEC_WRAPPER: "/opt/bootstrap",
         PORT: "8000",
       },

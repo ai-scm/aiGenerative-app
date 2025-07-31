@@ -69,8 +69,8 @@ export const AvailableTools = ({ availableTools, tools, setTools }: Props) => {
                   name: 'bedrock_agent',
                   bedrockAgentConfig: {
                     agentId: '',
-                    aliasId: ''
-                  }
+                    aliasId: '',
+                  },
                 } as AgentTool,
               ];
 
@@ -188,7 +188,14 @@ export const AvailableTools = ({ availableTools, tools, setTools }: Props) => {
         <Trans
           i18nKey="agent.help.overview"
           components={{
-            Link: <a href="https://docs.aws.amazon.com/bedrock/latest/userguide/conversation-inference-supported-models-features.html" target="_blank" rel="noopener noreferrer" className="text-aws-sea-blue-light dark:text-aws-sea-blue-dark underline" />
+            Link: (
+              <a
+                href="https://docs.aws.amazon.com/bedrock/latest/userguide/conversation-inference-supported-models-features.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-aws-sea-blue-light underline dark:text-aws-sea-blue-dark"
+              />
+            ),
           }}
         />
       </div>
@@ -205,8 +212,8 @@ export const AvailableTools = ({ availableTools, tools, setTools }: Props) => {
               {formatDescription(tool, t)}
             </div>
           </div>
-          {(tool.name === 'internet_search' &&
-            tools?.map(({ name }) => name).includes('internet_search')) && (
+          {tool.name === 'internet_search' &&
+            tools?.map(({ name }) => name).includes('internet_search') && (
               <ExpandableDrawerGroup
                 className="ml-8 mt-2"
                 isDefaultShow={false}
@@ -266,26 +273,24 @@ export const AvailableTools = ({ availableTools, tools, setTools }: Props) => {
                 </div>
               </ExpandableDrawerGroup>
             )}
-          {(tool.name === 'bedrock_agent' &&
-            tools?.map(({ name }) => name).includes('bedrock_agent')) && (
-              
-                <div className="space-y-4">
-                  <div className="ml-6 text-sm">
-                    <BedrockAgentConfigComponent
-                      config={
-                        tools.find(
-                          (t): t is BedrockAgentTool =>
-                            t.name === 'bedrock_agent' &&
-                            isBedrockAgentTool(t)
-                        )?.bedrockAgentConfig || {
-                          agentId: '',
-                          aliasId: '',
-                        }
+          {tool.name === 'bedrock_agent' &&
+            tools?.map(({ name }) => name).includes('bedrock_agent') && (
+              <div className="space-y-4">
+                <div className="ml-6 text-sm">
+                  <BedrockAgentConfigComponent
+                    config={
+                      tools.find(
+                        (t): t is BedrockAgentTool =>
+                          t.name === 'bedrock_agent' && isBedrockAgentTool(t)
+                      )?.bedrockAgentConfig || {
+                        agentId: '',
+                        aliasId: '',
                       }
-                      onChange={handleBedrockAgentConfigChange}
-                    />
-                  </div>
+                    }
+                    onChange={handleBedrockAgentConfigChange}
+                  />
                 </div>
+              </div>
             )}
         </div>
       ))}

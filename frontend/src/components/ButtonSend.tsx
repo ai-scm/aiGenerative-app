@@ -2,6 +2,8 @@ import React from 'react';
 import { PiPaperPlaneRightFill, PiSpinnerGap } from 'react-icons/pi';
 import { BaseProps } from '../@types/common';
 import { twMerge } from 'tailwind-merge';
+import Tooltip from './Tooltip';
+import { t } from 'i18next';
 
 type Props = BaseProps & {
   disabled?: boolean;
@@ -21,11 +23,16 @@ const ButtonSend: React.FC<Props> = (props) => {
       )}
       onClick={props.onClick}
       disabled={props.disabled || props.loading}>
-      {props.loading ? (
-        <PiSpinnerGap className="animate-spin" />
-      ) : (
-        <PiPaperPlaneRightFill />
-      )}
+      <Tooltip
+        message={t('tooltips.sendMessage')}
+        direction="right"
+        className="cursor-pointer">
+        {props.loading ? (
+          <PiSpinnerGap className="animate-spin" />
+        ) : (
+          <PiPaperPlaneRightFill />
+        )}
+      </Tooltip>
     </button>
   );
 };

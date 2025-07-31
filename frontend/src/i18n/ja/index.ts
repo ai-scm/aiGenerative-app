@@ -1,7 +1,7 @@
 // Check for any missing settings by uncomment
-// import en from '../en';
-// const translation: typeof en = {
-const translation = {
+import en from '../en';
+const translation: typeof en = {
+  // const translation = {
   translation: {
     signIn: {
       button: {
@@ -13,25 +13,32 @@ const translation = {
       inputMessage: 'お手伝いできることはありますか？',
       starredBots: 'スター付きのボット',
       recentlyUsedBots: '最近使用したボット',
-      conversationHistory: '会話履歴',
+      conversationHistory: '最近のチャット',
       chatWaitingSymbol: '▍',
-      adminConsoles: '管理者用',
+      adminConsoles: '管理者用機能',
+      userGroups: 'ユーザーグループ',
+      backChat: 'チャットに戻る',
     },
     model: {
+      'claude-v4-opus': {
+        label: 'Claude 4 (Opus)',
+        description: '複雑なタスク、コーディング、AIエージェント向けの最も強力なハイブリッド推論モデル（200Kトークンコンテキストウィンドウ）',
+      },
+      'claude-v4-sonnet': {
+        label: 'Claude 4 (Sonnet)',
+        description: '効率性とスケールを最適化したバランスの取れたハイブリッド推論モデル（200Kトークンコンテキストウィンドウ）',
+      },
       'claude-v3-haiku': {
         label: 'Claude 3 (Haiku)',
-        description:
-          '旧バージョンで、スピードとコンパクトさを最適化しており、ほぼ瞬時の応答を提供',
+        description: '旧バージョンで、スピードとコンパクトさを最適化しており、ほぼ瞬時の応答を提供',
       },
       'claude-v3.5-sonnet': {
         label: 'Claude 3.5 (Sonnet) v1',
-        description:
-          'Claude 3.5の初期バージョン。幅広いタスクに対応しますが、v2の方が精度が向上',
+        description: 'Claude 3.5の初期バージョン。幅広いタスクに対応しますが、v2の方が精度が向上',
       },
       'claude-v3.5-sonnet-v2': {
         label: 'Claude 3.5 (Sonnet) v2',
-        description:
-          'Claude 3.5の最新バージョン。v1をさらに強化し、より高い精度とパフォーマンスを提供',
+        description: 'Claude 3.5の最新バージョン。v1をさらに強化し、より高い精度とパフォーマンスを提供',
       },
       'claude-v3.7-sonnet': {
         label: 'Claude 3.7 Sonnet',
@@ -47,43 +54,35 @@ const translation = {
       },
       'mistral-7b-instruct': {
         label: 'Mistral 7B',
-        description:
-          '自然なコーディング機能で英語のテキスト生成タスクをサポートします',
+        description: '自然なコーディング機能で英語のテキスト生成タスクをサポートします',
       },
       'mixtral-8x7b-instruct': {
         label: 'Mistral-8x7B',
-        description:
-          'Mixtral-8x7BはMistral AIによって開発された基盤モデルで、英語、フランス語、ドイツ語、イタリア語、スペイン語のテキストをサポートし、コード生成機能を備えています。',
+        description: 'Mixtral-8x7BはMistral AIによって開発された基盤モデルで、英語、フランス語、ドイツ語、イタリア語、スペイン語のテキストをサポートし、コード生成機能を備えています。',
       },
       'mistral-large': {
         label: 'Mistral Large',
-        description:
-          '実質的な推論機能を必要とする複雑なタスクや、合成テキスト生成およびコード生成などの高度に専門化されたタスクに最適です',
+        description: '実質的な推論機能を必要とする複雑なタスクや、合成テキスト生成およびコード生成などの高度に専門化されたタスクに最適です',
       },
       'mistral-large-2': {
         label: 'Mistral Large2',
-        description:
-          '数十の言語と80以上のコーディング言語をサポートする先進的なLLMで、ネイティブ関数呼び出し、JSON出力、推論機能などのクラス最高レベルのエージェント機能を備えています',
+        description: '数十の言語と80以上のコーディング言語をサポートする先進的なLLMで、ネイティブ関数呼び出し、JSON出力、推論機能などのクラス最高レベルのエージェント機能を備えています',
       },
       'amazon-nova-pro': {
         label: 'Amazon Nova Pro',
-        description:
-          '精度、速度、コストのバランスが最も優れた高性能マルチモーダルモデル',
+        description: '精度、速度、コストのバランスが最も優れた高性能マルチモーダルモデル',
       },
       'amazon-nova-lite': {
         label: 'Amazon Nova Lite',
-        description:
-          '非常に低コストで高速なマルチモーダルモデルで、リアルタイム処理に最適',
+        description: '非常に低コストで高速なマルチモーダルモデルで、リアルタイム処理に最適',
       },
       'amazon-nova-micro': {
         label: 'Amazon Nova Micro',
-        description:
-          '最も低いレイテンシーと低コストで提供される軽量なテキストモデル',
+        description: '最も低いレイテンシーと低コストで提供される軽量なテキストモデル',
       },
       'deepseek-r1': {
         label: 'DeepSeek R1',
-        description:
-          '一般的な推論、数学、科学、コード生成に最適化された最先端の推論モデル。英語と中国語をサポート',
+        description: '一般的な推論、数学、科学、コード生成に最適化された最先端の推論モデル。英語と中国語をサポート',
       },
       // Meta Llama 3シリーズ
       'llama3-3-70b-instruct': {
@@ -110,8 +109,7 @@ const translation = {
     agent: {
       label: 'エージェント',
       help: {
-        overview:
-          'エージェント機能を使用すると、チャットボットはより複雑なタスクを自動的に処理できます。モデルがTool useに対応している必要があります。詳細は <Link>こちら</Link> をご確認ください。',
+        overview: 'エージェント機能を使用すると、チャットボットはより複雑なタスクを自動的に処理できます。モデルがTool useに対応している必要があります。詳細は <Link>こちら</Link> をご確認ください。',
       },
       hint: 'エージェントは、ユーザーの質問に答えるため、どのツールを使用するかを自動的に判断します。考える時間が必要なため、応答時間が長くなる傾向にあります。',
       progress: {
@@ -133,8 +131,7 @@ const translation = {
         },
         sql_db_query: {
           name: 'データベースクエリ',
-          description:
-            'データベースから結果を取得するために、詳細で正確なSQLクエリを実行します。',
+          description: 'データベースから結果を取得するために、詳細で正確なSQLクエリを実行します。',
         },
         sql_db_schema: {
           name: 'データベーススキーマ',
@@ -142,8 +139,7 @@ const translation = {
         },
         sql_db_list_tables: {
           name: 'データベーステーブル一覧',
-          description:
-            'データベースで利用可能なすべてのテーブルをリストします。',
+          description: 'データベースで利用可能なすべてのテーブルをリストします。',
         },
         sql_db_query_checker: {
           name: 'クエリチェッカー',
@@ -156,13 +152,13 @@ const translation = {
           engine: '検索エンジン',
           engines: {
             duckduckgo: {
-              'label': 'DuckDuckGo (For Trial)',
-              'hint': "リミットレートが厳しいが無料で使用可能。小規模利用向け",
+              label: 'DuckDuckGo (For Trial)',
+              hint: 'リミットレートが厳しいが無料で使用可能。小規模利用向け',
             },
             firecrawl: {
-              'label': 'Firecrawl (For Business)',
-              'hint': "レートリミットの拡張可能。ビジネス利用向け。APIキーが必要. https://www.firecrawl.dev/",
-            }
+              label: 'Firecrawl (For Business)',
+              hint: 'レートリミットの拡張可能。ビジネス利用向け。APIキーが必要. https://www.firecrawl.dev/',
+            },
           },
         },
         knowledge_base_tool: {
@@ -175,26 +171,26 @@ const translation = {
         },
         firecrawl: {
           apiKey: 'Firecrawl APIキー',
-          maxResults: '最大結果数'
+          maxResults: '最大結果数',
         },
         bedrockAgent: {
           name: 'Bedrock Agent',
           description: 'Bedrock Agentをツールとして使用します。',
           agentId: {
             label: 'Agent ID',
-            placeholder: 'Agent IDを入力'
+            placeholder: 'Agent IDを入力',
           },
           aliasId: {
             label: 'Alias ID',
-            placeholder: 'Alias IDを入力'
-          }
+            placeholder: 'Alias IDを入力',
+          },
         },
       },
     },
     bot: {
       label: {
         myBots: '自分のボット',
-        recentlyUsedBots: '最近使用した公開ボット',
+        recentlyUsedBots: '最近使用したボット',
         knowledge: 'ナレッジ',
         url: 'URL',
         s3url: 'S3 データソース',
@@ -208,10 +204,10 @@ const translation = {
         notAvailable: 'このボットは利用できません。',
         noBots: 'ボットが登録されていません。',
         noBotsRecentlyUsed: '最近利用した公開ボットはありません。',
+        noStarredBots: 'スター付きのボットはありません。',
         retrievingKnowledge: '[ナレッジを取得中...]',
         referenceLink: '参考ドキュメント',
-        dndFileUpload:
-          'ドラッグ＆ドロップでファイルをアップロードできます。\n対応ファイル: {{fileExtensions}}',
+        dndFileUpload: 'ドラッグ＆ドロップでファイルをアップロードできます。\n対応ファイル: {{fileExtensions}}',
         uploadError: 'エラーメッセージ',
         syncStatus: {
           queue: '同期待ち',
@@ -236,27 +232,22 @@ const translation = {
         edit: 'ボットを編集',
         copyLink: '共有リンクをコピー',
         copiedLink: 'コピーしました',
+        markAsEssential: '利用推奨ボットに登録',
+        removeEssential: '利用推奨ボットを解除',
       },
       help: {
-        overview:
-          'ボットはあらかじめ定義したインストラクションに従って動作します。チャットではメッセージ内にコンテキストを定義しなければ意図した振る舞いをしませんが、ボットを利用すればコンテキストの定義が不要になります。',
-        instructions:
-          'ボットがどのように振る舞うか定義します。曖昧な指示をすると予測できない動きをすることがあるので、具体的に指示をしてください。',
+        overview: 'ボットはあらかじめ定義したインストラクションに従って動作します。チャットではメッセージ内にコンテキストを定義しなければ意図した振る舞いをしませんが、ボットを利用すればコンテキストの定義が不要になります。',
+        instructions: 'ボットがどのように振る舞うか定義します。曖昧な指示をすると予測できない動きをすることがあるので、具体的に指示をしてください。',
         knowledge: {
-          overview:
-            '外部の情報をボットに提供することで、事前学習していないデータを扱えるようになります。',
+          overview: '外部の情報をボットに提供することで、事前学習していないデータを扱えるようになります。',
           url: 'URLを指定すると、そのURLの情報がナレッジとして利用されます。',
-          s3url:
-            'S3 の URI を入力し、S3 をデータソースとして追加します。最大 4 件追加できます。Bedrock利用リージョンと同じアカウント・同じリージョンに存在するバケットのみ対応しています。',
-          sitemap:
-            'サイトマップのURLを指定すると、そのサイトマップ内のサイトを自動的にスクレイピングして得られた情報がナレッジとして利用されます。',
+          s3url: 'S3 の URI を入力し、S3 をデータソースとして追加します。最大 4 件追加できます。Bedrock利用リージョンと同じアカウント・同じリージョンに存在するバケットのみ対応しています。',
+          sitemap: 'サイトマップのURLを指定すると、そのサイトマップ内のサイトを自動的にスクレイピングして得られた情報がナレッジとして利用されます。',
           file: 'アップロードしたファイルがナレッジとして利用されます。',
-          citeRetrievedContexts:
-            'ユーザーの質問に答えるために取得したコンテキストを引用情報として表示するかどうかを設定します。\n有効にすると、ユーザーは元のソースURLやファイルにアクセスできます。',
+          citeRetrievedContexts: 'ユーザーの質問に答えるために取得したコンテキストを引用情報として表示するかどうかを設定します。\n有効にすると、ユーザーは元のソースURLやファイルにアクセスできます。',
         },
         quickStarter: {
-          overview:
-            '会話を開始する際に、会話例を表示します。会話例を提供することで、ボットの使い方を利用者に示すことができます。',
+          overview: '会話を開始する際に、会話例を表示します。会話例を提供することで、ボットの使い方を利用者に示すことができます。',
         },
       },
       alert: {
@@ -306,15 +297,15 @@ const translation = {
       edit: {
         pageTitle: 'ボットを編集',
       },
+      my: {
+        label: {
+          pageTitle: 'マイボット',
+        },
+      },
       item: {
         title: 'ボット名',
         description: '説明文',
         instruction: 'インストラクション',
-      },
-      explore: {
-        label: {
-          pageTitle: 'ボットコンソール',
-        },
       },
       apiSettings: {
         pageTitle: '共有されたボットのAPI公開設定',
@@ -344,27 +335,17 @@ const translation = {
           offset: 'オフセット',
         },
         help: {
-          overview:
-            'APIを公開することで外部のクライアントがボットを利用することが可能になります。APIを利用することで、外部のアプリケーションとの連携が可能になります。',
-          endpoint:
-            'クライアントは、このAPIエンドポイントを通じてボットを利用できます。',
-          usagePlan:
-            '使用量プランは、APIがクライアントから受け入れられるリクエストの数またはレートを指定します。APIが受け取るリクエストは、この使用量プランに関連付けて追跡されます。',
+          overview: 'APIを公開することで外部のクライアントがボットを利用することが可能になります。APIを利用することで、外部のアプリケーションとの連携が可能になります。',
+          endpoint: 'クライアントは、このAPIエンドポイントを通じてボットを利用できます。',
+          usagePlan: '使用量プランは、APIがクライアントから受け入れられるリクエストの数またはレートを指定します。APIが受け取るリクエストは、この使用量プランに関連付けて追跡されます。',
           throttling: 'ユーザがAPIを呼び出せるレートを制限します。',
-          rateLimit:
-            'クライアントがAPIを呼び出すことができるレートを1秒あたりのリクエスト数で入力します。',
-          burstLimit:
-            'クライアントがAPIに対して同時に実行できるリクエストの数を入力します。',
-          quota:
-            'ある期間にユーザがAPIに対して実行できるリクエストの数を制限します。',
-          requestLimit:
-            'ドロップダウンリストで選択した期間にユーザが実行できるリクエストの総数を入力します。',
-          allowOrigins:
-            'アクセスを許可するクライアントのオリジンを入力します。許可されていないオリジンからAPIが呼び出された場合は、403 Forbidden エラーのレスポンスが返されて、アクセスが拒否されます。オリジンのフォーマットは、"(http|https)://host-name" または "(http|https)://host-name:port" である必要があります。なお、ワイルドカード(*)も利用可能です。',
-          allowOriginsExample:
-            '入力例) https://your-host-name.com, https://*.your-host-name.com, http://localhost:8000',
-          apiKeys:
-            'APIキーは英数字の文字列で、APIのクライアントを識別します。APIキーが識別できない場合、403 Forbiddenエラーのレスポンスが返され、APIへのアクセスが拒否されます。',
+          rateLimit: 'クライアントがAPIを呼び出すことができるレートを1秒あたりのリクエスト数で入力します。',
+          burstLimit: 'クライアントがAPIに対して同時に実行できるリクエストの数を入力します。',
+          quota: 'ある期間にユーザがAPIに対して実行できるリクエストの数を制限します。',
+          requestLimit: 'ドロップダウンリストで選択した期間にユーザが実行できるリクエストの総数を入力します。',
+          allowOrigins: 'アクセスを許可するクライアントのオリジンを入力します。許可されていないオリジンからAPIが呼び出された場合は、403 Forbidden エラーのレスポンスが返されて、アクセスが拒否されます。オリジンのフォーマットは、"(http|https)://host-name" または "(http|https)://host-name:port" である必要があります。なお、ワイルドカード(*)も利用可能です。',
+          allowOriginsExample: '入力例) https://your-host-name.com, https://*.your-host-name.com, http://localhost:8000',
+          apiKeys: 'APIキーは英数字の文字列で、APIのクライアントを識別します。APIキーが識別できない場合、403 Forbiddenエラーのレスポンスが返され、APIへのアクセスが拒否されます。',
         },
         button: {
           ApiKeyShow: '表示',
@@ -390,8 +371,7 @@ const translation = {
         },
         deleteApiDaialog: {
           title: '削除しますか?',
-          content:
-            'このAPIを本当に削除しますか? このAPIを削除すると、すべてのクライアントはこのAPIに一切アクセスできなくなります。',
+          content: 'このAPIを本当に削除しますか? このAPIを削除すると、すべてのクライアントはこのAPIに一切アクセスできなくなります。',
         },
         addApiKeyDialog: {
           title: 'APIキーの追加',
@@ -399,8 +379,7 @@ const translation = {
         },
         deleteApiKeyDialog: {
           title: '削除しますか?',
-          content:
-            '本当に <Bold>{{title}}</Bold> を削除しますか?\nこのAPIキーを利用しているクライアントは、APIにアクセスできなくなります。',
+          content: '本当に <Bold>{{title}}</Bold> を削除しますか?\nこのAPIキーを利用しているクライアントは、APIにアクセスできなくなります。',
         },
       },
       button: {
@@ -414,6 +393,8 @@ const translation = {
         instructionsSamples: 'サンプル',
         chooseFiles: 'ファイルを選択',
         apiSettings: 'API公開設定',
+        viewAll: '全て見る',
+        removeFromRecent: '履歴から削除',
       },
       deleteDialog: {
         title: '削除しますか？',
@@ -421,32 +402,65 @@ const translation = {
       },
       shareDialog: {
         title: '共有',
+        switchLabel: 'このボットを共有する',
+        label: {
+          selectShare: '共有先',
+          all: 'すべてのユーザー',
+          partial: '一部のユーザー',
+          search: 'ユーザーとユーザーグループを検索できます',
+          noSearchResults: '検索結果がありません',
+          memberManagement: 'メンバーの管理',
+          group: 'グループ',
+          user: 'ユーザー',
+          sharing: {
+            not_shared: 'どのグループとグループにも共有されていません。',
+            shared_only_users: '{{count}}人のユーザに共有されています。',
+            shared_only_users_plural: '{{count}}人のユーザに共有されています。',
+            shared_only_groups: '{{count}}つのグループに共有されています。',
+            shared_only_groups_plural: '{{count}}つのグループに共有されています。',
+            shared_both: '{{groupCount}}つのグループと{{userCount}}人のユーザーに共有されています。',
+            shared_both_user_plural: '{{groupCount}}つのグループと{{userCount}}人のユーザーに共有されています。',
+            shared_both_group_plural: '{{groupCount}}つのグループと{{userCount}}人のユーザーに共有されています。',
+            shared_both_plural: '{{groupCount}}つのグループと{{userCount}}人のユーザーに共有されています。',
+          },
+        },
+
         off: {
-          content:
-            '共有リンクが無効化されているため、あなた以外はこのボットにアクセスできません。',
+          content: 'このボットは共有されていないため、あなた以外アクセスできません。',
         },
         on: {
-          content:
-            '共有リンクが有効化されているため、全てのユーザが共有リンクを使って会話できます。',
+          content: 'このボットは共有されているため、あなた以外のユーザーもアクセスできます。共有されているユーザーは「ボットを探す」から、このボットを検索して利用することができます。',
+          linkDescription: '以下の共有リンクを使ってボットと会話することもできます。',
+        },
+        button: {
+          manage: '管理',
+          removeAccess: 'アクセス権限を削除',
+          cancelRemoval: '削除をキャンセル',
+          cancelAddition: '追加をキャンセル',
         },
       },
       error: {
         notSupportedFile: 'このファイル形式はサポートされていません。',
-        duplicatedFile:
-          '同一ファイル名のファイルが既にアップロードされています。',
+        duplicatedFile: '同一ファイル名のファイルが既にアップロードされています。',
         failDeleteApi: 'APIの削除に失敗しました。',
       },
       activeModels: {
         title: '利用可能なモデル設定',
         description: 'このボットで使用可能なモデルを設定します。',
       },
+      promptCaching: {
+        title: 'プロンプトキャッシュ',
+        promptCachingEnabled: {
+          title: 'モデルが対応している場合、プロンプトキャッシュを利用する。',
+          description: '有効にすると、このボットと繰り返し会話した際のコストとレイテンシーを削減できます。',
+        },
+      },
     },
     admin: {
-      sharedBotAnalytics: {
+      botAnalytics: {
         label: {
-          pageTitle: '公開ボット確認',
-          noPublicBotUsages:
-            '指定の集計期間内に公開ボットは利用されていません。',
+          pageTitle: 'ボット確認',
+          noBotUsages: '指定の集計期間内にボットは利用されていません。',
           published: 'API公開中',
           SearchCondition: {
             title: '集計期間',
@@ -456,10 +470,8 @@ const translation = {
           sortByCost: '利用料金でソート',
         },
         help: {
-          overview:
-            '共有されているボットと公開済みのAPIにおける利用状況を確認できます。',
-          calculationPeriod:
-            '集計期間が未設定の場合は、本日の利用状況が表示されます。',
+          overview: 'ボットと公開済みのAPIにおける利用状況を確認できます。',
+          calculationPeriod: '集計期間が未設定の場合は、本日の利用状況が表示されます。',
         },
       },
       apiManagement: {
@@ -482,12 +494,12 @@ const translation = {
           codeBuildId: 'CodeBuild ID',
           usagePlanOn: 'ON',
           usagePlanOff: 'OFF',
-          rateLimit:
-            'クライアントは、毎秒 <Bold>{{limit}}</Bold> リクエストAPIを呼び出すことができます。',
-          burstLimit:
-            'クライアントは、同時に <Bold> {{ limit }}</Bold> リクエストAPIを呼び出すことができます。',
-          requestsLimit:
-            '<Bold>{{period}}</Bold> <Bold>{{limit}}</Bold> リクエストAPIを呼び出すことができます。',
+          rateLimit: 'クライアントは、毎秒 <Bold>{{limit}}</Bold> リクエストAPIを呼び出すことができます。',
+          burstLimit: 'クライアントは、同時に <Bold> {{ limit }}</Bold> リクエストAPIを呼び出すことができます。',
+          requestsLimit: '<Bold>{{period}}</Bold> <Bold>{{limit}}</Bold> リクエストAPIを呼び出すことができます。',
+          owner: 'オーナー',
+          privateBot: 'プライベートボット',
+          sharedAllUsers: '全てのユーザーに共有されています',
         },
         alert: {
           noApiKeys: {
@@ -503,9 +515,58 @@ const translation = {
         period: 'FromとToを両方入力してください。',
       },
     },
+    discover: {
+      pageTitle: 'ボットを探す',
+      description: '全員に共有されているボットとあなたがアクセス許可されているボットのみ、検索・表示されます。',
+      search: {
+        placeholder: 'ボットを検索する',
+        searching: '検索中...',
+        results: '"{{query}}"にマッチするボットが{{count}}件見つかりました',
+        noResults: '"{{query}}"にマッチするボットは見つかりませんでした',
+        tryDifferent: '別のキーワードで検索してください。',
+        backToHome: 'ホームに戻る',
+      },
+      essential: {
+        label: '利用推奨ボット',
+        description: '管理者が厳選した利用が推奨されているボットです。業務効率化が見込めるので積極的に使いましょう。',
+        noEssentialBotsMessage: {
+          title: '利用推奨ボットがありません',
+          content: `利用推奨ボットが登録されていないため、管理者以外にこのセクションは表示されていません。<br/>
+          利用推奨ボットとして登録するには、ボットを全てのユーザーに共有する必要があります。<br/>
+          チャット画面、マイボット画面、スター付きのボット一覧画面、最近使用したボット一覧画面に表示されている当該ボットのメニューから、登録することができます。<br/>
+          ボットの横に表示されている<MenuButton/> ボタンを押すと、メニューを開くことができます。`,
+        },
+      },
+      trending: {
+        label: '人気のボット',
+        description: '最も人気のあるボットです。',
+      },
+      discover: {
+        label: '発見',
+        description: 'ランダムにピックアップしたボットが表示されます。',
+      },
+    },
+    conversationHistory: {
+      pageTitle: 'チャット履歴',
+      label: {
+        noConversations: 'チャット履歴がありません',
+      },
+      searchConversation: {
+        placeholder: '会話を検索...',
+        searching: '検索中...',
+        results: ' "{{query}}"にマッチしたチャットが{{count}}件見つかりました',
+        noResults: '{{query}}にマッチするチャットが見つかりませんでした',
+        tryDifferentKeywords: '別のキーワードで試してください',
+        resultsCount: '{{count}}件の検索結果',
+      },
+    },
     deleteDialog: {
       title: '削除',
       content: 'チャット「<Bold>{{title}}</Bold>」を削除しますか？',
+      pinnedBotError: {
+        title: '削除できません',
+        content: 'このボットは利用推奨ボットに登録されています。利用推奨ボットの変更は管理者が行うことができます。',
+      },
     },
     clearDialog: {
       title: '削除',
@@ -514,31 +575,50 @@ const translation = {
     languageDialog: {
       title: '言語の切替',
     },
+    drawerOptionsDialog: {
+      title: 'サイドメニューオプション',
+      label: {
+        displayCount: '表示数',
+      },
+    },
     feedbackDialog: {
       title: 'フィードバック',
       content: '詳細を教えてください。',
       categoryLabel: 'カテゴリ',
       commentLabel: '自由入力',
       commentPlaceholder: '（任意）コメントを記入してください',
-      categories: [
-        {
-          value: 'notFactuallyCorrect',
-          label: '事実と異なる',
-        },
-        {
-          value: 'notFullyFollowRequest',
-          label: '要求に応えていない',
-        },
-        {
-          value: 'other',
-          label: 'その他',
-        },
-      ],
+      categories: {
+        positive: [
+          {
+            value: 'factuallyCorrect',
+            label: '事実に即している',
+          },
+          {
+            value: 'fullyFollowRequest',
+            label: '要求に完全に応えている',
+          },
+        ],
+        negative: [
+          {
+            value: 'notFactuallyCorrect',
+            label: '事実と異なる',
+          },
+          {
+            value: 'notFullyFollowRequest',
+            label: '要求に応えていない',
+          },
+          {
+            value: 'other',
+            label: 'その他',
+          },
+        ],
+      },
     },
     button: {
       newChat: '新しいチャット',
+      backToConversationHistory: 'チャット履歴に戻る',
       botConsole: 'ボットコンソール',
-      sharedBotAnalytics: '公開ボット確認',
+      botAnalytics: 'ボット確認',
       apiManagement: 'API管理',
       userUsages: 'ユーザ利用状況',
       SaveAndSubmit: '変更 & 送信',
@@ -557,6 +637,9 @@ const translation = {
       close: '閉じる',
       add: '追加',
       continue: '生成を続ける',
+      botManagement: 'ボットの管理',
+      drawerOption: 'サイドメニューオプション',
+      mode: 'モード',
     },
     input: {
       hint: {
@@ -569,8 +652,7 @@ const translation = {
     },
     embeddingSettings: {
       title: 'ベクトル埋め込みパラメーター設定',
-      description:
-        'ベクトル埋め込みのパラメーター設定が行えます。パラメーターを変更することで、ドキュメントの検索精度が変わります。',
+      description: 'ベクトル埋め込みのパラメーター設定が行えます。パラメーターを変更することで、ドキュメントの検索精度が変わります。',
       chunkSize: {
         label: 'チャンクサイズ',
         hint: '埋め込み時のドキュメントの分割サイズを指定します。',
@@ -580,25 +662,17 @@ const translation = {
         hint: '隣接するチャンク同士で重複する文字数を指定します。',
       },
       enablePartitionPdf: {
-        label:
-          'PDFの詳細解析の有効化。有効にすると時間をかけてPDFを詳細に分析します。',
+        label: 'PDFの詳細解析の有効化。有効にすると時間をかけてPDFを詳細に分析します。',
         hint: '検索精度を高めたい場合に有効です。計算により多くの時間がかかるため計算コストが増加します。',
       },
       help: {
-        chunkSize:
-          'チャンクサイズが小さすぎると文脈情報が失われ、大きすぎると同一チャンクの中に異なる文脈の情報が存在することになり、検索精度が低下する場合があります。',
-        chunkOverlap:
-          'チャンクオーバーラップを指定することで、チャンク境界付近の文脈情報を保持することができます。チャンクサイズを大きくすることで、検索精度の向上ができる場合があります。しかし、チャンクオーバーラップを大きくすると、計算コストが増大するのでご注意ください。',
-        overlapTokens:
-          '重複するトークンの数、または隣接するチャンク間で繰り返すトークンの数を構成します。たとえば、オーバーラップ トークンを 60 に設定すると、最初のチャンクの最後の 60 個のトークンも 2 番目のチャンクの先頭に含まれます。',
-        maxParentTokenSize:
-          '親チャンクサイズを定義できます。取得中、システムは最初に子チャンクを取得しますが、より包括的なコンテキストをモデルに提供するために、それらをより広範な親チャンクに置き換えます',
-        maxChildTokenSize:
-          '子チャンクサイズを定義できます。取得中、システムは最初に子チャンクを取得しますが、より包括的なコンテキストをモデルに提供するために、それらをより広範な親チャンクに置き換えます',
-        bufferSize:
-          'このパラメータは、各チャンクの境界を決定するために一緒に検査されるテキストの量に影響を与え、結果として生じるチャンクの粒度と一貫性に影響を与える可能性があります。バッファサイズを大きくすると、より多くのコンテキストをキャプチャできますが、ノイズも発生する可能性があります。バッファサイズを小さくすると、重要なコンテキストを見逃す可能性がありますが、より正確なチャンクが保証されます。',
-        breakpointPercentileThreshold:
-          'しきい値が高いほど、文を異なるチャンクに分割するために、文をより区別できる必要があります。しきい値が高いほどチャンクが少なくなり、通常は平均チャンクサイズが大きくなります。',
+        chunkSize: 'チャンクサイズが小さすぎると文脈情報が失われ、大きすぎると同一チャンクの中に異なる文脈の情報が存在することになり、検索精度が低下する場合があります。',
+        chunkOverlap: 'チャンクオーバーラップを指定することで、チャンク境界付近の文脈情報を保持することができます。チャンクサイズを大きくすることで、検索精度の向上ができる場合があります。しかし、チャンクオーバーラップを大きくすると、計算コストが増大するのでご注意ください。',
+        overlapTokens: '重複するトークンの数、または隣接するチャンク間で繰り返すトークンの数を構成します。たとえば、オーバーラップ トークンを 60 に設定すると、最初のチャンクの最後の 60 個のトークンも 2 番目のチャンクの先頭に含まれます。',
+        maxParentTokenSize: '親チャンクサイズを定義できます。取得中、システムは最初に子チャンクを取得しますが、より包括的なコンテキストをモデルに提供するために、それらをより広範な親チャンクに置き換えます',
+        maxChildTokenSize: '子チャンクサイズを定義できます。取得中、システムは最初に子チャンクを取得しますが、より包括的なコンテキストをモデルに提供するために、それらをより広範な親チャンクに置き換えます',
+        bufferSize: 'このパラメータは、各チャンクの境界を決定するために一緒に検査されるテキストの量に影響を与え、結果として生じるチャンクの粒度と一貫性に影響を与える可能性があります。バッファサイズを大きくすると、より多くのコンテキストをキャプチャできますが、ノイズも発生する可能性があります。バッファサイズを小さくすると、重要なコンテキストを見逃す可能性がありますが、より正確なチャンクが保証されます。',
+        breakpointPercentileThreshold: 'しきい値が高いほど、文を異なるチャンクに分割するために、文をより区別できる必要があります。しきい値が高いほどチャンクが少なくなり、通常は平均チャンクサイズが大きくなります。',
       },
       alert: {
         sync: {
@@ -611,8 +685,7 @@ const translation = {
     },
     generationConfig: {
       title: '推論パラメーターの設定',
-      description:
-        'LLM の推論パラメーターを設定して、モデルからの応答を制御することができます。',
+      description: 'LLM の推論パラメーターを設定して、モデルからの応答を制御することができます。',
       maxTokens: {
         label: '最大長',
         hint: '生成されるトークン数の最大長を指定します。',
@@ -639,12 +712,12 @@ const translation = {
       budgetTokens: {
         label: '思考予算トークン',
         hint: '深い思考に割り当てるトークンの最大数。より大きな値は、より複雑な思考を可能にしますが、応答時間が長くなる可能性があります。',
+        help: '深い思考に割り当てる思考予算トークンは、トークンの最大長よりも長くできません。',
       },
     },
     searchSettings: {
       title: '検索設定',
-      description:
-        'ベクトルストアから関連ドキュメントを検索する際の設定が行えます。',
+      description: 'ベクトルストアから関連ドキュメントを検索する際の設定が行えます。',
       maxResults: {
         label: '最大検索数',
         hint: 'ベクトルストアから検索するレコードの最大数',
@@ -663,10 +736,15 @@ const translation = {
     },
     knowledgeBaseSettings: {
       title: 'ナレッジの詳細設定',
-      description:
-        'ナレッジを設定するための埋め込みモデルの選択や、ナレッジとして追加したドキュメントの分割方法などを設定します。ボット作成後の変更はできません。',
+      description: 'ナレッジを設定するための埋め込みモデルの選択や、ナレッジとして追加したドキュメントの分割方法などを設定します。ボット作成後の変更はできません。',
       embeddingModel: {
         label: '埋め込みモデル',
+        titan_v2: {
+          label: 'Titan Embedding Text v2',
+        },
+        cohere_multilingual_v3: {
+          label: 'Embed Multilingual v3',
+        },
       },
       chunkingStrategy: {
         label: 'チャンキング戦略',
@@ -741,8 +819,7 @@ const translation = {
       },
       advancedParsing: {
         label: '高度なドキュメント解析機能',
-        description:
-          'ドキュメントの高度なドキュメント解析機能に使用するモデルを選択してください。',
+        description: 'ドキュメントの高度なドキュメント解析機能に使用するモデルを選択してください。',
         hint: '構造が損なわれていないPDF内の表など、サポートされている文書形式の標準テキスト以外の解析に適しています。生成AIを使用した解析のために追加のコストが発生します。',
       },
       parsingModel: {
@@ -789,8 +866,7 @@ const translation = {
       advancedConfigration: {
         existKnowledgeBaseId: {
           label: '既存のAmazon Bedrock Knowledge BaseのID',
-          description:
-            '既存のAmazon Bedrock Knowledge Baseを使用することができる',
+          description: '既存のAmazon Bedrock Knowledge Baseを使用することができる',
           createNewKb: {
             label: '新規のナレッジを作成する',
           },
@@ -802,8 +878,7 @@ const translation = {
     },
     error: {
       answerResponse: '回答中にエラーが発生しました。',
-      notFoundConversation:
-        '指定のチャットは存在しないため、新規チャット画面を表示しました。',
+      notFoundConversation: '指定のチャットは存在しないため、新規チャット画面を表示しました。',
       notFoundPage: 'お探しのページが見つかりませんでした。',
       unexpectedError: {
         title: '予期せぬエラーが発生しました',
@@ -815,11 +890,21 @@ const translation = {
       },
       notSupportedImage: '選択しているモデルは、画像を利用できません。',
       unsupportedFileFormat: '選択したファイル形式はサポートされていません。',
-      totalFileSizeToSendExceeded:
-        'ファイルサイズの合計が{{maxSize}}を超えています。',
+      totalFileSizeToSendExceeded: 'ファイルサイズの合計が{{maxSize}}を超えています。',
       attachment: {
         fileSizeExceeded: 'ファイルサイズは{{maxSize}}以下にしてください。',
         fileCountExceeded: 'ファイル数は{{maxCount}}以下にしてください。',
+      },
+      cannotAccessBot: 'このボットにアクセスできません。新しいチャットへリダイレクトしました。',
+      share: {
+        markedEssential: {
+          title: '共有設定を変更できません',
+          content: 'このボットは管理者によって利用推奨ボットに登録されています。利用推奨ボットは全ユーザーに共有する必要があります。',
+        },
+        publication: {
+          title: '共有設定を変更できません',
+          content: 'このボットは管理者によってAPIとして公開されています。APIを公開するためには、全ユーザーに共有する必要があります。',
+        },
       },
     },
     validation: {
@@ -831,15 +916,20 @@ const translation = {
         message: '設定できる最小値は{{size}}です',
       },
       chunkOverlapLessThanChunkSize: {
-        message:
-          'チャンクオーバーラップはチャンクサイズより小さく設定する必要があります',
+        message: 'チャンクオーバーラップはチャンクサイズより小さく設定する必要があります',
       },
       parentTokenRange: {
-        message:
-          '親トークンのサイズは子トークンのサイズより大きくする必要があります',
+        message: '親トークンのサイズは子トークンのサイズより大きくする必要があります',
       },
       quickStarter: {
         message: 'タイトルと入力例は、どちらも入力してください。',
+      },
+      maxBudgetTokens: {
+        message: '思考予算トークンは、トークンの最大長である{{size}}より大きい値を設定できません。',
+      },
+      required: '{{key}}は必須入力です。',
+      number: {
+        greaterThen: '{{key}}は{{value}}より大きい数字にしてください。',
       },
     },
     helper: {
@@ -900,6 +990,14 @@ const translation = {
         label: '思考過程',
       },
     },
+    tooltips: {
+      starredTooltip: 'スター付きボットとして保存',
+      positiveFeedback: 'ポジティブなフィードバックを送信',
+      negativeFeedback: 'ネガティブなフィードバックを送信',
+      copyResponse: '応答をコピー',
+      editInput: '入力を編集',
+      sendMessage: 'メッセージを送信',
+    }
   },
 };
 

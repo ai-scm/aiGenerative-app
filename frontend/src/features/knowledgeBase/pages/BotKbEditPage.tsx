@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import InputText from '../../../components/InputText';
 import Button from '../../../components/Button';
 import useBot from '../../../hooks/useBot';
@@ -33,7 +33,10 @@ import Toggle from '../../../components/Toggle';
 import RadioButton from '../../../components/RadioButton';
 import { useAgent } from '../../../features/agent/hooks/useAgent';
 import { AgentTool } from '../../../features/agent/types';
-import { isInternetTool, isBedrockAgentTool } from '../../../features/agent/utils/typeGuards';
+import {
+  isInternetTool,
+  isBedrockAgentTool,
+} from '../../../features/agent/utils/typeGuards';
 import { AvailableTools } from '../../../features/agent/components/AvailableTools';
 import {
   DEFAULT_FIXED_CHUNK_PARAMS,
@@ -66,9 +69,9 @@ import {
 } from '../types';
 import { toCamelCase } from '../../../utils/StringUtils';
 
-const edgeGenerationParams = EDGE_GENERATION_PARAMS
+const edgeGenerationParams = EDGE_GENERATION_PARAMS;
 
-const defaultGenerationConfig = DEFAULT_GENERATION_CONFIG
+const defaultGenerationConfig = DEFAULT_GENERATION_CONFIG;
 
 const BotKbEditPage: React.FC = () => {
   const { i18n, t } = useTranslation();
@@ -104,6 +107,7 @@ const BotKbEditPage: React.FC = () => {
     defaultGenerationConfig.reasoningParams?.budgetTokens ??
       EDGE_GENERATION_PARAMS.budgetTokens.MIN
   );
+  const [promptCachingEnabled, setPromptCachingEnabled] = useState<boolean>(false);
   const [tools, setTools] = useState<AgentTool[]>([]);
   const [conversationQuickStarters, setConversationQuickStarters] = useState<
     ConversationQuickStarter[]
@@ -472,6 +476,7 @@ const BotKbEditPage: React.FC = () => {
           setBudgetTokens(bot.generationParams.reasoningParams.budgetTokens);
           setUnchangedFilenames([...bot.knowledge.filenames]);
           setDisplayRetrievedChunks(bot.displayRetrievedChunks);
+          setPromptCachingEnabled(bot.promptCachingEnabled);
           if (bot.syncStatus === 'FAILED') {
             setErrorMessages(
               isSyncChunkError(bot.syncStatusReason)
@@ -891,7 +896,7 @@ const BotKbEditPage: React.FC = () => {
         );
         return true;
       }
-      
+
       if (isBedrockAgentTool(tool) && !tool.bedrockAgentConfig?.aliasId) {
         setErrorMessages(
           `tools-${idx}-bedrockAgentConfig.alias_id`,
@@ -899,18 +904,20 @@ const BotKbEditPage: React.FC = () => {
         );
         return true;
       }
-      
+
       // Firecrawl tool validation
-      if (isInternetTool(tool) && 
-          tool.searchEngine === 'firecrawl' && 
-          (!tool.firecrawlConfig || !tool.firecrawlConfig.apiKey)) {
+      if (
+        isInternetTool(tool) &&
+        tool.searchEngine === 'firecrawl' &&
+        (!tool.firecrawlConfig || !tool.firecrawlConfig.apiKey)
+      ) {
         setErrorMessages(
           `tools-${idx}-firecrawlConfig.apiKey`,
           t('input.validationError.required')
         );
         return true;
       }
-      
+
       return false; // Tool is valid
     });
 
@@ -1128,7 +1135,6 @@ const BotKbEditPage: React.FC = () => {
       }
     }
 
-
     if (searchParams.maxResults < EDGE_SEARCH_PARAMS.maxResults.MIN) {
       setErrorMessages(
         'maxResults',
@@ -1201,40 +1207,7 @@ const BotKbEditPage: React.FC = () => {
     setIsLoading(true);
     registerBot({
       agent: {
-        tools: tools.map((tool) => {
-          const baseTool = {
-            tool_type: tool.toolType,
-            name: tool.name,
-            description: tool.description,
-          };
-
-          if (isInternetTool(tool)) {
-            return {
-              ...baseTool,
-              search_engine: tool.searchEngine,
-              firecrawl_config: tool.firecrawlConfig
-                ? {
-                    api_key: tool.firecrawlConfig.apiKey,
-                    max_results: tool.firecrawlConfig.maxResults,
-                  }
-                : undefined,
-            };
-          }
-
-          if (isBedrockAgentTool(tool)) {
-            return {
-              ...baseTool,
-              bedrock_agent_config: tool.bedrockAgentConfig
-                ? {
-                    agent_id: tool.bedrockAgentConfig.agentId,
-                    alias_id: tool.bedrockAgentConfig.aliasId,
-                  }
-                : undefined,
-            };
-          }
-
-          return baseTool;
-        }),
+        tools,
       },
       id: botId,
       title,
@@ -1258,6 +1231,7 @@ const BotKbEditPage: React.FC = () => {
         filenames: files.map((f) => f.filename),
       },
       displayRetrievedChunks,
+      promptCachingEnabled: promptCachingEnabled,
       conversationQuickStarters: conversationQuickStarters.filter(
         (qs) => qs.title !== '' && qs.example !== ''
       ),
@@ -1307,7 +1281,7 @@ const BotKbEditPage: React.FC = () => {
       activeModels,
     })
       .then(() => {
-        navigate('/bot/explore');
+        navigate('/bot/my');
       })
       .catch(() => {
         setIsLoading(false);
@@ -1331,6 +1305,7 @@ const BotKbEditPage: React.FC = () => {
     s3Urls,
     files,
     displayRetrievedChunks,
+    promptCachingEnabled,
     conversationQuickStarters,
     navigate,
     knowledgeBaseId,
@@ -1362,40 +1337,7 @@ const BotKbEditPage: React.FC = () => {
       setIsLoading(true);
       updateBot(botId, {
         agent: {
-          tools: tools.map((tool) => {
-            const baseTool = {
-              tool_type: tool.toolType,
-              name: tool.name,
-              description: tool.description,
-            };
-
-            if (isInternetTool(tool)) {
-              return {
-                ...baseTool,
-                search_engine: tool.searchEngine,
-                firecrawl_config: tool.firecrawlConfig
-                  ? {
-                      api_key: tool.firecrawlConfig.apiKey,
-                      max_results: tool.firecrawlConfig.maxResults,
-                    }
-                  : undefined,
-              };
-            }
-
-            if (isBedrockAgentTool(tool)) {
-              return {
-                ...baseTool,
-                bedrock_agent_config: tool.bedrockAgentConfig
-                  ? {
-                      agent_id: tool.bedrockAgentConfig.agentId,
-                      alias_id: tool.bedrockAgentConfig.aliasId,
-                    }
-                  : undefined,
-              };
-            }
-
-            return baseTool;
-          }),
+          tools,
         },
         title,
         description,
@@ -1420,6 +1362,7 @@ const BotKbEditPage: React.FC = () => {
           unchangedFilenames,
         },
         displayRetrievedChunks,
+        promptCachingEnabled: promptCachingEnabled,
         conversationQuickStarters: conversationQuickStarters.filter(
           (qs) => qs.title !== '' && qs.example !== ''
         ),
@@ -1469,7 +1412,7 @@ const BotKbEditPage: React.FC = () => {
         activeModels,
       })
         .then(() => {
-          navigate('/bot/explore');
+          navigate('/bot/my');
         })
         .catch(() => {
           setIsLoading(false);
@@ -1497,6 +1440,7 @@ const BotKbEditPage: React.FC = () => {
     deletedFilenames,
     unchangedFilenames,
     displayRetrievedChunks,
+    promptCachingEnabled,
     conversationQuickStarters,
     navigate,
     knowledgeBaseId,
@@ -2647,6 +2591,25 @@ const BotKbEditPage: React.FC = () => {
                         </div>
                       </div>
                     ))}
+                  </div>
+                </div>
+              </ExpandableDrawerGroup>
+
+              <ExpandableDrawerGroup
+                isDefaultShow={false}
+                label={t('bot.promptCaching.title')}
+                className="py-2"
+              >
+                <div className="flex mt-4 items-start">
+                  <Toggle
+                    value={promptCachingEnabled}
+                    onChange={setPromptCachingEnabled}
+                  />
+                  <div>
+                    <Trans t={t} i18nKey="bot.promptCaching.promptCachingEnabled.title" />
+                    <div className="text-sm text-dark-gray dark:text-light-gray">
+                      <Trans t={t} i18nKey="bot.promptCaching.promptCachingEnabled.description" />
+                    </div>
                   </div>
                 </div>
               </ExpandableDrawerGroup>

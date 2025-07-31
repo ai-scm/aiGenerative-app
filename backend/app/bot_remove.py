@@ -8,7 +8,7 @@ from app.repositories.api_publication import (
     find_stack_by_bot_id,
     find_usage_plan_by_id,
 )
-from app.repositories.common import RecordNotFoundError, decompose_bot_id
+from app.repositories.common import RecordNotFoundError, decompose_sk
 from app.utils import delete_api_key_from_secret_manager
 
 DOCUMENT_BUCKET = os.environ.get("DOCUMENT_BUCKET", "documents")
@@ -66,13 +66,13 @@ def handler(event: dict, context: Any) -> None:
 
     pk = record["dynamodb"]["Keys"]["PK"]["S"]
     sk = record["dynamodb"]["Keys"].get("SK", {}).get("S")
-    if not sk or "#BOT#" not in sk:
+    if not sk or "BOT#" not in sk:
         # Ignore non-bot items
         print(f"Skipping event for SK: {sk}")
         return
 
     user_id = pk
-    bot_id = decompose_bot_id(sk)
+    bot_id = decompose_sk(sk)
 
     delete_from_s3(user_id, bot_id)
     delete_custom_bot_stack_by_bot_id(bot_id)

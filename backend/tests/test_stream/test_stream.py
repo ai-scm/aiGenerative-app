@@ -37,6 +37,8 @@ def on_stop(x: OnStopInput) -> None:
     print(f"Price: {x['price']}")
     print(f"Input token count: {x['input_token_count']}")
     print(f"Output token count: {x['output_token_count']}")
+    print(f"Cache read input token count: {x['cache_read_input_count']}")
+    print(f"Cache write input token count: {x['cache_write_input_count']}")
     pprint(x["message"])
 
 
@@ -45,13 +47,20 @@ def on_reasoning(x: str) -> None:
 
 
 class TestConverseApiStreamHandler(unittest.TestCase):
-    # MODEL = "claude-v3-sonnet"
-    # MODEL = "mistral-7b-instruct"
-    MODEL = "claude-v3.7-sonnet"
+    # MODEL = "claude-v3.5-haiku"
+    MODEL = "claude-v3.5-sonnet"
+    MODEL_REASONING = "claude-v3.7-sonnet"
 
-    def _run(self, message, instructions=[], generation_params=None, guardrail=None):
+    def _run(
+        self,
+        message,
+        instructions=[],
+        generation_params=None,
+        guardrail=None,
+        reasoning=False,
+    ):
         self.stream_handler = ConverseApiStreamHandler(
-            model=self.MODEL,
+            model=self.MODEL if not reasoning else self.MODEL_REASONING,
             instructions=instructions,
             generation_params=generation_params,
             guardrail=guardrail,
@@ -111,6 +120,7 @@ class TestConverseApiStreamHandler(unittest.TestCase):
                     budget_tokens=1024,
                 ),
             ),
+            reasoning=True,
         )
 
     def test_run_with_instruction(self):
@@ -221,8 +231,7 @@ class TestConverseApiStreamHandler(unittest.TestCase):
 
 
 class TestConverseApiStreamHandlerGuardrail(unittest.TestCase):
-    MODEL = "claude-v3-sonnet"
-    # MODEL = "mistral-7b-instruct"
+    MODEL = "claude-v3.5-haiku"
 
     def setUp(self) -> None:
         # Note that the region must be the same as the one used in the bedrock client

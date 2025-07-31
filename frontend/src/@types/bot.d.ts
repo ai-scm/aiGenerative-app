@@ -1,6 +1,11 @@
+import {
+  Agent,
+  AgentInput,
+} from '../features/agent/types';
 import { BedrockKnowledgeBase } from '../features/knowledgeBase/types';
 import { Model } from './conversation';
 export type BotKind = 'private' | 'mixed';
+export type SharedScope = 'private' | 'partial' | 'all';
 
 type ActiveModels = {
   [K in Model]: boolean;
@@ -12,10 +17,11 @@ export type BotMeta = {
   description: string;
   createTime: Date;
   lastUsedTime: Date;
-  isPublic: boolean;
-  isPinned: boolean;
+  isStarred: boolean;
   owned: boolean;
   syncStatus: BotSyncStatus;
+  sharedScope: SharedScope;
+  sharedStatus: string;
 };
 
 export type BotKnowledge = {
@@ -73,11 +79,16 @@ export type GuardrailsParams = {
   guardrailVersion: string;
 };
 
-export type BotDetails = BotMeta & {
+export type BotDetails = Omit<BotMeta, 'isStarred' | 'owned'> & {
   instruction: string;
+  allowedCognitoGroups: string[];
+  allowedCognitoUsers: string[];
+  ownerUserId: string;
+  isPublication: boolean;
   generationParams: GenerationParams;
   agent: Agent;
   knowledge: BotKnowledge;
+  promptCachingEnabled: boolean;
   syncStatusReason: string;
   displayRetrievedChunks: boolean;
   conversationQuickStarters: ConversationQuickStarter[];
@@ -89,7 +100,6 @@ export type BotDetails = BotMeta & {
 export type BotSummary = BotMeta & {
   hasKnowledge: boolean;
   hasAgent: boolean;
-  hasExistKnowledngeBaseId: boolean;
   conversationQuickStarters: ConversationQuickStarter[];
   activeModels: ActiveModels;
 };
@@ -110,6 +120,7 @@ export type RegisterBotRequest = {
   generationParams?: GenerationParams;
   knowledge?: BotKnowledge;
   displayRetrievedChunks: boolean;
+  promptCachingEnabled: boolean;
   conversationQuickStarters: ConversationQuickStarter[];
   bedrockGuardrails?: GuardrailsParams;
   bedrockKnowledgeBase?: BedrockKnowledgeBase;
@@ -123,9 +134,10 @@ export type UpdateBotRequest = {
   instruction: string;
   description?: string;
   agent: AgentInput;
-  generationParams?: BotGenerationConfig;
+  generationParams?: GenerationParams;
   knowledge?: BotKnowledgeDiff;
   displayRetrievedChunks: boolean;
+  promptCachingEnabled: boolean;
   conversationQuickStarters: ConversationQuickStarter[];
   bedrockGuardrails?: GuardrailsParams;
   bedrockKnowledgeBase?: BedrockKnowledgeBase;
@@ -140,22 +152,41 @@ export type UpdateBotResponse = {
   generationParams: GenerationParams;
   knowledge?: BotKnowledge;
   displayRetrievedChunks: boolean;
+  promptCachingEnabled: boolean;
   conversationQuickStarters: ConversationQuickStarter[];
   bedrockKnowledgeBase: BedrockKnowledgeBase;
   activeModels: ActiveModels;
 };
 
-export type UpdateBotPinnedRequest = {
-  pinned: boolean;
+export type UpdateBotStarredRequest = {
+  starred: boolean;
 };
 
-export type UpdateBotPinnedResponse = null;
+export type UpdateBotStarredResponse = null;
 
-export type UpdateBotVisibilityRequest = {
-  toPublic: boolean;
-};
+export type UpdateBotSharedScopeRequest =
+  | {
+      targetSharedScope: 'private';
+    }
+  | {
+      targetSharedScope: 'partial';
+      targetAllowedGroupIds: string[];
+      targetAllowedUserIds: string[];
+    }
+  | {
+      targetSharedScope: 'all';
+    };
 
-export type UpdateBotVisibilityResponse = null;
+export type UpdateBotSharedScopeResponse = null;
+
+export type UpdateBotPushedRequest =
+  | {
+      toPinned: true;
+      order: number;
+    }
+  | {
+      toPinned: false;
+    };
 
 export type GetBotsRequest =
   | {
@@ -168,12 +199,14 @@ export type GetBotsRequest =
     }
   | {
       kind: 'mixed';
-      pinned: boolean;
+      starred: boolean;
     };
 
 export type GetBotsResponse = BotListItem[];
 
 export type GetMyBotResponse = BotDetails;
+
+export type GetPinnedBotResponse = BotMeta[];
 
 export type GetBotSummaryResponse = BotSummary;
 

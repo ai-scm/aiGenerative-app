@@ -9,9 +9,11 @@ import { Authenticator } from '@aws-amplify/ui-react';
 import { useTranslation } from 'react-i18next';
 import './i18n';
 import { validateSocialProvider } from './utils/SocialProviderUtils';
-import AppContent from './components/AppContent';
+import AppContent from './layouts/AppContent';
 import { ErrorBoundary } from 'react-error-boundary';
 import ErrorFallback from './pages/ErrorFallback';
+// Usar la versión segura temporalmente
+import { useClearStorageOnUnloadSafe } from './custom-components/hooks';
 
 const customProviderEnabled =
   import.meta.env.VITE_APP_CUSTOM_PROVIDER_ENABLED === 'true';
@@ -21,6 +23,8 @@ const socialProviderFromEnv = import.meta.env.VITE_APP_SOCIAL_PROVIDERS?.split(
 
 const App: React.FC = () => {
   const { t, i18n } = useTranslation();
+
+  
 
   useEffect(() => {
     // set header title
@@ -44,6 +48,8 @@ const App: React.FC = () => {
       },
     },
   });
+
+  useClearStorageOnUnloadSafe();
 
   I18n.putVocabularies(translations);
   I18n.setLanguage(i18n.language);

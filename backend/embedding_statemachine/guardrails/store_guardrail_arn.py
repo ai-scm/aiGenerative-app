@@ -4,10 +4,10 @@ import os
 from typing import List, TypedDict
 
 import boto3
-from app.repositories.common import _get_table_client
-from app.repositories.custom_bot import decompose_bot_id, update_guardrails_params
+from app.repositories.common import decompose_sk
+from app.repositories.custom_bot import update_guardrails_params
 from app.routes.schemas.bot import type_sync_status
-from retry import retry
+from reretry import retry
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -65,6 +65,6 @@ def handler(event, context):
         guardrail_version = first_output.get("GuardrailVersion", "")
 
     user_id = pk
-    bot_id = decompose_bot_id(sk)
+    bot_id = decompose_sk(sk)
 
     update_guardrails_params(user_id, bot_id, guardrail_arn, guardrail_version)

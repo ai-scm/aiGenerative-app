@@ -1,5 +1,5 @@
 export type AgentInput = {
-  tools: string[];
+  tools: AgentTool[];
 };
 
 export type FirecrawlConfig = {
@@ -16,7 +16,7 @@ export type BedrockAgentConfig = {
 };
 
 export type InternetAgentTool = {
-  toolType: "internet";
+  toolType: 'internet';
   name: string;
   description: string;
   searchEngine: SearchEngine;
@@ -24,13 +24,13 @@ export type InternetAgentTool = {
 };
 
 export type PlainAgentTool = {
-  toolType: "plain";
+  toolType: 'plain';
   name: string;
   description: string;
 };
 
 export type BedrockAgentTool = {
-  toolType: "bedrock_agent";
+  toolType: 'bedrock_agent';
   name: string;
   description: string;
   bedrockAgentConfig?: BedrockAgentConfig;

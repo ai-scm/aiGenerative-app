@@ -19,7 +19,7 @@ export default defineConfig({
       manifest: {
         name: 'Bedrock Chat',
         short_name: 'Bedrock Chat',
-        description: 'AWS-native chatbot using Bedrock + Claude',
+        description: 'AWS-native chatbot using Bedrock',
         start_url: '/index.html',
         display: 'standalone',
         theme_color: '#232F3E',

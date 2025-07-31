@@ -3,8 +3,8 @@ from app.repositories.conversation import (
     delete_conversation_by_id,
     delete_conversation_by_user_id,
     find_conversation_by_user_id,
-    find_related_documents_by_conversation_id,
     find_related_document_by_id,
+    find_related_documents_by_conversation_id,
     update_feedback,
 )
 from app.repositories.models.conversation import FeedbackModel
@@ -13,6 +13,7 @@ from app.routes.schemas.conversation import (
     ChatOutput,
     Conversation,
     ConversationMetaOutput,
+    ConversationSearchResult,
     FeedbackInput,
     FeedbackOutput,
     NewTitleInput,
@@ -24,6 +25,7 @@ from app.usecases.chat import (
     chat_output_from_message,
     fetch_conversation,
     propose_conversation_title,
+    search_conversations as search_conversations_usecase,
 )
 from app.user import User
 from fastapi import APIRouter, Request
@@ -42,7 +44,7 @@ def post_message(request: Request, chat_input: ChatInput):
     """Send chat message"""
     current_user: User = request.state.current_user
 
-    conversation, message = chat(user_id=current_user.id, chat_input=chat_input)
+    conversation, message = chat(user=current_user, chat_input=chat_input)
     output = chat_output_from_message(conversation=conversation, message=message)
     return output
 
@@ -121,11 +123,17 @@ def get_all_conversations(
 
 
 @router.delete("/conversations")
-def remove_all_conversations(
-    request: Request,
-):
+def remove_all_conversations(request: Request):
     """Delete all conversations"""
     delete_conversation_by_user_id(request.state.current_user.id)
+
+
+@router.get("/conversations/search", response_model=list[ConversationSearchResult])
+def search_conversations(request: Request, query: str):
+    """Search conversations by keyword"""
+    current_user: User = request.state.current_user
+    output = search_conversations_usecase(query, current_user)
+    return output
 
 
 @router.patch("/conversation/{conversation_id}/title")

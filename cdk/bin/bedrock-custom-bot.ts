@@ -36,7 +36,7 @@ interface BaseConfig {
   ownerUserId: string;
   botId: string;
   documentBucketName: string;
-  useStandbyReplicas: boolean;
+  enableRagReplicas: boolean;
 }
 
 interface KnowledgeConfig {
@@ -84,9 +84,9 @@ const baseConfig: BaseConfig = {
   envPrefix: params.envPrefix,
   bedrockRegion: params.bedrockRegion,
   ownerUserId: params.pk,
-  botId: params.sk.split("#")[2],
+  botId: params.sk.split("#")[1],
   documentBucketName: params.documentBucketName,
-  useStandbyReplicas: params.useStandByReplicas === true,
+  enableRagReplicas: params.enableRagReplicas === true,
 };
 
 const knowledgeConfig: KnowledgeConfig = {
@@ -233,7 +233,7 @@ new BedrockCustomBotStack(app, `BrChatKbStack${baseConfig.botId}`, {
   ownerUserId: baseConfig.ownerUserId,
   botId: baseConfig.botId,
   bedrockClaudeChatDocumentBucketName: baseConfig.documentBucketName,
-  useStandbyReplicas: baseConfig.useStandbyReplicas,
+  enableRagReplicas: baseConfig.enableRagReplicas,
 
   // Knowledge base configuration
   embeddingsModel: knowledgeConfig.embeddingsModel,

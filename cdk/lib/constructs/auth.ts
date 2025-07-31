@@ -1,4 +1,10 @@
-import { CfnOutput, Duration, Stack, CustomResource, RemovalPolicy } from "aws-cdk-lib";
+import {
+  CfnOutput,
+  Duration,
+  Stack,
+  CustomResource,
+  RemovalPolicy,
+} from "aws-cdk-lib";
 import {
   ProviderAttribute,
   UserPool,
@@ -25,6 +31,7 @@ export interface AuthProps {
   readonly allowedSignUpEmailDomains: string[];
   readonly autoJoinUserGroups: string[];
   readonly selfSignUpEnabled: boolean;
+  readonly tokenValidity: Duration;
 }
 
 export class Auth extends Construct {
@@ -45,12 +52,12 @@ export class Auth extends Construct {
         username: false,
         email: true,
       },
-      removalPolicy: RemovalPolicy.DESTROY
+      removalPolicy: RemovalPolicy.DESTROY,
     });
 
     const clientProps = (() => {
       const defaultProps = {
-        idTokenValidity: Duration.days(1),
+        idTokenValidity: props.tokenValidity,
         authFlows: {
           userPassword: true,
           userSrp: true,
@@ -153,7 +160,7 @@ export class Auth extends Construct {
         this,
         "CheckEmailDomain",
         {
-          runtime: Runtime.PYTHON_3_12,
+          runtime: Runtime.PYTHON_3_13,
           index: "check_email_domain.py",
           entry: path.join(
             __dirname,
@@ -211,7 +218,7 @@ export class Auth extends Construct {
         this,
         "AddUserToGroups",
         {
-          runtime: Runtime.PYTHON_3_12,
+          runtime: Runtime.PYTHON_3_13,
           index: "add_user_to_groups.py",
           entry: path.join(
             __dirname,
@@ -252,7 +259,7 @@ export class Auth extends Construct {
           ),
           handler: "index.handler",
 
-          runtime: Runtime.PYTHON_3_12,
+          runtime: Runtime.PYTHON_3_13,
           environment: {
             USER_POOL_ID: userPool.userPoolId,
           },

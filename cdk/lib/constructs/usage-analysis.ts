@@ -130,7 +130,7 @@ export class UsageAnalysis extends Construct {
         type: glue.Schema.struct([{ name: "S", type: glue.Schema.STRING }]),
       },
       {
-        name: "IsPinned",
+        name: "IsStarred",
         type: glue.Schema.struct([{ name: "BOOL", type: glue.Schema.BOOLEAN }]),
       },
       {
@@ -240,17 +240,17 @@ export class UsageAnalysis extends Construct {
 
     const exportHandler = new python.PythonFunction(this, "ExportHandler", {
       entry: path.join(__dirname, "../../../backend/s3_exporter/"),
-      runtime: Runtime.PYTHON_3_11,
+      runtime: Runtime.PYTHON_3_13,
       environment: {
         BUCKET_NAME: ddbBucket.bucketName,
-        TABLE_ARN: props.sourceDatabase.table.tableArn,
+        TABLE_ARN: props.sourceDatabase.conversationTable.tableArn,
       },
       logRetention: logs.RetentionDays.THREE_MONTHS,
     });
     exportHandler.role?.addToPrincipalPolicy(
       new iam.PolicyStatement({
         actions: ["dynamodb:ExportTableToPointInTime"],
-        resources: [props.sourceDatabase.table.tableArn],
+        resources: [props.sourceDatabase.conversationTable.tableArn],
       })
     );
     ddbBucket.grantReadWrite(exportHandler);

@@ -5,6 +5,7 @@ import { BedrockChatStack } from "../lib/bedrock-chat-stack";
 import { BedrockRegionResourcesStack } from "../lib/bedrock-region-resources";
 import { FrontendWafStack } from "../lib/frontend-waf-stack";
 import { LogRetentionChecker } from "../rules/log-retention-checker";
+import { Language } from "../lib/constructs/bot-store";
 import { getBedrockChatParameters } from "../lib/utils/parameter-models";
 import { bedrockChatParams } from "../parameter";
 
@@ -84,11 +85,16 @@ const chat = new BedrockChatStack(
     autoJoinUserGroups: params.autoJoinUserGroups,
     selfSignUpEnabled: params.selfSignUpEnabled,
     documentBucket: bedrockRegionResources.documentBucket,
-    useStandbyReplicas: params.enableRagReplicas,
+    enableRagReplicas: params.enableRagReplicas,
     enableBedrockCrossRegionInference: params.enableBedrockCrossRegionInference,
     enableLambdaSnapStart: params.enableLambdaSnapStart,
     alternateDomainName: params.alternateDomainName,
     hostedZoneId: params.hostedZoneId,
+    enableBotStore: params.enableBotStore,
+    enableBotStoreReplicas: params.enableBotStoreReplicas,
+    botStoreLanguage: params.botStoreLanguage,
+    tokenValidMinutes: params.tokenValidMinutes,
+    devAccessIamRoleArn: params.devAccessIamRoleArn,
   }
 );
 chat.addDependency(waf);

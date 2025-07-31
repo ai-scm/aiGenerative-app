@@ -22,7 +22,15 @@ from app.routes.schemas.bot_kb import (
     BedrockKnowledgeBaseOutput,
 )
 from app.routes.schemas.conversation import type_model_name
-from pydantic import Discriminator, Field, create_model, field_validator, validator
+from charset_normalizer.utils import is_punctuation
+from pydantic import (
+    Discriminator,
+    Field,
+    create_model,
+    field_validator,
+    model_validator,
+    validator,
+)
 
 if TYPE_CHECKING:
     from app.repositories.models.custom_bot import BotModel
@@ -37,6 +45,8 @@ type_sync_status = Literal[
     "FAILED",
     "ORIGINAL_NOT_FOUND",
 ]
+
+type_shared_scope = Literal["partial", "all", "private"]
 
 
 def _create_model_activate_input(model_names: List[str]) -> Type[BaseSchema]:
@@ -147,17 +157,8 @@ class Agent(BaseSchema):
         return v
 
 
-class AgentToolInput(BaseSchema):
-    tool_type: Literal["plain", "internet", "bedrock_agent"]
-    name: str
-    description: str
-    search_engine: Literal["duckduckgo", "firecrawl"] | None = None
-    firecrawl_config: FirecrawlConfig | None = None
-    bedrock_agent_config: BedrockAgentConfig | None = None
-
-
 class AgentInput(BaseSchema):
-    tools: list[AgentToolInput] = Field(..., description="List of tools")
+    tools: list[Tool] = Field(..., description="List of tools")
 
 
 class Knowledge(BaseSchema):
@@ -210,10 +211,32 @@ class BotInput(BaseSchema):
     agent: Optional[AgentInput] = None
     knowledge: Knowledge | None
     display_retrieved_chunks: bool
+    prompt_caching_enabled: bool = True
     conversation_quick_starters: list[ConversationQuickStarter] | None
     bedrock_knowledge_base: BedrockKnowledgeBaseInput | None = None
     bedrock_guardrails: BedrockGuardrailsInput | None = None
     active_models: ActiveModelsInput  # type: ignore
+
+    def has_knowledge(self) -> bool:
+        if self.knowledge:
+            return (
+                len(self.knowledge.source_urls) > 0
+                or len(self.knowledge.sitemap_urls) > 0
+                or len(self.knowledge.filenames) > 0
+                or len(self.knowledge.s3_urls) > 0
+                # This is a condition for running Sfn to register existing KB information in DynamoDB when an existing KB is specified.
+                or (
+                    self.bedrock_knowledge_base is not None
+                    and self.bedrock_knowledge_base.exist_knowledge_base_id is not None
+                )
+            )
+        return False
+
+    def has_guardrails(self) -> bool:
+        if self.bedrock_guardrails is None:
+            return False
+
+        return self.bedrock_guardrails.is_guardrail_enabled == True
 
 
 class BotModifyInput(BaseSchema):
@@ -224,6 +247,7 @@ class BotModifyInput(BaseSchema):
     agent: Optional[AgentInput] = None
     knowledge: KnowledgeDiffInput | None
     display_retrieved_chunks: bool
+    prompt_caching_enabled: bool
     conversation_quick_starters: list[ConversationQuickStarter] | None
     bedrock_knowledge_base: BedrockKnowledgeBaseInput | None = None
     bedrock_guardrails: BedrockGuardrailsInput | None = None
@@ -338,6 +362,7 @@ class BotModifyOutput(BaseSchema):
     generation_params: GenerationParams
     agent: Agent
     knowledge: Knowledge
+    prompt_caching_enabled: bool
     conversation_quick_starters: list[ConversationQuickStarter]
     bedrock_knowledge_base: BedrockKnowledgeBaseOutput | None
     bedrock_guardrails: BedrockGuardrailsOutput | None
@@ -351,13 +376,16 @@ class BotOutput(BaseSchema):
     instruction: str
     create_time: float
     last_used_time: float
-    is_public: bool
-    is_pinned: bool
-    # Whether the bot is owned by the user
-    owned: bool
+    shared_scope: type_shared_scope
+    shared_status: str
+    allowed_cognito_groups: list[str]
+    allowed_cognito_users: list[str]
+    owner_user_id: str
+    is_publication: bool
     generation_params: GenerationParams
     agent: Agent
     knowledge: Knowledge
+    prompt_caching_enabled: bool
     sync_status: type_sync_status
     sync_status_reason: str
     sync_last_exec_id: str
@@ -374,13 +402,17 @@ class BotMetaOutput(BaseSchema):
     description: str
     create_time: float
     last_used_time: float
-    is_pinned: bool
-    is_public: bool
+    is_starred: bool
     owned: bool
     # Whether the bot is available or not.
     # This can be `False` if the bot is not owned by the user and original bot is removed.
     available: bool
     sync_status: type_sync_status
+    shared_scope: type_shared_scope
+    shared_status: str = Field(
+        ...,
+        description="Shared status of the bot. Possible values: `private`, `shared` and `pinned@xxx",
+    )
 
 
 class BotSummaryOutput(BaseSchema):
@@ -389,22 +421,49 @@ class BotSummaryOutput(BaseSchema):
     description: str
     create_time: float
     last_used_time: float
-    is_pinned: bool
-    is_public: bool
+    is_starred: bool
     has_agent: bool
     owned: bool
     sync_status: type_sync_status
     has_knowledge: bool
     conversation_quick_starters: list[ConversationQuickStarter]
+    shared_scope: type_shared_scope
+    shared_status: str = Field(
+        ...,
+        description="Shared status of the bot. Possible values: `private`, `shared` and `pinned@xxx",
+    )
     active_models: ActiveModelsOutput  # type: ignore
 
 
-class BotSwitchVisibilityInput(BaseSchema):
-    to_public: bool
+class PrivateVisibilityInput(BaseSchema):
+    target_shared_scope: Literal["private"]
 
 
-class BotPinnedInput(BaseSchema):
-    pinned: bool
+class PartialVisibilityInput(BaseSchema):
+    target_shared_scope: Literal["partial"]
+    target_allowed_user_ids: list[str]
+    target_allowed_group_ids: list[str]
+
+    # @model_validator(mode="after")
+    # def validate_not_both_empty(self) -> Self:
+    #     if not self.target_allowed_user_ids and not self.target_allowed_group_ids:
+    #         raise ValueError(
+    #             "Either target_allowed_user_ids or target_allowed_group_ids must not be empty"
+    #         )
+    #     return self
+
+
+class AllVisibilityInput(BaseSchema):
+    target_shared_scope: Literal["all"]
+
+
+BotSwitchVisibilityInput = (
+    PrivateVisibilityInput | PartialVisibilityInput | AllVisibilityInput
+)
+
+
+class BotStarredInput(BaseSchema):
+    starred: bool
 
 
 class BotPresignedUrlOutput(BaseSchema):

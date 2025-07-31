@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ListItemBot from './ListItemBot';
-import { BotListItem } from '../@types/bot';
+import { BotListItem, SharedScope } from '../@types/bot';
 import {
   PiGlobe,
   PiLink,
@@ -26,11 +26,12 @@ const bots: BotListItem[] = [
     description: 'Bot 1',
     createTime: new Date(),
     lastUsedTime: new Date(),
-    isPublic: false,
-    isPinned: false,
+    isStarred: false,
     owned: false,
     syncStatus: 'SUCCEEDED',
     available: true,
+    sharedScope: 'private',
+    sharedStatus: '',
   },
   {
     id: '2',
@@ -38,11 +39,12 @@ const bots: BotListItem[] = [
     description: 'Bot 2',
     createTime: new Date(),
     lastUsedTime: new Date(),
-    isPublic: true,
-    isPinned: true,
+    isStarred: true,
     owned: true,
     syncStatus: 'SUCCEEDED',
     available: true,
+    sharedScope: 'private',
+    sharedStatus: '',
   },
   {
     id: '3',
@@ -50,11 +52,12 @@ const bots: BotListItem[] = [
     description: '',
     createTime: new Date(),
     lastUsedTime: new Date(),
-    isPublic: false,
-    isPinned: false,
+    isStarred: false,
     owned: false,
     syncStatus: 'SUCCEEDED',
     available: false,
+    sharedScope: 'private',
+    sharedStatus: '',
   },
   {
     id: '4',
@@ -62,11 +65,12 @@ const bots: BotListItem[] = [
     description: '',
     createTime: new Date(),
     lastUsedTime: new Date(),
-    isPublic: true,
-    isPinned: true,
+    isStarred: true,
     owned: true,
     syncStatus: 'SUCCEEDED',
     available: false,
+    sharedScope: 'private',
+    sharedStatus: '',
   },
 ];
 
@@ -96,7 +100,7 @@ export const MyBots = () => {
             )}
 
             <div className="mr-5 flex justify-end">
-              {bot.isPublic ? (
+              {bot.sharedScope === 'all' ? (
                 <div className="flex items-center">
                   <PiUsers className="mr-1" />
                   <ButtonIcon className="-mr-3" onClick={() => {}}>
@@ -111,7 +115,7 @@ export const MyBots = () => {
             </div>
 
             <div className="mr-5">
-              {bot.isPinned ? (
+              {bot.isStarred ? (
                 <ButtonIcon disabled={!bot.available} onClick={() => {}}>
                   <PiStarFill className="text-aws-aqua" />
                 </ButtonIcon>
@@ -173,7 +177,7 @@ export const RecentlyUsedSharedBots = () => {
           bot={bot}
           onClick={() => {}}
           className="last:border-b-0">
-          {bot.isPinned ? (
+          {bot.isStarred ? (
             <ButtonIcon disabled={!bot.available} onClick={() => {}}>
               <PiStarFill className="text-aws-aqua" />
             </ButtonIcon>
@@ -207,6 +211,9 @@ export const ApiManagement = () => {
       publishedStackName: 'ApiPublishmentStackBot1',
       publishedDatetime: new Date(),
       available: true,
+      sharedStatus: '',
+      sharedScope: 'all' as SharedScope,
+      owned: false,
     },
     {
       id: '2',
@@ -215,6 +222,9 @@ export const ApiManagement = () => {
       publishedStackName: 'ApiPublishmentStackBot1',
       publishedDatetime: new Date(),
       available: false,
+      sharedStatus: '',
+      sharedScope: 'all' as SharedScope,
+      owned: false,
     },
   ];
   return (
@@ -247,6 +257,9 @@ export const Analytics = () => {
       publishedDatetime: new Date(),
       isPublished: true,
       available: true,
+      sharedStatus: '',
+      sharedScope: 'all' as SharedScope,
+      owned: false,
     },
     {
       id: '2',
@@ -256,6 +269,9 @@ export const Analytics = () => {
       publishedDatetime: new Date(),
       isPublished: false,
       available: true,
+      sharedStatus: '',
+      sharedScope: 'all' as SharedScope,
+      owned: false,
     },
     {
       id: '3',
@@ -265,6 +281,9 @@ export const Analytics = () => {
       publishedDatetime: new Date(),
       isPublished: true,
       available: false,
+      sharedStatus: '',
+      sharedScope: 'all' as SharedScope,
+      owned: false,
     },
     {
       id: '4',
@@ -274,6 +293,9 @@ export const Analytics = () => {
       publishedDatetime: new Date(),
       isPublished: false,
       available: false,
+      sharedStatus: '',
+      sharedScope: 'all' as SharedScope,
+      owned: false,
     },
   ];
   return (
@@ -289,7 +311,7 @@ export const Analytics = () => {
               {bot.isPublished ? (
                 <>
                   {bot.isPublished
-                    ? t('admin.sharedBotAnalytics.label.published')
+                    ? t('admin.botAnalytics.label.published')
                     : null}
                 </>
               ) : (

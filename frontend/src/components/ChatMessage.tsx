@@ -7,7 +7,7 @@ import {
   PiNotePencil,
   PiUserFill,
   PiThumbsDown,
-  PiThumbsDownFill,
+  PiThumbsDownFill
 } from 'react-icons/pi';
 import { BaseProps } from '../@types/common';
 import {
@@ -22,7 +22,7 @@ import Textarea from './Textarea';
 import Button from './Button';
 import ModalDialog from './ModalDialog';
 import { useTranslation } from 'react-i18next';
-import DialogFeedback from './DialogFeedback';
+import { FeedbackDialog } from '../custom-components/organisms';
 import UploadedAttachedFile from './UploadedAttachedFile';
 import { TEXT_FILE_EXTENSIONS } from '../constants/supportedAttachedFiles';
 import AgentToolList from '../features/agent/components/AgentToolList';
@@ -31,6 +31,8 @@ import { convertThinkingLogToAgentToolProps } from '../features/agent/utils/Agen
 import { convertUsedChunkToRelatedDocument } from '../utils/MessageUtils';
 import ReasoningCard from '../features/reasoning/components/ReasoningCard';
 import { ReasoningContext } from '../features/reasoning/xstates/reasoningState';
+import { FeedbackButtonIcon } from '../custom-components/molecules';
+import Tooltip from './Tooltip';
 
 type Props = BaseProps & {
   tools?: AgentToolsProps[];
@@ -48,6 +50,7 @@ const ChatMessage: React.FC<Props> = (props) => {
   const [isEdit, setIsEdit] = useState(false);
   const [changedContent, setChangedContent] = useState('');
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const [feedbackValue, setFeedbackValue] = useState(false);
 
   const [firstTextContent, setFirstTextContent] = useState(0);
 
@@ -188,7 +191,10 @@ const ChatMessage: React.FC<Props> = (props) => {
         )}
         {chatContent?.role === 'assistant' && (
           <div className="min-w-[2.3rem] max-w-[2.3rem]">
-            <img src="/images/bedrock_icon_64.png" className="rounded" />
+            <img
+              src="/images/favicon.ico"
+              className="pointer-events-none rounded "
+            />
           </div>
         )}
 
@@ -362,19 +368,37 @@ const ChatMessage: React.FC<Props> = (props) => {
                 setChangedContent(textContent.body);
                 setIsEdit(true);
               }}>
-              <PiNotePencil />
+                <Tooltip
+                message={t('tooltips.editInput')}
+                direction="left"
+                className="cursor-pointer">
+                <PiNotePencil />
+              </Tooltip>
             </ButtonIcon>
           )}
           {chatContent?.role === 'assistant' && (
             <div className="flex">
+              <FeedbackButtonIcon
+                isActive={!!chatContent.feedback?.thumbsUp}
+                tooltipText={t('tooltips.positiveFeedback')}
+                onClick={() => {
+                  setIsFeedbackOpen(true);
+                  setFeedbackValue(true);
+                }}
+              />
               <ButtonIcon
                 className="text-dark-gray dark:text-light-gray"
                 onClick={() => setIsFeedbackOpen(true)}>
-                {chatContent.feedback && !chatContent.feedback.thumbsUp ? (
-                  <PiThumbsDownFill />
-                ) : (
-                  <PiThumbsDown />
-                )}
+                <Tooltip
+                  message={t('tooltips.negativeFeedback')}
+                  direction="right"
+                  className="cursor-pointer">
+                  {chatContent.feedback && !chatContent.feedback.thumbsUp ? (
+                    <PiThumbsDownFill />
+                  ) : (
+                    <PiThumbsDown />
+                  )}
+                </Tooltip>
               </ButtonIcon>
               <ButtonCopy
                 className="text-dark-gray dark:text-light-gray"
@@ -392,9 +416,9 @@ const ChatMessage: React.FC<Props> = (props) => {
           )}
         </div>
       </div>
-      <DialogFeedback
+      <FeedbackDialog
         isOpen={isFeedbackOpen}
-        thumbsUp={false}
+        thumbsUp={feedbackValue}
         feedback={chatContent?.feedback ?? undefined}
         onClose={() => setIsFeedbackOpen(false)}
         onSubmit={(feedback) => {

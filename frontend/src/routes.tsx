@@ -15,6 +15,10 @@ import {
   useLocation,
 } from 'react-router-dom';
 import { useMemo } from 'react';
+import BotDiscoverPage from './features/discover/pages/BotDiscoverPage.tsx';
+import BotRecentlyUsedPage from './pages/BotRecentlyUsedPage.tsx';
+import BotStarredPage from './pages/BotStarredPage.tsx';
+import ConversationHistoryPage from './pages/ConversationHistoryPage.tsx';
 
 const rootChildren = [
   {
@@ -22,8 +26,20 @@ const rootChildren = [
     element: <ChatPage />,
   },
   {
-    path: '/bot/explore',
+    path: '/bot/my',
     element: <BotExplorePage />,
+  },
+  {
+    path: '/bot/recently-used',
+    element: <BotRecentlyUsedPage />,
+  },
+  {
+    path: '/bot/starred',
+    element: <BotStarredPage />,
+  },
+  {
+    path: '/bot/discover',
+    element: <BotDiscoverPage />,
   },
   {
     path: '/bot/new',
@@ -40,6 +56,10 @@ const rootChildren = [
   {
     path: '/bot/:botId',
     element: <ChatPage />,
+  },
+  {
+    path: '/conversations',
+    element: <ConversationHistoryPage />,
   },
   {
     path: '/admin/shared-bot-analytics',
@@ -81,10 +101,11 @@ export const allPaths = getAllPaths(rootChildren);
 export const usePageLabel = () => {
   const { t } = useTranslation();
   const pageLabel: { path: (typeof allPaths)[number]; label: string }[] = [
-    { path: '/bot/explore', label: t('bot.explore.label.pageTitle') },
+    { path: '/bot/my', label: t('bot.my.label.pageTitle') },
+    { path: '/bot/discover', label: t('discover.pageTitle') },
     {
       path: '/admin/shared-bot-analytics',
-      label: t('admin.sharedBotAnalytics.label.pageTitle'),
+      label: t('admin.botAnalytics.label.pageTitle'),
     },
     {
       path: '/admin/api-management',

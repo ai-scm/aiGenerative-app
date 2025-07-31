@@ -55,9 +55,13 @@ describe("Bedrock Chat Stack Test", () => {
         selfSignUpEnabled: true,
         enableIpV6: true,
         documentBucket: bedrockRegionResourcesStack.documentBucket,
-        useStandbyReplicas: false,
+        enableRagReplicas: false,
         enableBedrockCrossRegionInference: false,
         enableLambdaSnapStart: true,
+        enableBotStore: true,
+        enableBotStoreReplicas: false,
+        botStoreLanguage: "en",
+        tokenValidMinutes: 60,
       }
     );
     const hasGoogleProviderTemplate = Template.fromStack(
@@ -127,9 +131,13 @@ describe("Bedrock Chat Stack Test", () => {
         selfSignUpEnabled: true,
         enableIpV6: true,
         documentBucket: bedrockRegionResourcesStack.documentBucket,
-        useStandbyReplicas: false,
+        enableRagReplicas: false,
         enableBedrockCrossRegionInference: false,
         enableLambdaSnapStart: true,
+        enableBotStore: true,
+        enableBotStoreReplicas: false,
+        botStoreLanguage: "en",
+        tokenValidMinutes: 60,
       }
     );
     const hasOidcProviderTemplate = Template.fromStack(hasOidcProviderStack);
@@ -189,9 +197,13 @@ describe("Bedrock Chat Stack Test", () => {
       selfSignUpEnabled: true,
       enableIpV6: true,
       documentBucket: bedrockRegionResourcesStack.documentBucket,
-      useStandbyReplicas: false,
+      enableRagReplicas: false,
       enableBedrockCrossRegionInference: false,
       enableLambdaSnapStart: true,
+      enableBotStore: true,
+      enableBotStoreReplicas: false,
+      botStoreLanguage: "en",
+      tokenValidMinutes: 60,
     });
     const template = Template.fromStack(stack);
 
@@ -200,7 +212,7 @@ describe("Bedrock Chat Stack Test", () => {
 
   test("custom domain configuration", () => {
     const app = new cdk.App();
-    
+
     const bedrockRegionResourcesStack = new BedrockRegionResourcesStack(
       app,
       "BedrockRegionResourcesStack",
@@ -230,11 +242,15 @@ describe("Bedrock Chat Stack Test", () => {
       selfSignUpEnabled: true,
       enableIpV6: true,
       documentBucket: bedrockRegionResourcesStack.documentBucket,
-      useStandbyReplicas: false,
+      enableRagReplicas: false,
       enableBedrockCrossRegionInference: false,
       enableLambdaSnapStart: true,
       alternateDomainName: "chat.example.com",
       hostedZoneId: "Z0123456789ABCDEF",
+      enableBotStore: true,
+      enableBotStoreReplicas: false,
+      botStoreLanguage: "en",
+      tokenValidMinutes: 60,
     });
 
     const template = Template.fromStack(customDomainStack);
@@ -252,10 +268,7 @@ describe("Bedrock Chat Stack Test", () => {
       Type: "A",
       AliasTarget: {
         DNSName: {
-          "Fn::GetAtt": [
-            Match.anyValue(),
-            "DomainName"
-          ]
+          "Fn::GetAtt": [Match.anyValue(), "DomainName"],
         },
         HostedZoneId: Match.anyValue(),
       },
@@ -268,10 +281,7 @@ describe("Bedrock Chat Stack Test", () => {
       Type: "AAAA",
       AliasTarget: {
         DNSName: {
-          "Fn::GetAtt": [
-            Match.anyValue(),
-            "DomainName"
-          ]
+          "Fn::GetAtt": [Match.anyValue(), "DomainName"],
         },
         HostedZoneId: Match.anyValue(),
       },
@@ -281,7 +291,7 @@ describe("Bedrock Chat Stack Test", () => {
 
   test("no custom domain configuration", () => {
     const app = new cdk.App();
-    
+
     const bedrockRegionResourcesStack = new BedrockRegionResourcesStack(
       app,
       "BedrockRegionResourcesStack",
@@ -311,18 +321,160 @@ describe("Bedrock Chat Stack Test", () => {
       selfSignUpEnabled: true,
       enableIpV6: true,
       documentBucket: bedrockRegionResourcesStack.documentBucket,
-      useStandbyReplicas: false,
+      enableRagReplicas: false,
       enableBedrockCrossRegionInference: false,
       enableLambdaSnapStart: true,
       alternateDomainName: "",
       hostedZoneId: "",
+      enableBotStore: true,
+      enableBotStoreReplicas: false,
+      botStoreLanguage: "en",
+      tokenValidMinutes: 60,
     });
 
     const template = Template.fromStack(noDomainStack);
 
     // Verify no Route53 records are created
     template.resourceCountIs("AWS::Route53::RecordSet", 0);
-    
+
+    // Verify no ACM certificate is created
+    template.resourceCountIs("AWS::CertificateManager::Certificate", 0);
+
+    // Verify CloudFront distribution has no aliases
+    template.hasResourceProperties("AWS::CloudFront::Distribution", {
+      DistributionConfig: {
+        Aliases: Match.absent(),
+      },
+    });
+  });
+
+  test("custom domain configuration", () => {
+    const app = new cdk.App();
+
+    const bedrockRegionResourcesStack = new BedrockRegionResourcesStack(
+      app,
+      "BedrockRegionResourcesStack",
+      {
+        env: {
+          region: "us-east-1",
+        },
+        crossRegionReferences: true,
+      }
+    );
+
+    const customDomainStack = new BedrockChatStack(app, "CustomDomainStack", {
+      env: {
+        region: "us-east-1",
+      },
+      envName: "test",
+      envPrefix: "test-",
+      bedrockRegion: "us-east-1",
+      crossRegionReferences: true,
+      webAclId: "",
+      identityProviders: [],
+      userPoolDomainPrefix: "",
+      publishedApiAllowedIpV4AddressRanges: [""],
+      publishedApiAllowedIpV6AddressRanges: [""],
+      allowedSignUpEmailDomains: [],
+      autoJoinUserGroups: [],
+      selfSignUpEnabled: true,
+      enableIpV6: true,
+      documentBucket: bedrockRegionResourcesStack.documentBucket,
+      enableRagReplicas: false,
+      enableBedrockCrossRegionInference: false,
+      enableLambdaSnapStart: true,
+      alternateDomainName: "chat.example.com",
+      hostedZoneId: "Z0123456789ABCDEF",
+      enableBotStore: true,
+      enableBotStoreReplicas: false,
+      botStoreLanguage: "en",
+      tokenValidMinutes: 60,
+    });
+
+    const template = Template.fromStack(customDomainStack);
+
+    // Verify CloudFront distribution has alternate domain name
+    template.hasResourceProperties("AWS::CloudFront::Distribution", {
+      DistributionConfig: {
+        Aliases: ["chat.example.com"],
+      },
+    });
+
+    // Verify Route53 record is created
+    template.hasResourceProperties("AWS::Route53::RecordSet", {
+      Name: "chat.example.com.",
+      Type: "A",
+      AliasTarget: {
+        DNSName: {
+          "Fn::GetAtt": [Match.anyValue(), "DomainName"],
+        },
+        HostedZoneId: Match.anyValue(),
+      },
+      HostedZoneId: "Z0123456789ABCDEF",
+    });
+
+    // Verify AAAA record for IPv6
+    template.hasResourceProperties("AWS::Route53::RecordSet", {
+      Name: "chat.example.com.",
+      Type: "AAAA",
+      AliasTarget: {
+        DNSName: {
+          "Fn::GetAtt": [Match.anyValue(), "DomainName"],
+        },
+        HostedZoneId: Match.anyValue(),
+      },
+      HostedZoneId: "Z0123456789ABCDEF",
+    });
+  });
+
+  test("no custom domain configuration", () => {
+    const app = new cdk.App();
+
+    const bedrockRegionResourcesStack = new BedrockRegionResourcesStack(
+      app,
+      "BedrockRegionResourcesStack",
+      {
+        env: {
+          region: "us-east-1",
+        },
+        crossRegionReferences: true,
+      }
+    );
+
+    const noDomainStack = new BedrockChatStack(app, "NoDomainStack", {
+      env: {
+        region: "us-east-1",
+      },
+      envName: "test",
+      envPrefix: "test-",
+      bedrockRegion: "us-east-1",
+      crossRegionReferences: true,
+      webAclId: "",
+      identityProviders: [],
+      userPoolDomainPrefix: "",
+      publishedApiAllowedIpV4AddressRanges: [""],
+      publishedApiAllowedIpV6AddressRanges: [""],
+      allowedSignUpEmailDomains: [],
+      autoJoinUserGroups: [],
+      selfSignUpEnabled: true,
+      enableIpV6: true,
+      documentBucket: bedrockRegionResourcesStack.documentBucket,
+      enableRagReplicas: false,
+      enableBedrockCrossRegionInference: false,
+      enableLambdaSnapStart: true,
+      alternateDomainName: "",
+      hostedZoneId: "",
+      enableBotStore: true,
+      enableBotStoreReplicas: false,
+      botStoreLanguage: "en",
+      tokenValidMinutes: 60,
+    });
+
+    const template = Template.fromStack(noDomainStack);
+
+    // Verify no Route53 records are created
+    template.resourceCountIs("AWS::Route53::RecordSet", 0);
+
     // Verify no ACM certificate is created
     template.resourceCountIs("AWS::CertificateManager::Certificate", 0);
 
@@ -456,10 +608,8 @@ describe("Bedrock Knowledge Base Stack", () => {
       instruction,
       analyzer,
       overlapPercentage,
-      sourceUrls: knowledge.source_urls.L.map(
-        (sourceUrl: any) => sourceUrl.S
-      ),
-      existKnowledgeBaseId: undefined
+      sourceUrls: knowledge.source_urls.L.map((sourceUrl: any) => sourceUrl.S),
+      existKnowledgeBaseId: undefined,
     });
 
     return Template.fromStack(stack);

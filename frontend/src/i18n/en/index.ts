@@ -10,11 +10,23 @@ const translation = {
       inputMessage: 'How can I Help You?',
       starredBots: 'Starred Bots',
       recentlyUsedBots: 'Recently Used Bots',
-      conversationHistory: 'History',
+      conversationHistory: 'Recent Chats',
       chatWaitingSymbol: '▍',
-      adminConsoles: 'Admin Only',
+      adminConsoles: 'Admin Panel',
+      backChat: 'Back to Chat',
+      userGroups: 'User Groups',
     },
     model: {
+      'claude-v4-opus': {
+        label: 'Claude 4 (Opus)',
+        description:
+          'Most powerful hybrid reasoning model for complex tasks, coding, and AI agents with 200K token context window.',
+      },
+      'claude-v4-sonnet': {
+        label: 'Claude 4 (Sonnet)',
+        description:
+          'Balanced hybrid reasoning model optimized for efficiency at scale with 200K token context window.',
+      },
       'claude-v3-haiku': {
         label: 'Claude 3 (Haiku)',
         description:
@@ -87,23 +99,28 @@ const translation = {
       // Meta Llama 3 models
       'llama3-3-70b-instruct': {
         label: 'Meta Llama 3.3 70B Instruct',
-        description: 'Latest Llama 3 model offering performance on par with the 405B model at a lower cost with excellent reasoning and instruction-following capabilities.',
+        description:
+          'Latest Llama 3 model offering performance on par with the 405B model at a lower cost with excellent reasoning and instruction-following capabilities.',
       },
       'llama3-2-1b-instruct': {
         label: 'Meta Llama 3.2 1B Instruct',
-        description: 'Lightweight model optimized for edge devices with efficient on-device processing for personal information management and multilingual knowledge retrieval.',
+        description:
+          'Lightweight model optimized for edge devices with efficient on-device processing for personal information management and multilingual knowledge retrieval.',
       },
       'llama3-2-3b-instruct': {
         label: 'Meta Llama 3.2 3B Instruct',
-        description: 'Compact model delivering text generation, summarization, and sentiment analysis with low latency, ideal for mobile AI applications.',
+        description:
+          'Compact model delivering text generation, summarization, and sentiment analysis with low latency, ideal for mobile AI applications.',
       },
       'llama3-2-11b-instruct': {
         label: 'Meta Llama 3.2 11B Instruct',
-        description: 'Multimodal model excelling at image understanding and visual reasoning for image captioning, visual question answering, and document processing.',
+        description:
+          'Multimodal model excelling at image understanding and visual reasoning for image captioning, visual question answering, and document processing.',
       },
       'llama3-2-90b-instruct': {
         label: 'Meta Llama 3.2 90B Instruct',
-        description: 'Large multimodal model with advanced image understanding and visual reasoning capabilities for sophisticated visual intelligence applications.',
+        description:
+          'Large multimodal model with advanced image understanding and visual reasoning capabilities for sophisticated visual intelligence applications.',
       },
     },
     agent: {
@@ -155,13 +172,13 @@ const translation = {
           engine: 'Search Engine',
           engines: {
             duckduckgo: {
-              'label': 'DuckDuckGo (For Trial)',
-              'hint': "Limited rate, but free to use. Designed for trial use.",
+              label: 'DuckDuckGo (For Trial)',
+              hint: 'Limited rate, but free to use. Designed for trial use.',
             },
             firecrawl: {
-              'label': 'Firecrawl (For Business)',
-              'hint': "Rate limits can be expanded. Designed for business use. API key is required. https://www.firecrawl.dev/",
-            }
+              label: 'Firecrawl (For Business)',
+              hint: 'Rate limits can be expanded. Designed for business use. API key is required. https://www.firecrawl.dev/',
+            },
           },
         },
         knowledge_base_tool: {
@@ -174,26 +191,26 @@ const translation = {
         },
         firecrawl: {
           apiKey: 'Firecrawl API Key',
-          maxResults: 'Maximum Results'
+          maxResults: 'Maximum Results',
         },
         bedrockAgent: {
           name: 'Bedrock Agent',
           description: 'Use Bedrock Agent as a tool.',
           agentId: {
             label: 'Agent ID',
-            placeholder: 'Enter Agent ID'
+            placeholder: 'Enter Agent ID',
           },
           aliasId: {
             label: 'Alias ID',
-            placeholder: 'Enter Alias ID'
-          }
+            placeholder: 'Enter Alias ID',
+          },
         },
       },
     },
     bot: {
       label: {
         myBots: 'My Bots',
-        recentlyUsedBots: 'Recently Used Shared Bots',
+        recentlyUsedBots: 'Recently Used Bots',
         knowledge: 'Knowledge',
         url: 'URL',
         s3url: 'S3 Data Source',
@@ -206,9 +223,9 @@ const translation = {
         noDescription: 'No Description',
         notAvailable: 'This bot is NOT available.',
         noBots: 'No Bots.',
-        noBotsRecentlyUsed: 'No Recently Used Shared Bots.',
+        noBotsRecentlyUsed: 'No Recently Used Bots.',
+        noStarredBots: 'No Starred Bots.',
         retrievingKnowledge: '[Retrieving Knowledge...]',
-        selectParsingModel: 'Select Parsing Model',
         dndFileUpload:
           'You can upload files by drag and drop.\nSupported files: {{fileExtensions}}',
         uploadError: 'Error Message',
@@ -236,6 +253,8 @@ const translation = {
         edit: 'Edit',
         copyLink: 'Copy Link',
         copiedLink: 'Copied',
+        markAsEssential: 'Mark as Essential',
+        removeEssential: 'Remove Essential Status',
       },
       help: {
         overview:
@@ -306,16 +325,15 @@ How would you categorize this email?`,
       edit: {
         pageTitle: 'Edit My Bot',
       },
-
+      my: {
+        label: {
+          pageTitle: 'My Bots',
+        },
+      },
       item: {
         title: 'Name',
         description: 'Description',
         instruction: 'Instructions',
-      },
-      explore: {
-        label: {
-          pageTitle: 'Bot Console',
-        },
       },
       apiSettings: {
         pageTitle: 'Shared Bot Publish API Settings',
@@ -372,8 +390,8 @@ How would you categorize this email?`,
         },
         alert: {
           botUnshared: {
-            title: 'Please Share The Bot',
-            body: 'You cannot publish an API for the bot that is not shared.',
+            title: 'Please Share The Bot with All Users',
+            body: 'You cannot publish an API for the bot that is not shared with all users.',
           },
           deploying: {
             title: 'The API deployment is in PROGRESS',
@@ -414,6 +432,8 @@ How would you categorize this email?`,
         copied: 'Copied',
         instructionsSamples: 'Samples',
         chooseFiles: 'Choose files',
+        viewAll: 'View All',
+        removeFromRecent: 'Remove from History',
       },
       deleteDialog: {
         title: 'Delete?',
@@ -421,13 +441,46 @@ How would you categorize this email?`,
       },
       shareDialog: {
         title: 'Share',
+        switchLabel: 'Share this Bot',
+        label: {
+          selectShare: 'Share with',
+          all: 'ALL Users',
+          partial: 'Selected Users',
+          search: 'Search for Users and Groups',
+          noSearchResults: 'No search results found',
+          memberManagement: 'Edit Members',
+          sharing: {
+            not_shared: 'Not shared with any groups or users',
+            shared_only_users: 'Shared with {{count}} user',
+            shared_only_users_plural: 'Shared with {{count}} users',
+            shared_only_groups: 'Shared with {{count}} group',
+            shared_only_groups_plural: 'Shared with {{count}} groups',
+            shared_both:
+              'Shared with {{groupCount}} group and {{userCount}} user ',
+            shared_both_user_plural:
+              'Shared with {{groupCount}} group and {{userCount}} users',
+            shared_both_group_plural:
+              'Shared with {{groupCount}} groups and {{userCount}} user',
+            shared_both_plural:
+              'Shared with {{groupCount}} groups and {{userCount}} users ',
+          },
+          user: 'User',
+          group: 'Group',
+        },
         off: {
-          content:
-            'Link sharing is off, so only you can access this bot through its URL.',
+          content: 'This bot is private and only you have access to it.',
         },
         on: {
           content:
-            'Link sharing is on, so ALL users can use this link to conversation.',
+            'This bot is shared and accessible to other users. Shared users can find and use this bot through the <Link>Discover Bot</Link> page.',
+          linkDescription:
+            'You can also chat with the bot using this shared link.',
+        },
+        button: {
+          manage: 'Manage',
+          removeAccess: 'Remove Access',
+          cancelRemoval: 'Cancel Removal',
+          cancelAddition: 'Cancel Addition',
         },
       },
       error: {
@@ -439,13 +492,19 @@ How would you categorize this email?`,
         title: 'Model Activation',
         description: 'Configure which AI models can be used with this bot.',
       },
+      promptCaching: {
+        title: 'Prompt Caching',
+        promptCachingEnabled: {
+          title: 'Use prompt caching if the model supports it.',
+          description: 'If enabled, it may reduce the cost and latency of repeated conversations with this bot.',
+        },
+      },
     },
     admin: {
-      sharedBotAnalytics: {
+      botAnalytics: {
         label: {
-          pageTitle: 'Shared Bot Analytics',
-          noPublicBotUsages:
-            'During the Calculation Period, no public bots were utilized.',
+          pageTitle: 'Bot Analytics',
+          noBotUsages: 'During the Calculation Period, no bots were utilized.',
           published: 'API is published.',
           SearchCondition: {
             title: 'Calculation Period',
@@ -455,8 +514,7 @@ How would you categorize this email?`,
           sortByCost: 'Sort by Cost',
         },
         help: {
-          overview:
-            'Monitor the usage status of Shared Bots and Published Bot APIs.',
+          overview: 'Monitor the usage status of Bots and Published Bot APIs.',
           calculationPeriod:
             'If the Calculation Period is not set, the cost for today will be displayed.',
         },
@@ -471,7 +529,7 @@ How would you categorize this email?`,
       botManagement: {
         label: {
           pageTitle: 'Bot Management',
-          sharedUrl: 'Shared Bot URL',
+          sharedUrl: 'Bot URL',
           apiSettings: 'API Publish Settings',
           noKnowledge: 'This bot has no Knowledge.',
           notPublishApi: "This bot's API is not published.",
@@ -487,6 +545,9 @@ How would you categorize this email?`,
             'The client can make <Bold>{{limit}}</Bold> concurrent requests to the API.',
           requestsLimit:
             'You can make <Bold>{{limit}}</Bold> requests <Bold>{{period}}</Bold>.',
+          sharedAllUsers: 'Shared with ALL Users',
+          privateBot: 'This bot is not shared.',
+          owner: 'Owner',
         },
         alert: {
           noApiKeys: {
@@ -502,9 +563,61 @@ How would you categorize this email?`,
         period: 'Enter both From and To',
       },
     },
+    discover: {
+      pageTitle: 'Discover Bot',
+      description:
+        'View and search bots that are public or permitted for your access.',
+      search: {
+        placeholder: 'Search Bots',
+        searching: 'Searching...',
+        results: 'Found {{count}} results for "{{query}}"',
+        noResults: 'No results found for "{{query}}"',
+        tryDifferent: 'Try different keywords.',
+        backToHome: 'Back to Home',
+      },
+      essential: {
+        label: 'Essential',
+        description:
+          'These bots are officially selected by administrators. Use them actively to improve your work efficiency as part of standard operations.',
+        noEssentialBotsMessage: {
+          title: 'No Essential Bots',
+          content: `Essential section is hidden for non-admin users since there are no Essential bots.<br/>
+          Bots shared with All Users can be marked as Essential.<br/>
+          Use the bot menu in Chat, My Bots, Starred Bots, or Recently Used Bots views to mark a bot as Essential.<br/>
+          Click the <MenuButton/> button on these views to access the menu.`,
+        },
+      },
+      trending: {
+        label: 'Trending',
+        description: 'Most popular Bots.',
+      },
+      discover: {
+        label: 'Discover',
+        description: 'Random bot showcase.',
+      },
+    },
+    conversationHistory: {
+      pageTitle: 'Chat History',
+      label: {
+        noConversations: 'No Chat History',
+      },
+      searchConversation: {
+        placeholder: 'Search conversations...',
+        searching: 'Searching...',
+        results: 'Found {{count}} chats matching "{{query}}"',
+        noResults: 'No chats matching for "{{query}}"',
+        tryDifferentKeywords: 'Try different keywords',
+        resultsCount: '{{count}} results found',
+      },
+    },
     deleteDialog: {
       title: 'Delete?',
       content: 'Are you sure to delete <Bold>{{title}}</Bold>?',
+      pinnedBotError: {
+        title: 'Cannot Delete',
+        content:
+          'This bots is marked as essential. Essential status can be changed by administrator.',
+      },
     },
     clearDialog: {
       title: 'Delete ALL?',
@@ -513,31 +626,58 @@ How would you categorize this email?`,
     languageDialog: {
       title: 'Switch language',
     },
+    drawerOptionsDialog: {
+      title: 'Side Menu Options',
+      label: {
+        displayCount: 'Display Count',
+      },
+    },
     feedbackDialog: {
       title: 'Feedback',
       content: 'Please provide more details.',
       categoryLabel: 'Category',
       commentLabel: 'Comment',
       commentPlaceholder: '(Optional) Enter your comment',
-      categories: [
-        {
-          value: 'notFactuallyCorrect',
-          label: 'Not factually correct',
-        },
-        {
-          value: 'notFullyFollowRequest',
-          label: 'Not fully following my request',
-        },
-        {
-          value: 'other',
-          label: 'Other',
-        },
-      ],
+      categories: {
+        positive: [
+          {
+            value: 'helpful',
+            label: 'Helpful',
+          },
+          {
+            value: 'accurate',
+            label: 'Accurate information',
+          },
+          {
+            value: 'wellExplained',
+            label: 'Well explained',
+          },
+          {
+            value: 'other',
+            label: 'Other',
+          },
+        ],
+        negative: [
+          {
+            value: 'notFactuallyCorrect',
+            label: 'Not factually correct',
+          },
+          {
+            value: 'notFullyFollowRequest',
+            label: 'Not fully following my request',
+          },
+          {
+            value: 'other',
+            label: 'Other',
+          },
+        ],
+      },
     },
     button: {
       newChat: 'New Chat',
+      backToConversationHistory: 'Back to Chat History',
       botConsole: 'Bot Console',
-      sharedBotAnalytics: 'Shared Bot Analytics',
+      botAnalytics: 'Shared Bot Analytics',
       apiManagement: 'API Management',
       userUsages: 'User Usages',
       SaveAndSubmit: 'Save & Submit',
@@ -551,11 +691,14 @@ How would you categorize this email?`,
       back: 'Back',
       menu: 'Menu',
       language: 'Language',
-      clearConversation: 'Delete ALL conversations',
+      clearConversation: 'Delete ALL Conversations',
       signOut: 'Sign out',
       close: 'Close',
       add: 'Add',
-      continue: 'Continue to generate',
+      continue: 'Continue to Generate',
+      botManagement: 'Bot Management',
+      mode: 'Mode',
+      drawerOption: 'Side Menu Options',
     },
     input: {
       hint: {
@@ -638,6 +781,7 @@ How would you categorize this email?`,
       budgetTokens: {
         label: 'Reasoning Budget Tokens',
         hint: 'The maximum number of tokens to allocate for reasoning steps. Larger values allow for more complex reasoning but may increase response time',
+        help: 'Sets the token budget for reasoning steps. Cannot exceed the Max Tokens value.',
       },
     },
     searchSettings: {
@@ -810,6 +954,7 @@ How would you categorize this email?`,
       notFoundConversation:
         'Since the specified chat does not exist, a new chat screen is displayed.',
       notFoundPage: 'The page you are looking for is not found.',
+      cannotAccessBot: 'Cannot access this bot. Redirected to New Chat.',
       unexpectedError: {
         title: 'An unexpected error has occurred.',
         restore: 'Go to TOP page',
@@ -827,6 +972,18 @@ How would you categorize this email?`,
         fileSizeExceeded:
           'Each document size must be no more than {{maxSize}}.',
         fileCountExceeded: 'Could not upload more than {{maxCount}} files.',
+      },
+      share: {
+        markedEssential: {
+          title: 'Unable to Change Sharing Settings',
+          content:
+            'This bot is marked Essential by administrator. Essential bots must be shared with all users.',
+        },
+        publication: {
+          title: 'Unable to Change Sharing Settings',
+          content:
+            'This bot is published as API by administrator. Published API must be shared with all users.',
+        },
       },
     },
     validation: {
@@ -848,6 +1005,10 @@ How would you categorize this email?`,
       },
       quickStarter: {
         message: 'Please input both Title and Conversation Example.',
+      },
+      required: '{{key}} is required',
+      number: {
+        greaterThen: '{{key}} must be greater then {{value}} ',
       },
     },
     helper: {
@@ -887,28 +1048,6 @@ How would you categorize this email?`,
           hint: 'Describes input prompts and model responses that seeks or provides information about engaging in misconduct activity, or harming, defrauding, or taking advantage of a person, group or institution. 0: disable, 1: low, 2: middle, 3: High',
         },
       },
-      promptAttacks: {
-        hint: 'Describes user prompts intended to bypass the safety and moderation capabilities of a foundation model in order to generate harmful content (also known as jailbreak), and ignore and override instructions specified by the developer (referred to as prompt injection). Please refer to Prompt Attack for more details to use it with input tagging.',
-      },
-      deniedTopics: {
-        hint: 'Add up to 30 denied topics to block user inputs or model responses associated with the topic.',
-      },
-      wordFilters: {
-        hint: 'Use these filters to block certain words and phrases in user inputs and model responses.',
-        profanityFilter: {
-          hint: 'Enable this feature to block profane words in user inputs and model responses. The list of words is based on the global definition of profanity and is subject to change.',
-        },
-        customWordsAndPhrases: {
-          hint: 'Specify up to 10,000 words or phrases (max 3 words) to be blocked by the guardrail. A blocked message will show if user input or model responses contain these words or phrases.',
-        },
-      },
-      sensitiveInformationFilters: {
-        hint: 'Use these filters to handle any data related to privacy.',
-        personallyIdentifiableInformationTypes: {
-          PIITypes: {},
-          regexPatterns: {},
-        },
-      },
       contextualGroundingCheck: {
         label: 'Contextual Grounding Check',
         hint: 'Use this policy to validate if model responses are grounded in the reference source and relevant to user’s query to filter model hallucination.',
@@ -929,6 +1068,14 @@ How would you categorize this email?`,
       card: {
         label: 'Reasoning Process',
       },
+    },
+    tooltips: {
+      starredTooltip: 'Add this bot to your favorites for quick access',
+      positiveFeedback: 'Click to let us know if this response was helpful',
+      negativeFeedback: 'Click to let us know if this response was not helpful',
+      copyResponse: 'Click to copy the response',
+      editInput: 'Click to edit the message',
+      sendMessage: 'Send the message',
     },
   },
 };

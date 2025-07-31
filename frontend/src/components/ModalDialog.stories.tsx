@@ -1,15 +1,21 @@
 import { useState } from 'react';
-import { BotMeta } from '../@types/bot';
+import { SharedScope } from '../@types/bot';
 import DialogConfirmAddApiKey from './DialogConfirmAddApiKey';
 import DialogConfirmClearConversations from './DialogConfirmClearConversations';
 import DialogConfirmDeleteApi from './DialogConfirmDeleteApi';
 import DialogConfirmDeleteApiKey from './DialogConfirmDeleteApiKey';
 import DialogConfirmDeleteBot from './DialogConfirmDeleteBot';
 import DialogConfirmDeleteChat from './DialogConfirmDeleteChat';
-import DialogFeedback from './DialogFeedback';
+import { FeedbackDialog } from '../custom-components/organisms';
 import DialogInstructionsSamples from './DialogInstructionsSamples';
 import DialogSelectLanguage from './DialogSelectLanguage';
 import DialogShareBot from './DialogShareBot';
+import {
+  GetUserResponse,
+  SearchUserGroupsResponse,
+  SearchUsersResponse,
+} from '../@types/user';
+import { msw } from '@ladle/react';
 
 export const AddApiKey = () => {
   const [isOpenAddApiKeyDialog, setIsOpenAddApiKeyDialog] = useState(true);
@@ -62,7 +68,7 @@ export const DeleteApiKey = () => {
   const [isOpenDialog, setIsOpenDialog] = useState(true);
   return (
     <DialogConfirmDeleteApiKey
-      apiKeyTitle='API Key 1'
+      apiKeyTitle="API Key 1"
       isOpen={isOpenDialog}
       onDelete={() => {
         setIsOpenDialog(false);
@@ -85,10 +91,11 @@ export const DeleteBot = () => {
         description: 'Bot 1',
         createTime: new Date(),
         lastUsedTime: new Date(),
-        isPublic: false,
-        isPinned: false,
+        isStarred: false,
         owned: true,
         syncStatus: 'SUCCEEDED',
+        sharedScope: 'private',
+        sharedStatus: '',
       }}
       onDelete={() => {
         setIsOpenDeleteDialog(false);
@@ -110,7 +117,7 @@ export const DeleteConversation = () => {
         title: 'Conversation 1',
         createTime: new Date().getTime(),
         lastMessageId: '1',
-        model: 'claude-v3.5-sonnet'
+        model: 'claude-v3.5-sonnet',
       }}
       onDelete={() => {
         setIsOpenDeleteModal(false);
@@ -125,7 +132,7 @@ export const DeleteConversation = () => {
 export const Feedback = () => {
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(true);
   return (
-    <DialogFeedback
+    <FeedbackDialog
       isOpen={isFeedbackOpen}
       thumbsUp={false}
       onClose={() => {
@@ -151,45 +158,119 @@ export const InstructionsSamples = () => {
 };
 
 export const SelectLanguage = () => {
-  const [isOpenLangage, setIsOpenLangage] = useState(true);
+  const [isOpenLanguage, setIsOpenLanguage] = useState(true);
   return (
     <DialogSelectLanguage
-      isOpen={isOpenLangage}
+      isOpen={isOpenLanguage}
       onSelectLanguage={() => {
-        setIsOpenLangage(false);
+        setIsOpenLanguage(false);
       }}
       onClose={() => {
-        setIsOpenLangage(false);
+        setIsOpenLanguage(false);
       }}
     />
   );
 };
 
+export default {
+  msw: [
+    msw.http.get(
+      new URL('user/search', import.meta.env.VITE_APP_API_ENDPOINT).toString(),
+      () => {
+        const res: SearchUsersResponse = [
+          {
+            id: 'user3',
+            name: 'Tom Morello',
+            email: 'tom@ratm.com',
+          },
+          {
+            id: 'user4',
+            name: 'Zack de la Rocha',
+            email: 'zack@ratm.com',
+          },
+        ];
+        return msw.HttpResponse.json(res);
+      }
+    ),
+    msw.http.get(
+      new URL(
+        'user/group/search',
+        import.meta.env.VITE_APP_API_ENDPOINT
+      ).toString(),
+      () => {
+        const res: SearchUserGroupsResponse = [
+          {
+            type: 'group',
+            name: 'HR all',
+            description: 'All member of the HR department.',
+          },
+        ];
+        return msw.HttpResponse.json(res);
+      }
+    ),
+    msw.http.get(
+      new URL('user/user1', import.meta.env.VITE_APP_API_ENDPOINT).toString(),
+      () => {
+        const res: GetUserResponse = {
+          id: 'user1',
+          name: 'Anthony Kiedis',
+          email: 'anthony@rhcp.com',
+        };
+        return msw.HttpResponse.json(res);
+      }
+    ),
+    msw.http.get(
+      new URL('user/user2', import.meta.env.VITE_APP_API_ENDPOINT).toString(),
+      () => {
+        const res: GetUserResponse = {
+          id: 'user2',
+          name: 'John Frusciante',
+          email: 'jotn@rhcp.com',
+        };
+        return msw.HttpResponse.json(res);
+      }
+    ),
+  ],
+};
+
 export const ShareBot = () => {
-  const [isOpenShareDialog, setIsOpenShareDialog] = useState(true);
-  const [bot, setBot] = useState<BotMeta>({
-    id: '1',
-    title: 'Bot 1',
-    description: 'Bot 1',
-    createTime: new Date(),
-    lastUsedTime: new Date(),
-    isPublic: false,
-    isPinned: false,
-    owned: true,
-    syncStatus: 'SUCCEEDED',
-  });
+  const [isOpen, setIsOpen] = useState(true);
+  const [sharedScope, setSharedScope] = useState<SharedScope>('private');
+  const [allowedUserIds] = useState(['user1', 'user2']);
+  const [allowedGroupIds] = useState(['group1']);
+
   return (
     <DialogShareBot
-      isOpen={isOpenShareDialog}
-      target={bot}
-      onToggleShare={() => {
-        setBot(current => ({
-          ...current,
-          isPublic: !current.isPublic,
-        }));
+      isOpen={isOpen}
+      botId="1"
+      allowedUserIds={allowedUserIds}
+      allowedGroupIds={allowedGroupIds}
+      sharedScope={sharedScope}
+      onChangeSharedScope={(scope) => {
+        setSharedScope(scope);
       }}
+      onUpdateAllowedUserAndGroup={() => {}}
       onClose={() => {
-        setIsOpenShareDialog(false);
+        setIsOpen(false);
+      }}
+    />
+  );
+};
+
+export const ShareBotLoading = () => {
+  const [isOpen, setIsOpen] = useState(true);
+  return (
+    <DialogShareBot
+      isOpen={isOpen}
+      isLoading
+      botId="1"
+      allowedUserIds={[]}
+      allowedGroupIds={[]}
+      sharedScope="private"
+      onChangeSharedScope={() => {}}
+      onUpdateAllowedUserAndGroup={() => {}}
+      onClose={() => {
+        setIsOpen(false);
       }}
     />
   );

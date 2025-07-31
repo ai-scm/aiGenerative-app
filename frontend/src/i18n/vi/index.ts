@@ -140,7 +140,6 @@ const translation = {
         noBots: 'Không có Bot.',
         noBotsRecentlyUsed: 'Không có Bot Chia Sẻ Đã Dùng Gần Đây.',
         retrievingKnowledge: '[Đang truy xuất Kiến thức...]',
-        selectParsingModel: 'Chọn Mô hình Phân tích',
         dndFileUpload:
           'Bạn có thể tải lên tệp bằng cách kéo thả.\nCác tệp hỗ trợ: {{fileExtensions}}',
         uploadError: 'Thông báo Lỗi',
@@ -372,11 +371,11 @@ Bạn sẽ phân loại email này như thế nào?`,
       },
     },
     admin: {
-      sharedBotAnalytics: {
+      botAnalytics: {
         label: {
-          pageTitle: 'Phân tích Bot Chia Sẻ',
-          noPublicBotUsages:
-            'Trong Thời gian Tính toán, không có bot công khai nào được sử dụng.',
+          pageTitle: 'Phân tích Bot',
+          noBotUsages:
+            'Trong Thời gian Tính toán, không có bot nào được sử dụng.',
           published: 'API đã được công bố.',
           SearchCondition: {
             title: 'Thời gian Tính toán',
@@ -468,7 +467,7 @@ Bạn sẽ phân loại email này như thế nào?`,
     button: {
       newChat: 'Trò chuyện Mới',
       botConsole: 'Bảng điều khiển Bot',
-      sharedBotAnalytics: 'Phân tích Bot Chia Sẻ',
+      botAnalytics: 'Phân tích Bot',
       apiManagement: 'Quản lý API',
       userUsages: 'Lượt Sử dụng của Người dùng',
       SaveAndSubmit: 'Lưu & Gửi',
@@ -795,28 +794,6 @@ Bạn sẽ phân loại email này như thế nào?`,
         misconduct: {
           label: 'Hành vi sai trái',
           hint: 'Mô tả đầu vào và phản hồi mô hình tìm kiếm hoặc cung cấp thông tin về việc tham gia vào hành vi sai trái, hoặc gây hại, lừa đảo, lợi dụng một người, nhóm hoặc tổ chức. 0: tắt, 1: thấp, 2: trung bình, 3: cao',
-        },
-      },
-      promptAttacks: {
-        hint: 'Mô tả các prompt người dùng nhằm vượt qua tính an toàn và kiểm duyệt của mô hình nền tảng (gọi là jailbreak), và bỏ qua hướng dẫn của nhà phát triển (prompt injection). Vui lòng tham khảo Prompt Attack để biết chi tiết.',
-      },
-      deniedTopics: {
-        hint: 'Thêm tối đa 30 chủ đề bị từ chối để chặn đầu vào người dùng hoặc phản hồi mô hình liên quan đến chủ đề đó.',
-      },
-      wordFilters: {
-        hint: 'Dùng các bộ lọc này để chặn một số từ và cụm từ trong đầu vào người dùng và phản hồi mô hình.',
-        profanityFilter: {
-          hint: 'Bật tính năng này để chặn từ ngữ tục tĩu trong đầu vào người dùng và phản hồi mô hình. Danh sách từ ngữ dựa trên định nghĩa toàn cầu về tục tĩu và có thể thay đổi.',
-        },
-        customWordsAndPhrases: {
-          hint: 'Chỉ định tối đa 10.000 từ hoặc cụm từ (tối đa 3 từ) để bị chặn. Một thông báo bị chặn sẽ hiện nếu đầu vào người dùng hoặc phản hồi mô hình chứa những từ hoặc cụm từ này.',
-        },
-      },
-      sensitiveInformationFilters: {
-        hint: 'Dùng các bộ lọc này để xử lý dữ liệu liên quan đến quyền riêng tư.',
-        personallyIdentifiableInformationTypes: {
-          PIITypes: {},
-          regexPatterns: {},
         },
       },
       contextualGroundingCheck: {

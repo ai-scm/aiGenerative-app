@@ -1,13 +1,11 @@
-import json
 import logging
 import os
 from typing import List
 
-import boto3
-from app.repositories.common import _get_table_client
-from app.repositories.custom_bot import decompose_bot_id, update_knowledge_base_id
+from app.repositories.common import decompose_sk
+from app.repositories.custom_bot import update_knowledge_base_id
 from app.routes.schemas.bot import type_sync_status
-from retry import retry
+from reretry import retry
 from typing_extensions import TypedDict
 
 logger = logging.getLogger()
@@ -48,6 +46,6 @@ def handler(event, context):
     ]
 
     user_id = pk
-    bot_id = decompose_bot_id(sk)
+    bot_id = decompose_sk(sk)
 
     update_knowledge_base_id(user_id, bot_id, kb_id, data_source_ids)

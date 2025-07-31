@@ -14,11 +14,7 @@ import useScroll from '../hooks/useScroll';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   PiArrowsCounterClockwise,
-  PiLink,
   PiPenNib,
-  PiPencilLine,
-  PiStar,
-  PiStarFill,
   PiWarningCircleFill,
 } from 'react-icons/pi';
 import Button from '../components/Button';
@@ -27,14 +23,12 @@ import SwitchBedrockModel from '../components/SwitchBedrockModel';
 import useSnackbar from '../hooks/useSnackbar';
 import useBot from '../hooks/useBot';
 import useConversation from '../hooks/useConversation';
-import ButtonPopover from '../components/PopoverMenu';
-import PopoverItem from '../components/PopoverItem';
-import { ActiveModels } from '../@types/bot';
+import { ActiveModels, BotSummary } from '../@types/bot';
+import IconPinnedBot from '../components/IconPinnedBot.tsx';
 
-import { copyBotUrl } from '../utils/BotUtils';
+import { copyBotUrl, isPinnedBot, canBePinned } from '../utils/BotUtils';
 import { toCamelCase } from '../utils/StringUtils';
 import { produce } from 'immer';
-import ButtonIcon from '../components/ButtonIcon';
 import StatusSyncBot from '../components/StatusSyncBot';
 import Alert from '../components/Alert';
 import useBotSummary from '../hooks/useBotSummary';
@@ -54,6 +48,12 @@ import {
 } from '../@types/conversation.ts';
 import { AVAILABLE_MODEL_KEYS } from '../constants/index';
 import usePostMessageStreaming from '../hooks/usePostMessageStreaming.ts';
+import useLoginUser from '../hooks/useLoginUser';
+import useBotPinning from '../hooks/useBotPinning';
+import Skeleton from '../components/Skeleton.tsx';
+import { twMerge } from 'tailwind-merge';
+import ButtonStar from '../components/ButtonStar.tsx';
+import MenuBot from '../components/MenuBot.tsx';
 
 // Default model activation settings when no bot is selected
 const defaultActiveModels: ActiveModels = (() => {
@@ -67,6 +67,8 @@ const ChatPage: React.FC = () => {
   const navigate = useNavigate();
   const { open: openSnackbar } = useSnackbar();
   const { errorDetail } = usePostMessageStreaming();
+  const { isAdmin } = useLoginUser();
+  const { pinBot, unpinBot } = useBotPinning();
 
   const {
     agentThinking,
@@ -99,7 +101,7 @@ const ChatPage: React.FC = () => {
       if (conversationError.response?.status === 404) {
         openSnackbar(t('error.notFoundConversation'));
         newChat();
-        navigate('');
+        navigate('/');
       } else {
         openSnackbar(conversationError.message ?? '');
       }
@@ -138,21 +140,25 @@ const ChatPage: React.FC = () => {
       setPageTitle(t('bot.label.normalChat'));
     }
     if (botError) {
-      if (botError.response?.status === 404) {
-        setPageTitle(t('bot.label.notAvailableBot'));
+      setPageTitle(t('bot.label.notAvailableBot'));
+
+      // redirect to new chat(no bot chat) if not set conversationId
+      if (!conversationId) {
+        openSnackbar(t('error.cannotAccessBot'));
+        newChat();
+        navigate('/');
       }
     }
-  }, [bot, botError, t]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bot, botError]);
 
   const description = useMemo<string>(() => {
     if (!bot) {
       return '';
-    } else if (bot.description === '') {
-      return t('bot.label.noDescription');
     } else {
       return bot.description;
     }
-  }, [bot, t]);
+  }, [bot]);
 
   const disabledInput = useMemo(() => {
     return botId !== null && !isAvailabilityBot && !isLoadingBot;
@@ -240,7 +246,7 @@ const ChatPage: React.FC = () => {
     }
   }, [messages, scrollToBottom, scrollToTop]);
 
-  const { updateMyBotStarred, updateSharedBotStarred } = useBot();
+  const { updateStarred } = useBot();
   const onClickBotEdit = useCallback(
     (botId: string) => {
       navigate(`/bot/edit/${botId}`);
@@ -248,42 +254,28 @@ const ChatPage: React.FC = () => {
     [navigate]
   );
 
-  const onClickStar = useCallback(() => {
+  const onClickStar = useCallback(async () => {
     if (!bot) {
       return;
     }
-    const isStarred = !bot.isPinned;
+    const isStarred = !bot.isStarred;
     mutateBot(
       produce(bot, (draft) => {
-        draft.isPinned = isStarred;
+        draft.isStarred = isStarred;
       }),
       {
         revalidate: false,
       }
     );
 
-    try {
-      if (bot.owned) {
-        updateMyBotStarred(bot.id, isStarred);
-      } else {
-        updateSharedBotStarred(bot.id, isStarred);
-      }
-    } finally {
+    updateStarred(bot.id, isStarred).finally(() => {
       mutateBot();
-    }
-  }, [bot, mutateBot, updateMyBotStarred, updateSharedBotStarred]);
+    });
+  }, [bot, mutateBot, updateStarred]);
 
-  const [copyLabel, setCopyLabel] = useState(t('bot.titleSubmenu.copyLink'));
-  const onClickCopyUrl = useCallback(
-    (botId: string) => {
-      copyBotUrl(botId);
-      setCopyLabel(t('bot.titleSubmenu.copiedLink'));
-      setTimeout(() => {
-        setCopyLabel(t('bot.titleSubmenu.copyLink'));
-      }, 3000);
-    },
-    [t]
-  );
+  const onClickCopyUrl = useCallback((botId: string) => {
+    copyBotUrl(botId);
+  }, []);
 
   const onClickSyncError = useCallback(() => {
     navigate(`/bot/edit/${bot?.id}`);
@@ -381,7 +373,7 @@ const ChatPage: React.FC = () => {
           ];
         }
 
-        if (bot?.hasKnowledge || bot?.hasExistKnowledngeBaseId) {
+        if (bot?.hasKnowledge) {
           return [
             {
               thought: t('bot.label.retrievingKnowledge'), // @@
@@ -392,7 +384,7 @@ const ChatPage: React.FC = () => {
 
         return undefined;
       } else {
-        if (bot?.hasKnowledge || bot?.hasExistKnowledngeBaseId) {
+        if (bot?.hasKnowledge) {
           const pseudoToolUseId = message.id;
           const relatedDocumentsOfVectorSearch = getRelatedDocumentsOfToolUse(
             relatedDocuments,
@@ -452,6 +444,34 @@ const ChatPage: React.FC = () => {
     return isActiveModelsEmpty ? defaultActiveModels : bot.activeModels;
   }, [bot]);
 
+  const togglePinBot = useCallback(
+    (bot: BotSummary) => {
+      mutateBot(
+        produce(bot, (draft) => {
+          draft.sharedStatus = isPinnedBot(bot.sharedStatus)
+            ? 'shared'
+            : 'pinned@000';
+        }),
+        {
+          revalidate: false,
+        }
+      );
+
+      isPinnedBot(bot.sharedStatus)
+        ? unpinBot(bot.id).finally(() => {
+            mutateBot();
+          })
+        : pinBot(bot.id, 0).finally(() => {
+            mutateBot();
+          });
+    },
+    [mutateBot, pinBot, unpinBot]
+  );
+
+  const canSwitchPinned = useMemo(() => {
+    return isAdmin && canBePinned(bot?.sharedScope ?? 'private');
+  }, [bot?.sharedScope, isAdmin]);
+
   return (
     <div
       className="relative flex h-full flex-1 flex-col"
@@ -462,15 +482,32 @@ const ChatPage: React.FC = () => {
         <div className="sticky top-0 z-10 mb-1.5 flex h-14 w-full items-center justify-between border-b border-gray bg-aws-paper-light p-2 dark:bg-aws-paper-dark">
           <div className="flex w-full justify-between">
             <div className="p-2">
-              <div className="mr-10 font-bold">{pageTitle}</div>
-              <div className="text-xs font-thin text-dark-gray dark:text-light-gray">
-                {description}
+              <div className="mr-10 flex items-center whitespace-nowrap font-bold">
+                {isLoadingBot ? (
+                  <Skeleton className="h-5 w-32" />
+                ) : (
+                  <>
+                    <IconPinnedBot
+                      botSharedStatus={bot?.sharedStatus}
+                      className="mr-1 text-aws-aqua"
+                    />
+                    {pageTitle}
+                  </>
+                )}
               </div>
             </div>
 
-            {isAvailabilityBot && (
+            {isLoadingBot && (
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="size-7" />
+                <Skeleton className="h-7 w-12" />
+              </div>
+            )}
+
+            {isAvailabilityBot && !isLoadingBot && (
               <div className="absolute -top-1 right-0 flex h-full items-center">
-                <div className="h-full bg-gradient-to-r from-transparent to-aws-paper-light dark:to-aws-paper-dark"></div>
+                <div className="h-full w-12 bg-gradient-to-r from-transparent to-aws-paper-light dark:to-aws-paper-dark"></div>
                 <div className="flex items-center bg-aws-paper-light dark:bg-aws-paper-dark">
                   {bot?.owned && (
                     <StatusSyncBot
@@ -478,35 +515,36 @@ const ChatPage: React.FC = () => {
                       onClickError={onClickSyncError}
                     />
                   )}
-                  <ButtonIcon onClick={onClickStar}>
-                    {bot?.isPinned ? (
-                      <PiStarFill className="text-aws-aqua" />
-                    ) : (
-                      <PiStar />
-                    )}
-                  </ButtonIcon>
-                  <ButtonPopover className="mx-1" target="bottom-right">
-                    {bot?.owned && (
-                      <PopoverItem
-                        onClick={() => {
-                          onClickBotEdit(bot.id);
-                        }}>
-                        <PiPencilLine />
-                        {t('bot.titleSubmenu.edit')}
-                      </PopoverItem>
-                    )}
-                    {bot?.isPublic && (
-                      <PopoverItem
-                        onClick={() => {
-                          if (bot) {
-                            onClickCopyUrl(bot.id);
-                          }
-                        }}>
-                        <PiLink />
-                        {copyLabel}
-                      </PopoverItem>
-                    )}
-                  </ButtonPopover>
+
+                  <ButtonStar
+                    isStarred={bot?.isStarred ?? false}
+                    onClick={onClickStar}
+                  />
+
+                  <MenuBot
+                    className="mx-1"
+                    {...(bot?.owned && {
+                      onClickEdit: () => {
+                        onClickBotEdit(bot.id);
+                      },
+                    })}
+                    {...(bot?.sharedScope !== 'private' && {
+                      onClickCopyUrl: () => {
+                        onClickCopyUrl(bot?.id ?? '');
+                      },
+                    })}
+                    {...(canSwitchPinned
+                      ? {
+                          onClickSwitchPinned: () => {
+                            bot && togglePinBot(bot);
+                          },
+                          isPinned: isPinnedBot(bot?.sharedStatus ?? ''),
+                        }
+                      : {
+                          isPinned: undefined,
+                          onClickSwitchPinned: undefined,
+                        })}
+                  />
                 </div>
               </div>
             )}
@@ -522,16 +560,39 @@ const ChatPage: React.FC = () => {
             <div
               id="messages"
               role="presentation"
-              className=" flex h-full flex-col overflow-auto pb-16">
+              className="flex h-full flex-col overflow-auto pb-16">
               {messages?.length === 0 ? (
-                <div className="relative flex w-full justify-center">
+                <div className="relative mb-[45vh]  flex w-full flex-col items-center justify-center">
                   {!loadingConversation && (
                     <SwitchBedrockModel
-                      className="mt-3 w-min"
+                      className="mb-6 mt-3 w-min"
                       activeModels={activeModels}
                       botId={botId}
                     />
                   )}
+                  <div className="px-20">
+                    <div className="px-10 text-lg font-bold">
+                      {isLoadingBot && botId && (
+                        <Skeleton className="h-5 w-32" />
+                      )}
+                      {!isLoadingBot && bot && (
+                        <div className="flex items-baseline">
+                          <IconPinnedBot
+                            botSharedStatus={bot?.sharedStatus}
+                            className="mr-1 shrink-0 text-aws-aqua"
+                          />
+                          <div>{pageTitle}</div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="mt-3 text-xs text-dark-gray dark:text-light-gray">
+                      {isLoadingBot ? (
+                        <Skeleton className="mt-1 h-3 w-64" />
+                      ) : (
+                        description
+                      )}
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <>
@@ -541,7 +602,7 @@ const ChatPage: React.FC = () => {
                       className={`${
                         message.role === 'assistant'
                           ? 'bg-aws-squid-ink-light/5 dark:bg-aws-squid-ink-dark/35'
-                          : ''
+                          : 'rounded-xl bg-houndoc-primary-hover'
                       }`}>
                       <ChatMessageWithRelatedDocuments
                         chatContent={message}
@@ -554,7 +615,7 @@ const ChatPage: React.FC = () => {
                           }
                         }}
                       />
-                      <div className="w-full border-b border-aws-squid-ink-light/10 dark:border-aws-squid-ink-dark/10"></div>
+                      <div className="w-full "></div>
                     </div>
                   ))}
                 </>
@@ -586,7 +647,10 @@ const ChatPage: React.FC = () => {
       </div>
 
       <div
-        className={`bottom-0 z-0 flex w-full flex-col items-center justify-center ${messages.length === 0 ? 'absolute top-1/2 -translate-y-1/2' : ''}`}>
+        className={twMerge(
+          'bottom-0 z-0 flex w-full flex-col items-center justify-center',
+          messages.length === 0 ? 'absolute top-2/3 -translate-y-1/2' : ''
+        )}>
         {bot && bot.syncStatus !== SyncStatus.SUCCEEDED && (
           <div className="mb-8 w-1/2">
             <Alert
@@ -615,6 +679,7 @@ const ChatPage: React.FC = () => {
         )}
 
         <InputChatContent
+          className="mb-7 w-11/12 md:w-10/12 lg:w-4/6 xl:w-3/6"
           dndMode={dndMode}
           disabledSend={postingMessage || hasError}
           disabledRegenerate={postingMessage || hasError}

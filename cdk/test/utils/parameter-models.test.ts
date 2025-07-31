@@ -18,6 +18,101 @@ function createTestApp(context = {}) {
   });
 }
 
+describe("BaseParametersSchema", () => {
+  describe("Parameter Validation", () => {
+    describe("envName", () => {
+      // set any values for required fields
+      const commonParams = {
+        bedrockRegion: "eu-west-1",
+      };
+
+      test("should not throw ZodError when not set", () => {
+        // Given
+        const app = createTestApp();
+        const inputParams = {
+          ...commonParams,
+          envName: "",
+        };
+
+        // When/Then
+        expect(() => {
+          resolveBedrockChatParameters(app, inputParams);
+        }).not.toThrow();
+      });
+
+      test("should not throw ZodError when set 10 characters and Upper case at first character", () => {
+        // Given
+        const app = createTestApp();
+        const inputParams = {
+          ...commonParams,
+          envName: "Env4567890",
+        };
+
+        // When/Then
+        expect(() => {
+          resolveBedrockChatParameters(app, inputParams);
+        }).not.toThrow();
+      });
+
+      test("should not throw ZodError when lower case at first character", () => {
+        // Given
+        const app = createTestApp();
+        const inputParams = {
+          ...commonParams,
+          envName: "env",
+        };
+
+        // When/Then
+        expect(() => {
+          resolveBedrockChatParameters(app, inputParams);
+        }).not.toThrow();
+      });
+
+      test("should throw ZodError when set 11 characters", () => {
+        // Given
+        const app = createTestApp();
+        const inputParams = {
+          ...commonParams,
+          envName: "env45678901",
+        };
+
+        // When/Then
+        expect(() => {
+          resolveBedrockChatParameters(app, inputParams);
+        }).toThrow();
+      });
+
+      test("should throw ZodError when set number at first character", () => {
+        // Given
+        const app = createTestApp();
+        const inputParams = {
+          ...commonParams,
+          envName: "1env",
+        };
+
+        // When/Then
+        expect(() => {
+          resolveBedrockChatParameters(app, inputParams);
+        }).toThrow();
+      });
+
+      test("should throw ZodError when set non-alphanumeric character", () => {
+        // Given
+        const app = createTestApp();
+        const inputParams = {
+          ...commonParams,
+          envName: "!",
+        };
+
+        // When/Then
+        expect(() => {
+          resolveBedrockChatParameters(app, inputParams);
+        }).toThrow();
+      });
+    });
+  });
+});
+
 describe("resolveBedrockChatParameters", () => {
   describe("Parameter Source Selection", () => {
     test("should use parametersInput when provided", () => {
@@ -83,6 +178,7 @@ describe("resolveBedrockChatParameters", () => {
         enableLambdaSnapStart: false,
         alternateDomainName: "chat.example.com",
         hostedZoneId: "Z1234567890",
+        devAccessIamRoleArn: "arn:aws:iam::123456789012:role/Admin",
       };
 
       // When
@@ -110,6 +206,7 @@ describe("resolveBedrockChatParameters", () => {
       expect(result.enableLambdaSnapStart).toBe(false);
       expect(result.alternateDomainName).toBe("chat.example.com");
       expect(result.hostedZoneId).toBe("Z1234567890");
+      expect(result.devAccessIamRoleArn).toBe("arn:aws:iam::123456789012:role/Admin")
     });
 
     test("should throw ZodError when invalid parameter is specified", () => {
@@ -224,6 +321,7 @@ describe("resolveBedrockChatParameters", () => {
       enableLambdaSnapStart: true,
       alternateDomainName: "",
       hostedZoneId: "",
+      devAccessIamRoleArn: "",
     });
 
     // When
@@ -257,6 +355,7 @@ describe("resolveBedrockChatParameters", () => {
     expect(result.enableLambdaSnapStart).toBe(true);
     expect(result.alternateDomainName).toBe("");
     expect(result.hostedZoneId).toBe("");
+    expect(result.devAccessIamRoleArn).toBe("");
   });
 });
 
@@ -589,7 +688,7 @@ describe("resolveBedrockCustomBotParameters", () => {
       const originalEnv = process.env;
       process.env = {
         ...originalEnv,
-        ENV_NAME: "test-env",
+        ENV_NAME: "testEnv",
         ENV_PREFIX: "test-prefix",
         BEDROCK_REGION: "us-east-1",
         PK: "env-pk",
@@ -598,7 +697,7 @@ describe("resolveBedrockCustomBotParameters", () => {
         KNOWLEDGE: '{"env": "knowledge"}',
         BEDROCK_KNOWLEDGE_BASE: '{"env": "kb"}',
         BEDROCK_GUARDRAILS: '{"env": "guardrails"}',
-        USE_STAND_BY_REPLICAS: "true",
+        ENABLE_RAG_REPLICAS: "true",
       };
 
       try {
@@ -607,7 +706,7 @@ describe("resolveBedrockCustomBotParameters", () => {
 
         // Then
         expect(result.bedrockRegion).toBe("us-east-1");
-        expect(result.envName).toBe("test-env");
+        expect(result.envName).toBe("testEnv");
         expect(result.envPrefix).toBe("test-prefix");
         expect(result.pk).toBe("env-pk");
         expect(result.sk).toBe("env-sk");
@@ -615,7 +714,7 @@ describe("resolveBedrockCustomBotParameters", () => {
         expect(result.knowledge).toBe('{"env": "knowledge"}');
         expect(result.knowledgeBase).toBe('{"env": "kb"}');
         expect(result.guardrails).toBe('{"env": "guardrails"}');
-        expect(result.useStandByReplicas).toBe(true);
+        expect(result.enableRagReplicas).toBe(true);
       } finally {
         // Restore original environment
         process.env = originalEnv;

@@ -1,9 +1,14 @@
 import logging
-from typing import Callable
+from typing import Callable, Dict
 
-from app.agents.tools.agent_tool import ToolRunResult
+from app.agents.tools.agent_tool import AgentTool, ToolRunResult
+from app.agents.tools.knowledge import create_knowledge_tool
 from app.agents.utils import get_tools
-from app.bedrock import call_converse_api, compose_args_for_converse_api
+from app.bedrock import (
+    call_converse_api,
+    compose_args_for_converse_api,
+    is_tooluse_supported,
+)
 from app.prompt import build_rag_prompt, get_prompt_to_cite_tool_results
 from app.repositories.conversation import (
     RecordNotFoundError,
@@ -11,7 +16,8 @@ from app.repositories.conversation import (
     store_conversation,
     store_related_documents,
 )
-from app.repositories.custom_bot import find_alias_by_id, store_alias
+from app.repositories.conversation_search import find_conversations_by_query
+from app.repositories.custom_bot import alias_exists, store_alias
 from app.repositories.models.conversation import (
     ConversationModel,
     MessageModel,
@@ -33,12 +39,16 @@ from app.routes.schemas.conversation import (
     ChatOutput,
     Chunk,
     Conversation,
+    ConversationMetaOutput,
+    ConversationSearchResult,
     FeedbackOutput,
     MessageOutput,
+    SearchHighlight,
     type_model_name,
 )
 from app.stream import ConverseApiStreamHandler, OnStopInput, OnThinking
-from app.usecases.bot import fetch_bot, modify_bot_last_used_time
+from app.usecases.bot import fetch_bot, modify_bot_last_used_time, modify_bot_stats
+from app.user import User
 from app.utils import get_current_time
 from app.vector_search import (
     SearchResult,
@@ -53,7 +63,7 @@ logger.setLevel(logging.INFO)
 
 
 def prepare_conversation(
-    user_id: str,
+    user: User,
     chat_input: ChatInput,
 ) -> tuple[str, ConversationModel, BotModel | None]:
     current_time = get_current_time()
@@ -61,7 +71,7 @@ def prepare_conversation(
 
     try:
         # Fetch existing conversation
-        conversation = find_conversation_by_id(user_id, chat_input.conversation_id)
+        conversation = find_conversation_by_id(user.id, chat_input.conversation_id)
         logger.info(f"Found conversation: {conversation}")
         parent_id = chat_input.message.parent_message_id
         if chat_input.message.parent_message_id == "system" and chat_input.bot_id:
@@ -71,7 +81,7 @@ def prepare_conversation(
             parent_id = conversation.last_message_id
         if chat_input.bot_id:
             logger.info("Bot id is provided. Fetching bot.")
-            owned, bot = fetch_bot(user_id, chat_input.bot_id)
+            owned, bot = fetch_bot(user, chat_input.bot_id)
     except RecordNotFoundError:
         # The case for new conversation. Note that editing first user message is not considered as new conversation.
         logger.info(
@@ -102,7 +112,7 @@ def prepare_conversation(
             logger.info("Bot id is provided. Fetching bot.")
             parent_id = "instruction"
             # Fetch bot and append instruction
-            owned, bot = fetch_bot(user_id, chat_input.bot_id)
+            owned, bot = fetch_bot(user, chat_input.bot_id)
             initial_message_map["instruction"] = MessageModel(
                 role="instruction",
                 content=[
@@ -124,39 +134,13 @@ def prepare_conversation(
             if not owned:
                 try:
                     # Check alias is already created
-                    find_alias_by_id(user_id, chat_input.bot_id)
+                    alias_exists(user.id, chat_input.bot_id)
                 except RecordNotFoundError:
                     logger.info(
                         "Bot is not owned by the user. Creating alias to shared bot."
                     )
                     # Create alias item
-                    store_alias(
-                        user_id,
-                        BotAliasModel(
-                            id=bot.id,
-                            title=bot.title,
-                            description=bot.description,
-                            original_bot_id=chat_input.bot_id,
-                            create_time=current_time,
-                            last_used_time=current_time,
-                            is_pinned=False,
-                            sync_status=bot.sync_status,
-                            has_knowledge=bot.has_knowledge(),
-                            has_agent=bot.is_agent_enabled(),
-                            conversation_quick_starters=(
-                                []
-                                if bot.conversation_quick_starters is None
-                                else [
-                                    ConversationQuickStarterModel(
-                                        title=starter.title,
-                                        example=starter.example,
-                                    )
-                                    for starter in bot.conversation_quick_starters
-                                ]
-                            ),
-                            active_models=bot.active_models,
-                        ),
-                    )
+                    store_alias(user.id, BotAliasModel.from_bot_for_initial_alias(bot))
 
         # Create new conversation
         conversation = ConversationModel(
@@ -225,7 +209,7 @@ def trace_to_root(
 
 
 def chat(
-    user_id: str,
+    user: User,
     chat_input: ChatInput,
     on_stream: Callable[[str], None] | None = None,
     on_stop: Callable[[OnStopInput], None] | None = None,
@@ -233,9 +217,12 @@ def chat(
     on_tool_result: Callable[[ToolRunResult], None] | None = None,
     on_reasoning: Callable[[str], None] | None = None,
 ) -> tuple[ConversationModel, MessageModel]:
-    user_msg_id, conversation, bot = prepare_conversation(user_id, chat_input)
+    user_msg_id, conversation, bot = prepare_conversation(user, chat_input)
 
-    tools = get_tools(bot)
+    # # Set tools only when tooluse is supported
+    tools: Dict[str, AgentTool] = {}
+    if is_tooluse_supported(chat_input.message.model):
+        tools = get_tools(bot)
 
     display_citation = bot is not None and bot.display_retrieved_chunks
 
@@ -253,11 +240,61 @@ def chat(
     related_documents: list[RelatedDocumentModel] = []
     search_results: list[SearchResult] = []
     if bot is not None:
-        if bot.is_agent_enabled():
+        if bot.is_agent_enabled() and is_tooluse_supported(chat_input.message.model):
+            # If it have a knowledge base, always process it in agent mode
+            if bot.has_knowledge():
+                # Add knowledge tool
+                knowledge_tool = create_knowledge_tool(bot=bot)
+                tools[knowledge_tool.name] = knowledge_tool
+
             if display_citation:
                 instructions.append(
                     get_prompt_to_cite_tool_results(
                         model=chat_input.message.model,
+                    )
+                )
+        elif bot.has_knowledge() and not is_tooluse_supported(chat_input.message.model):
+            # Fetch most related documents from vector store
+            # NOTE: Currently embedding not support multi-modal. For now, use the last content.
+            content = conversation.message_map[user_msg_id].content[-1]
+            if isinstance(content, TextContentModel):
+                pseudo_tool_use_id = "new-message-assistant"
+
+                if on_thinking:
+                    on_thinking(
+                        {
+                            "tool_use_id": pseudo_tool_use_id,
+                            "name": "knowledge_base_tool",
+                            "input": {
+                                "query": content.body,
+                            },
+                        }
+                    )
+
+                search_results = search_related_docs(bot=bot, query=content.body)
+                logger.info(f"Search results from vector store: {search_results}")
+
+                if on_tool_result:
+                    on_tool_result(
+                        {
+                            "tool_use_id": pseudo_tool_use_id,
+                            "status": "success",
+                            "related_documents": [
+                                search_result_to_related_document(
+                                    search_result=result,
+                                    source_id_base=pseudo_tool_use_id,
+                                )
+                                for result in search_results
+                            ],
+                        }
+                    )
+
+                # Insert contexts to instruction
+                instructions.append(
+                    build_rag_prompt(
+                        search_results=search_results,
+                        model=chat_input.message.model,
+                        display_citation=display_citation,
                     )
                 )
 
@@ -315,6 +352,9 @@ def chat(
             grounding_source=grounding_source,
             message_for_continue_generate=message_for_continue_generate,
             enable_reasoning=chat_input.enable_reasoning,
+            prompt_caching_enabled=(
+                bot.prompt_caching_enabled if bot is not None else True
+            ),
         )
 
         message = result["message"]
@@ -440,9 +480,9 @@ def chat(
         thinking_log.append(tool_result_message)
 
     # Store conversation before finish streaming so that front-end can avoid 404 issue
-    store_conversation(user_id, conversation)
+    store_conversation(user.id, conversation)
     store_related_documents(
-        user_id=user_id,
+        user_id=user.id,
         conversation_id=conversation.id,
         related_documents=related_documents,
     )
@@ -451,10 +491,12 @@ def chat(
         on_stop(result)
 
     # Update bot last used time
-    if chat_input.bot_id:
-        logger.info("Bot id is provided. Updating bot last used time.")
+    if bot:
+        logger.info("Bot is provided. Updating bot last used time.")
         # Update bot last used time
-        modify_bot_last_used_time(user_id, chat_input.bot_id)
+        modify_bot_last_used_time(user, bot)
+        # Update bot stats
+        modify_bot_stats(user, bot, increment=1)
 
     return conversation, message
 
@@ -613,4 +655,34 @@ def fetch_conversation(user_id: str, conversation_id: str) -> Conversation:
         bot_id=conversation.bot_id,
         should_continue=conversation.should_continue,
     )
+    return output
+
+
+def search_conversations(query: str, user: User) -> list[ConversationSearchResult]:
+    """Search conversations by keyword"""
+    conversations = find_conversations_by_query(query, user)
+    output = []
+
+    for conversation in conversations:
+        # Convert model SearchHighlightModel to schema SearchHighlight
+        schema_highlights = None
+        if conversation.highlights:
+            schema_highlights = [
+                SearchHighlight(
+                    field_name=highlight.field_name, fragments=highlight.fragments
+                )
+                for highlight in conversation.highlights
+            ]
+
+        # Create ConversationSearchResult with properly converted highlights
+        output.append(
+            ConversationSearchResult(
+                id=conversation.id,
+                title=conversation.title,
+                last_updated_time=conversation.last_updated_time,
+                bot_id=conversation.bot_id,
+                highlights=schema_highlights,
+            )
+        )
+
     return output

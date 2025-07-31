@@ -41,15 +41,18 @@ const translation = {
       },
       'mistral-7b-instruct': {
         label: 'Mistral 7B',
-        description: 'Dapat menghasilkan teks bahasa Inggris dengan kemampuan coding alami'
+        description:
+          'Dapat menghasilkan teks bahasa Inggris dengan kemampuan coding alami',
       },
       'mixtral-8x7b-instruct': {
         label: 'Mixtral-8x7B',
-        description: "Model Mixture-of-Experts (MoE) yang populer, berkualitas tinggi, dan ideal untuk merangkum teks, tanya jawab, klasifikasi teks, melengkapi teks, dan menghasilkan kode"
+        description:
+          'Model Mixture-of-Experts (MoE) yang populer, berkualitas tinggi, dan ideal untuk merangkum teks, tanya jawab, klasifikasi teks, melengkapi teks, dan menghasilkan kode',
       },
       'mistral-large': {
         label: 'Mistral Large',
-        description: "Ideal untuk tugas-tugas rumit yang memerlukan kemampuan penalaran substansial, atau tugas-tugas yang sangat terspesialisasi, seperti Pembuatan Teks Sintetis atau Pembuatan Kode"
+        description:
+          'Ideal untuk tugas-tugas rumit yang memerlukan kemampuan penalaran substansial, atau tugas-tugas yang sangat terspesialisasi, seperti Pembuatan Teks Sintetis atau Pembuatan Kode',
       },
       'amazon-nova-pro': {
         label: 'Amazon Nova Pro',
@@ -98,7 +101,7 @@ const translation = {
         },
         sql_db_schema: {
           name: 'Skema Database',
-          description: 
+          description:
             'Mengambil skema dan sampel baris data dari daftar tabel.',
         },
         sql_db_list_tables: {
@@ -107,7 +110,8 @@ const translation = {
         },
         sql_db_query_checker: {
           name: 'Pemeriksa Query',
-          description: 'Periksa apakah query SQL Anda sudah benar sebelum dieksekusi.',
+          description:
+            'Periksa apakah query SQL Anda sudah benar sebelum dieksekusi.',
         },
         internet_search: {
           name: 'Pencarian Internet',
@@ -137,7 +141,6 @@ const translation = {
         noBots: 'Tidak Ada Bot.',
         noBotsRecentlyUsed: 'Tidak Ada Bot Bersama yang Baru Digunakan.',
         retrievingKnowledge: '[Mengambil Pengetahuan...]',
-        selectParsingModel: 'Pilih Model Parsing',
         dndFileUpload:
           'Anda dapat mengunggah file dengan drag and drop.\nFile yang didukung: {{fileExtensions}}',
         uploadError: 'Pesan Kesalahan',
@@ -370,11 +373,11 @@ const translation = {
       },
     },
     admin: {
-      sharedBotAnalytics: {
+      botAnalytics: {
         label: {
-          pageTitle: 'Analitik Bot Bersama',
-          noPublicBotUsages:
-            'Selama Periode Perhitungan, tidak ada bot publik yang digunakan.',
+          pageTitle: 'Analitik Bot',
+          noBotUsages:
+            'Selama Periode Perhitungan, tidak ada bot yang digunakan.',
           published: 'API telah dipublikasikan.',
           SearchCondition: {
             title: 'Periode Perhitungan',
@@ -385,7 +388,7 @@ const translation = {
         },
         help: {
           overview:
-            'Pantau status penggunaan Bot Bersama dan API Bot yang Dipublikasikan.',
+            'Pantau status penggunaan Bot dan API Bot yang Dipublikasikan.',
           calculationPeriod:
             'Jika Periode Perhitungan tidak diatur, biaya untuk hari ini akan ditampilkan.',
         },
@@ -466,7 +469,7 @@ const translation = {
     button: {
       newChat: 'Chat Baru',
       botConsole: 'Konsol Bot',
-      sharedBotAnalytics: 'Analitik Bot Bersama',
+      botAnalytics: 'Analitik Bot',
       apiManagement: 'Manajemen API',
       userUsages: 'Penggunaan Pengguna',
       SaveAndSubmit: 'Simpan & Kirim',
@@ -671,8 +674,7 @@ const translation = {
       },
       advancedParsing: {
         label: 'Parsing Lanjutan',
-        description:
-          'Pilih model untuk parsing dokumen tingkat lanjut.',
+        description: 'Pilih model untuk parsing dokumen tingkat lanjut.',
         hint: 'Cocok untuk memahami lebih dari sekadar teks standar dalam format dokumen yang didukung, misalnya termasuk tabel dalam PDF dengan struktur utuh. Biaya tambahan dikenakan untuk parsing menggunakan AI generatif.',
       },
       parsingModel: {
@@ -718,15 +720,16 @@ const translation = {
       },
       advancedConfigration: {
         existKnowledgeBaseId: {
-          label: "ID Amazon Bedrock Knowledge Base",
-          description: "Masukkan ID Amazon Bedrock Knowledge Base eksisting Anda.",
+          label: 'ID Amazon Bedrock Knowledge Base',
+          description:
+            'Masukkan ID Amazon Bedrock Knowledge Base eksisting Anda.',
           createNewKb: {
             label: 'Buat Knowledge Base baru',
           },
           existing: {
             label: 'Gunakan Knowledge Base eksisting',
-          }
-        }
+          },
+        },
       },
     },
     error: {
@@ -750,7 +753,8 @@ const translation = {
       attachment: {
         fileSizeExceeded:
           'Ukuran setiap dokumen tidak boleh lebih dari {{maxSize}}.',
-        fileCountExceeded: 'Tidak dapat mengunggah lebih dari {{maxCount}} file.',
+        fileCountExceeded:
+          'Tidak dapat mengunggah lebih dari {{maxCount}} file.',
       },
     },
     validation: {
@@ -765,7 +769,8 @@ const translation = {
         message: 'Nilai irisan token harus kurang dari ukuran potongan dokumen',
       },
       parentTokenRange: {
-        message: 'Ukuran token potongan induk harus lebih besar dari ukuran token potongan anak',
+        message:
+          'Ukuran token potongan induk harus lebih besar dari ukuran token potongan anak',
       },
       quickStarter: {
         message: 'Silakan masukkan baik Judul maupun Contoh Percakapan.',
@@ -806,28 +811,6 @@ const translation = {
         misconduct: {
           label: 'Perilaku Buruk',
           hint: 'Menggambarkan prompt input dan respons model yang mencari atau memberikan informasi tentang keterlibatan dalam kegiatan pelanggaran etik, atau mencelakai, menipu, atau memanfaatkan seseorang, kelompok, atau institusi. 0: nonaktifkan, 1: rendah, 2: sedang, 3: tinggi',
-        },
-      },
-      promptAttacks: {
-        hint: 'Menggambarkan prompt pengguna yang dimaksudkan untuk melewati kemampuan keamanan dan moderasi dari model dasar untuk menghasilkan konten berbahaya (juga dikenal sebagai jailbreak), dan mengabaikan serta menimpa instruksi yang ditentukan oleh developer (disebut injeksi prompt). Silakan merujuk ke Serangan Prompt untuk detail lebih lanjut untuk penggunaan dengan input tagging.',
-      },
-      deniedTopics: {
-        hint: 'Tambahkan hingga 30 topik yang dilarang untuk memblokir input pengguna atau respons model yang terkait dengan topik tersebut.',
-      },
-      wordFilters: {
-        hint: 'Gunakan filter ini untuk memblokir kata dan frasa tertentu dalam input pengguna dan respons model.',
-        profanityFilter: {
-          hint: 'Aktifkan fitur ini untuk memblokir kata-kata kasar dalam input pengguna dan respons model. Daftar kata didasarkan pada definisi kata-kata kasar global dan dapat berubah.',
-        },
-        customWordsAndPhrases: {
-          hint: 'Tentukan hingga 10.000 kata atau frasa (maks. 3 kata) yang akan diblokir oleh guardrail. Pesan pemblokiran akan ditampilkan jika input pengguna atau respons model mengandung kata-kata atau frasa ini.',
-        },
-      },
-      sensitiveInformationFilters: {
-        hint: 'Gunakan filter ini untuk menangani data apa pun yang terkait dengan privasi.',
-        personallyIdentifiableInformationTypes: {
-          PIITypes: {},
-          regexPatterns: {},
         },
       },
       contextualGroundingCheck: {

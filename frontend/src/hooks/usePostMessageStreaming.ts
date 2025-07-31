@@ -79,6 +79,7 @@ const usePostMessageStreaming = create<{
                 ws.send(
                   JSON.stringify({
                     step: PostStreamingStatus.END,
+                    token: token,
                   })
                 );
               }

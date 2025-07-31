@@ -4,7 +4,7 @@ export default {
   darkMode: 'class',
   theme: {
     fontFamily: {
-      body: ['M PLUS Rounded 1c'],
+      body: ['Open Sans', 'sans-serif'],
     },
     extend: {
       transitionProperty: {
@@ -16,22 +16,22 @@ export default {
       },
       colors: {
         'aws-squid-ink': {
-          light: '#232F3E',
+          light: 'var(--aws-font-color)', //! Importante: Color de bordes,
           dark: '#171717',
         },
         'aws-sea-blue': {
-          light: '#005276',
+          light: 'var(--aws-sea-blue)', //! Importante: Color principal de botones
           dark: '#757575',
         },
         'aws-sea-blue-hover': {
-          light: '#003550',
+          light: 'var(--aws-sea-blue-hover)', //TODO: Crear con funcion para obtener el hover con transparencia
           dark: '#5b5b5b',
         },
-        'aws-aqua': '#007faa',
+        'aws-aqua': 'var(--aws-sea-blue-hover)', //TODO: Crear con funcion para obtener el hover con transparencia
         'aws-lab': '#38ef7d',
         'aws-mist': '#9ffcea',
         'aws-font-color': {
-          light: '#232F3E',
+          light: 'var(--aws-font-color)', //! Importante: Color de fuente principal
           dark: '#cacaca',
           gray: '#909193',
           blue: '#276cc6',
@@ -54,6 +54,13 @@ export default {
         'dark-gray': '#6b7280',
         gray: '#9ca3af',
         'light-gray': '#e5e7eb',
+        'light-gray': '#e5e7eb',
+        'houndoc-primary': 'var(--aws-sea-blue)', //! Importante: Color principal de botones
+        'houndoc-primary-hover': 'var(--aws-sea-blue-hover)', //TODO: Crear con funcion para obtener el hover con transparencia
+        'houndoc-primary-dark': 'var(--houndoc-primary-dark)', //TODO: Crear con funcion para obtener el hover con transparencia
+        'houndoc-gray': '#f9f9f9',
+        'houndoc-font-color': 'var(--aws-font-color)', //! Importante: Color de fuente principal
+        'houndoc-font-color-white': '#ffffff',
       },
     },
   },

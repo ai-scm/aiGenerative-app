@@ -70,7 +70,12 @@
     "enableRagReplicas": true,
     "enableBedrockCrossRegionInference": true,
     "enableLambdaSnapStart": true,
+    "enableBotStore": true,
+    "enableBotStoreReplicas": false,
+    "botStoreLanguage": "en",
+    "tokenValidMinutes": 30,
     "alternateDomainName": "",
-    "hostedZoneId": ""
+    "hostedZoneId": "",
+    "devAccessIamRoleArn": ""
   }
 }

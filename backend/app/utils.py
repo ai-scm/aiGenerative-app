@@ -5,10 +5,13 @@ from datetime import datetime
 from typing import Any, Literal
 
 import boto3
+from app.repositories.models.custom_bot_guardrails import BedrockGuardrailsModel
+from app.user import User
 from botocore.client import Config
 from botocore.exceptions import ClientError
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 REGION = os.environ.get("REGION", "us-east-1")
 BEDROCK_REGION = os.environ.get("BEDROCK_REGION", "us-east-1")
@@ -21,6 +24,7 @@ logger.debug(f"ENV_NAME: {ENV_NAME}")
 PUBLISH_API_CODEBUILD_PROJECT_NAME = os.environ.get(
     "PUBLISH_API_CODEBUILD_PROJECT_NAME", ""
 )
+USER_POOL_ID = os.environ.get("USER_POOL_ID", "")
 
 
 def snake_to_camel(snake_str):
@@ -175,6 +179,24 @@ def start_codebuild_project(environment_variables: dict) -> str:
         environmentVariablesOverride=environment_variables_override,
     )
     return response["build"]["id"]
+
+
+def get_user_cognito_groups(user: User, user_pool_id: str = USER_POOL_ID) -> list[str]:
+    """Retrieve the groups that a Cognito user belongs to."""
+    client = boto3.client("cognito-idp")
+
+    try:
+        response = client.admin_list_groups_for_user(
+            UserPoolId=user_pool_id, Username=user.email
+        )
+        groups = [group["GroupName"] for group in response.get("Groups", [])]
+        logger.info(f"Groups for user {user.name}: {groups}")
+
+        return groups
+
+    except ClientError as e:
+        print(f"Error retrieving groups for user {user.name}: {e}")
+        return []
 
 
 def store_api_key_to_secret_manager(
