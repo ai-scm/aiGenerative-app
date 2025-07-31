@@ -602,7 +602,7 @@ const ChatPage: React.FC = () => {
                       className={`${
                         message.role === 'assistant'
                           ? 'bg-aws-squid-ink-light/5 dark:bg-aws-squid-ink-dark/35'
-                          : ''
+                          : 'rounded-xl bg-houndoc-primary-hover'
                       }`}>
                       <ChatMessageWithRelatedDocuments
                         chatContent={message}
@@ -615,7 +615,7 @@ const ChatPage: React.FC = () => {
                           }
                         }}
                       />
-                      <div className="w-full border-b border-aws-squid-ink-light/10 dark:border-aws-squid-ink-dark/10"></div>
+                      <div className="w-full "></div>
                     </div>
                   ))}
                 </>

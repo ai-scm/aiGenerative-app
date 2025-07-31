@@ -297,6 +297,8 @@ const Drawer: React.FC<Props> = (props) => {
                 to="/"
                 onClick={onClickNewChat}
                 labelComponent={t('button.newChat')}
+                className="mb-2 font-semibold text-houndoc-primary 
+                hover:bg-houndoc-primary-hover"
               />
               <DrawerItem
                 isActive={false}
@@ -497,6 +499,7 @@ const Drawer: React.FC<Props> = (props) => {
                 onClick={closeSmallDrawer}
               />
             )}
+            <div className="flex w-full items-center bg-houndoc-primary">
             <LogoContainer
               body={
                 <Menu
@@ -508,6 +511,7 @@ const Drawer: React.FC<Props> = (props) => {
                 />
               }
             />
+            </div>
           </div>
         </nav>
       </div>
