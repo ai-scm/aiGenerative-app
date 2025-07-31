@@ -6,7 +6,7 @@ interface props {
 
 const LogoContainer = (props: props) => {
   return (
-    <div className="flex items-center w-full justify-between px-2">
+    <div className="flex items-center text-white w-full justify-between px-2">
       {props.body}
       <img
         src="/images/logo-houndoc.webp"
