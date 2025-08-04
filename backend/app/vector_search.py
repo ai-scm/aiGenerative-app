@@ -98,6 +98,7 @@ def _bedrock_knowledge_base_search(bot: BotModel, query: str) -> list[SearchResu
             retrieval_result: KnowledgeBaseRetrievalResultTypeDef,
         ) -> tuple[str, str] | None:
             """Extract source URL/URI from retrieval result based on location type."""
+            metadata = retrieval_result.get("metadata", {})
             location = retrieval_result.get("location", {})
             location_type = location.get("type")
 
