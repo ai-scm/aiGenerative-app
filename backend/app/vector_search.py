@@ -106,7 +106,7 @@ def _bedrock_knowledge_base_search(bot: BotModel, query: str) -> list[SearchResu
                 return (url, url)
 
             elif location_type == "S3":
-                uri = location.get("s3Location", {}).get("uri", "")
+                uri = metadata.get("page_url") or location.get("s3Location", {}).get("uri", "")
                 source_name = urlparse(url=uri).path.split("/")[-1]
                 return (source_name, uri)
 
