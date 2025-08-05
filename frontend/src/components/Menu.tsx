@@ -90,7 +90,7 @@ const MenuSettings: React.FC<Props> = (props) => {
         <div
           ref={menuRef}
           className="absolute bottom-10 left-2 w-60 rounded border border-aws-font-color-white-light bg-aws-sea-blue-light text-aws-font-color-white-light dark:border-aws-font-color-white-dark dark:bg-aws-ui-color-dark dark:text-aws-font-color-white-dark">
-          <div className="flex w-full cursor-pointer items-center p-2 hover:bg-houndoc-primary-hover dark:hover:bg-aws-paper-dark">
+          <div className="flex flex-col w-full cursor-pointer items-center p-2 hover:bg-houndoc-primary-hover dark:hover:bg-aws-paper-dark">
             <div className="font-bold">{userName}</div>
             <div className="">
               <div className="italic">{t('app.userGroups')}</div>

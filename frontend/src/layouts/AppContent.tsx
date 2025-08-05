@@ -149,7 +149,7 @@ const AppContent: React.FC<Props> = (props) => {
       />
 
       <main className="relative flex min-h-dvh flex-1 flex-col overflow-y-hidden transition-width">
-        <header className="visible flex h-12 w-full items-center bg-aws-squid-ink-light p-3 text-lg text-aws-font-color-white-light dark:bg-aws-squid-ink-dark dark:text-aws-font-color-white-dark lg:hidden lg:h-0">
+        <header className="visible flex h-12 w-full items-center bg-houndoc-primary p-3 text-lg text-aws-font-color-white-light dark:bg-houndoc-primary-dark dark:text-aws-font-color-white-dark lg:hidden lg:h-0">
           <InvisibleItemUrl
           paramName="visibleNav"
           body={
