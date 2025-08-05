@@ -5,12 +5,11 @@ import React, {
   cloneElement,
   ReactElement,
 } from 'react';
-import Button from './Button';
+// import Button from './Button';
 import { BaseProps } from '../@types/common';
 import { getCurrentUser, signInWithRedirect, signOut } from 'aws-amplify/auth';
 import { useTranslation } from 'react-i18next';
 import { PiCircleNotch } from 'react-icons/pi';
-import { useAddCustomUrl } from '../custom-components/hooks';
 
 type Props = BaseProps & {
   children: ReactNode;
@@ -20,10 +19,8 @@ const AuthCustom: React.FC<Props> = ({ children }) => {
   const [authenticated, setAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const { t } = useTranslation();
-  const { saveCurrentUrl } = useAddCustomUrl();
 
   useEffect(() => {
-    saveCurrentUrl();
     getCurrentUser()
       .then(async () => {
         setAuthenticated(true);
@@ -42,14 +39,14 @@ const AuthCustom: React.FC<Props> = ({ children }) => {
   }, []);
 
 
-  const handleSignIn = async () => {
-    saveCurrentUrl()
-    signInWithRedirect({
-      provider: {
-        custom: import.meta.env.VITE_APP_CUSTOM_PROVIDER_NAME,
-      },
-    });
-  };
+  // const handleSignIn = async () => {
+  //   saveCurrentUrl()
+  //   signInWithRedirect({
+  //     provider: {
+  //       custom: import.meta.env.VITE_APP_CUSTOM_PROVIDER_NAME,
+  //     },
+  //   });
+  // };
 
   const handleSignOut = () => {
     signOut();
@@ -69,9 +66,9 @@ const AuthCustom: React.FC<Props> = ({ children }) => {
           <div className="mb-5 mt-10 text-4xl text-aws-sea-blue-light">
             {t('app.name')}
           </div>
-          <Button onClick={() => handleSignIn()} className="px-20 text-xl">
+          {/* <Button onClick={() => handleSignIn()} className="px-20 text-xl">
             {t('signIn.button.login')}
-          </Button>
+          </Button> */}
         </div>
       ) : (
         // Pass the signOut function to the child component

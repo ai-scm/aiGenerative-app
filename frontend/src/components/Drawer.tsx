@@ -43,6 +43,7 @@ import { isPinnedBot } from '../utils/BotUtils';
 import IconPinnedBot from './IconPinnedBot';
 import { NadiaTitle } from '../custom-components/atoms';
 import { LogoContainer } from '../custom-components/molecules';
+import { InvisibleItemUrl } from '../custom-components/organisms';
 
 type Props = BaseProps & {
   isAdmin: boolean;
@@ -215,6 +216,8 @@ const Drawer: React.FC<Props> = (props) => {
   const { newChat, conversationId } = useChat();
   const { botId } = useParams();
 
+  
+
   useEffect(() => {
     setPrevConversations(conversations);
   }, [conversations]);
@@ -283,251 +286,258 @@ const Drawer: React.FC<Props> = (props) => {
 
   return (
     <>
-      <div className="scrollbar-thumb-aws-squid-ink-light/30 relative h-full overflow-y-auto bg-white scrollbar-thin scrollbar-track-white dark:bg-aws-ui-color-dark dark:scrollbar-thumb-aws-ui-color-dark/30">
-        <nav
-          className={`lg:visible lg:w-64 ${
-            opened ? 'visible w-64' : 'invisible w-0'
-          } text-sm  aws-font-color transition-width`}>
-          {!isAdminPanel && (
-            <>
-              <NadiaTitle />
-              <DrawerItem
-                isActive={false}
-                icon={<PiNotePencil />}
-                to="/"
-                onClick={onClickNewChat}
-                labelComponent={t('button.newChat')}
-                className="mb-2 font-semibold text-houndoc-primary 
-                hover:bg-houndoc-primary-hover"
-              />
-              <DrawerItem
-                isActive={false}
-                icon={<PiListBullets />}
-                to="/bot/my"
-                labelComponent={getPageLabel('/bot/my')}
-                onClick={closeSmallDrawer}
-              />
-              <DrawerItem
-                isActive={false}
-                icon={<PiCompass />}
-                to="/bot/discover"
-                labelComponent={getPageLabel('/bot/discover')}
-                onClick={closeSmallDrawer}
-              />
-
-              <ExpandableDrawerGroup
-                label={t('app.starredBots')}
-                className="flex w-full cursor-pointer items-left transition hover:brightness-75">
-                {starredBots === undefined && (
-                  <div className="flex flex-col gap-2 p-2">
-                    <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
-                    <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
-                    <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
-                    <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
-                    <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
-                  </div>
-                )}
-                {starredBots
-                  ?.slice(0, drawerOptions.displayCount.starredBots)
-                  .map((bot) => (
+      <InvisibleItemUrl
+        paramName="visibleNav"
+        body={
+          <>
+            <div className="scrollbar-thumb-aws-squid-ink-light/30 relative h-full overflow-y-auto bg-white scrollbar-thin scrollbar-track-white dark:bg-aws-ui-color-dark dark:scrollbar-thumb-aws-ui-color-dark/30">
+              <nav
+                className={`lg:visible lg:w-64 ${
+                  opened ? 'visible w-64' : 'invisible w-0'
+                } text-sm  aws-font-color transition-width`}>
+                {!isAdminPanel && (
+                  <>
+                    <NadiaTitle />
                     <DrawerItem
-                      key={bot.id}
-                      isActive={botId === bot.id && !conversationId}
-                      to={`/bot/${bot.id}`}
-                      icon={
-                        isPinnedBot(bot.sharedStatus) ? (
-                          <IconPinnedBot showAlways />
-                        ) : (
-                          <PiRobot />
-                        )
-                      }
-                      labelComponent={bot.title}
-                      onClick={onClickNewBotChat}
-                    />
-                  ))}
-
-                {starredBots && starredBots.length > 15 && (
-                  <Button
-                    text
-                    rightIcon={<PiArrowRight />}
-                    className="w-full"
-                    onClick={() => {
-                      navigate('/bot/starred');
-                      closeSmallDrawer();
-                    }}>
-                    {t('bot.button.viewAll')}
-                  </Button>
-                )}
-              </ExpandableDrawerGroup>
-
-              <ExpandableDrawerGroup
-                label={t('app.recentlyUsedBots')}
-                className="w-full cursor-pointer items-center transition hover:brightness-75">
-                {recentlyUsedUnstarredBots === undefined && (
-                  <div className="flex flex-col gap-2 p-2">
-                    <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
-                    <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
-                    <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
-                    <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
-                    <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
-                  </div>
-                )}
-                {recentlyUsedUnstarredBots
-                  ?.slice(0, drawerOptions.displayCount.recentlyUsedBots)
-                  .map((bot) => (
-                    <DrawerItem
-                      key={bot.id}
                       isActive={false}
-                      to={`/bot/${bot.id}`}
-                      icon={
-                        isPinnedBot(bot.sharedStatus) ? (
-                          <IconPinnedBot showAlways />
-                        ) : (
-                          <PiRobot />
-                        )
-                      }
-                      labelComponent={bot.title}
-                      onClick={onClickNewBotChat}
+                      icon={<PiNotePencil />}
+                      to="/"
+                      onClick={onClickNewChat}
+                      labelComponent={t('button.newChat')}
+                      className="mb-2 font-semibold text-houndoc-primary 
+                      hover:bg-houndoc-primary-hover"
                     />
-                  ))}
-
-                {recentlyUsedUnstarredBots && (
-                  <Button
-                    text
-                    rightIcon={<PiArrowRight />}
-                    className="w-full"
-                    onClick={() => {
-                      navigate('/bot/recently-used');
-                      closeSmallDrawer();
-                    }}>
-                    {t('bot.button.viewAll')}
-                  </Button>
-                )}
-              </ExpandableDrawerGroup>
-
-              <ExpandableDrawerGroup
-                label={t('app.conversationHistory')}
-                className={twMerge(
-                  'w-full cursor-pointer transition hover:brightness-75',
-                  props.isAdmin ? 'mb-20' : 'mb-10'
-                )}>
-                {conversations === undefined && (
-                  <div className="flex flex-col gap-2 p-2">
-                    <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
-                    <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
-                    <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
-                    <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
-                    <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
-                  </div>
-                )}
-                {conversations
-                  ?.slice(0, drawerOptions.displayCount.conversationHistory)
-                  .map((conversation, idx) => (
-                    <Item
-                      key={idx}
-                      className="grow"
-                      label={conversation.title}
-                      conversationId={conversation.id}
-                      generatedTitle={idx === generateTitleIndex}
-                      updateTitle={props.updateConversationTitle}
+                    <DrawerItem
+                      isActive={false}
+                      icon={<PiListBullets />}
+                      to="/bot/my"
+                      labelComponent={getPageLabel('/bot/my')}
                       onClick={closeSmallDrawer}
-                      onDelete={() => props.onDeleteConversation(conversation)}
                     />
-                  ))}
+                    <DrawerItem
+                      isActive={false}
+                      icon={<PiCompass />}
+                      to="/bot/discover"
+                      labelComponent={getPageLabel('/bot/discover')}
+                      onClick={closeSmallDrawer}
+                    />
 
-                {conversations && (
-                  <Button
-                    text
-                    rightIcon={<PiArrowRight />}
-                    className="w-full"
-                    onClick={() => {
-                      navigate('/conversations');
-                      closeSmallDrawer();
-                    }}>
-                    {t('bot.button.viewAll')}
-                  </Button>
+                    <ExpandableDrawerGroup
+                      label={t('app.starredBots')}
+                      className="flex w-full cursor-pointer items-left transition hover:brightness-75">
+                      {starredBots === undefined && (
+                        <div className="flex flex-col gap-2 p-2">
+                          <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
+                          <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
+                          <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
+                          <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
+                          <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
+                        </div>
+                      )}
+                      {starredBots
+                        ?.slice(0, drawerOptions.displayCount.starredBots)
+                        .map((bot) => (
+                          <DrawerItem
+                            key={bot.id}
+                            isActive={botId === bot.id && !conversationId}
+                            to={`/bot/${bot.id}`}
+                            icon={
+                              isPinnedBot(bot.sharedStatus) ? (
+                                <IconPinnedBot showAlways />
+                              ) : (
+                                <PiRobot />
+                              )
+                            }
+                            labelComponent={bot.title}
+                            onClick={onClickNewBotChat}
+                          />
+                        ))}
+
+                      {starredBots && starredBots.length > 15 && (
+                        <Button
+                          text
+                          rightIcon={<PiArrowRight />}
+                          className="w-full"
+                          onClick={() => {
+                            navigate('/bot/starred');
+                            closeSmallDrawer();
+                          }}>
+                          {t('bot.button.viewAll')}
+                        </Button>
+                      )}
+                    </ExpandableDrawerGroup>
+
+                    <ExpandableDrawerGroup
+                      label={t('app.recentlyUsedBots')}
+                      className="w-full cursor-pointer items-center transition hover:brightness-75">
+                      {recentlyUsedUnstarredBots === undefined && (
+                        <div className="flex flex-col gap-2 p-2">
+                          <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
+                          <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
+                          <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
+                          <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
+                          <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
+                        </div>
+                      )}
+                      {recentlyUsedUnstarredBots
+                        ?.slice(0, drawerOptions.displayCount.recentlyUsedBots)
+                        .map((bot) => (
+                          <DrawerItem
+                            key={bot.id}
+                            isActive={false}
+                            to={`/bot/${bot.id}`}
+                            icon={
+                              isPinnedBot(bot.sharedStatus) ? (
+                                <IconPinnedBot showAlways />
+                              ) : (
+                                <PiRobot />
+                              )
+                            }
+                            labelComponent={bot.title}
+                            onClick={onClickNewBotChat}
+                          />
+                        ))}
+
+                      {recentlyUsedUnstarredBots && (
+                        <Button
+                          text
+                          rightIcon={<PiArrowRight />}
+                          className="w-full"
+                          onClick={() => {
+                            navigate('/bot/recently-used');
+                            closeSmallDrawer();
+                          }}>
+                          {t('bot.button.viewAll')}
+                        </Button>
+                      )}
+                    </ExpandableDrawerGroup>
+
+                    <ExpandableDrawerGroup
+                      label={t('app.conversationHistory')}
+                      className={twMerge(
+                        'w-full cursor-pointer transition hover:brightness-75',
+                        props.isAdmin ? 'mb-20' : 'mb-10'
+                      )}>
+                      {conversations === undefined && (
+                        <div className="flex flex-col gap-2 p-2">
+                          <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
+                          <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
+                          <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
+                          <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
+                          <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
+                        </div>
+                      )}
+                      {conversations
+                        ?.slice(0, drawerOptions.displayCount.conversationHistory)
+                        .map((conversation, idx) => (
+                          <Item
+                            key={idx}
+                            className="grow"
+                            label={conversation.title}
+                            conversationId={conversation.id}
+                            generatedTitle={idx === generateTitleIndex}
+                            updateTitle={props.updateConversationTitle}
+                            onClick={closeSmallDrawer}
+                            onDelete={() => props.onDeleteConversation(conversation)}
+                          />
+                        ))}
+
+                      {conversations && (
+                        <Button
+                          text
+                          rightIcon={<PiArrowRight />}
+                          className="w-full"
+                          onClick={() => {
+                            navigate('/conversations');
+                            closeSmallDrawer();
+                          }}>
+                          {t('bot.button.viewAll')}
+                        </Button>
+                      )}
+                    </ExpandableDrawerGroup>
+                  </>
                 )}
-              </ExpandableDrawerGroup>
-            </>
-          )}
 
-          {isAdminPanel && (
-            <>
-              <div className="px-2 py-1 italic">{t('app.adminConsoles')}</div>
-              <DrawerItem
-                className="w-60"
-                isActive={location.pathname === '/admin/shared-bot-analytics'}
-                icon={<PiChartLine />}
-                to="/admin/shared-bot-analytics"
-                labelComponent={getPageLabel('/admin/shared-bot-analytics')}
-                onClick={closeSmallDrawer}
-              />
-              <DrawerItem
-                className="w-60"
-                isActive={location.pathname === '/admin/api-management'}
-                icon={<PiPlugs />}
-                to="/admin/api-management"
-                labelComponent={getPageLabel('/admin/api-management')}
-                onClick={closeSmallDrawer}
-              />
-            </>
-          )}
+                {isAdminPanel && (
+                  <>
+                    <div className="px-2 py-1 italic">{t('app.adminConsoles')}</div>
+                    <DrawerItem
+                      className="w-60"
+                      isActive={location.pathname === '/admin/shared-bot-analytics'}
+                      icon={<PiChartLine />}
+                      to="/admin/shared-bot-analytics"
+                      labelComponent={getPageLabel('/admin/shared-bot-analytics')}
+                      onClick={closeSmallDrawer}
+                    />
+                    <DrawerItem
+                      className="w-60"
+                      isActive={location.pathname === '/admin/api-management'}
+                      icon={<PiPlugs />}
+                      to="/admin/api-management"
+                      labelComponent={getPageLabel('/admin/api-management')}
+                      onClick={closeSmallDrawer}
+                    />
+                  </>
+                )}
 
-          <div
-            className={twMerge(
-              opened ? 'w-64' : 'w-0',
-              props.isAdmin ? 'h-20' : 'h-10',
-              'fixed -bottom-2 z-50 mb-2 flex flex-col items-start bg-aws-squid-ink-light transition-width dark:bg-aws-ui-color-dark lg:w-64'
-            )}>
-            {props.isAdmin && !isAdminPanel && (
-              <DrawerItem
-                className="w-60"
-                isActive={false}
-                icon={<PiPresentationChart />}
-                to="/admin/shared-bot-analytics"
-                labelComponent={t('app.adminConsoles')}
-                onClick={closeSmallDrawer}
-              />
-            )}
-            {isAdminPanel && (
-              <DrawerItem
-                className="w-60"
-                isActive={false}
-                icon={<PiChatCenteredDotsDuotone />}
-                to="/"
-                labelComponent={t('app.backChat')}
-                onClick={closeSmallDrawer}
-              />
-            )}
-            <div className="flex w-full items-center bg-houndoc-primary">
-            <LogoContainer
-              body={
-                <Menu
-                  className="mx-2 flex h-10 justify-start"
-                  onSignOut={props.onSignOut}
-                  onSelectLanguage={props.onSelectLanguage}
-                  onClearConversations={props.onClearConversations}
-                  onClickDrawerOptions={props.onClickDrawerOptions}
-                />
-              }
-            />
+                <div
+                  className={twMerge(
+                    opened ? 'w-64' : 'w-0',
+                    props.isAdmin ? 'h-20' : 'h-10',
+                    'fixed -bottom-2 z-50 mb-2 flex flex-col items-start bg-aws-squid-ink-light transition-width dark:bg-aws-ui-color-dark lg:w-64'
+                  )}>
+                  {props.isAdmin && !isAdminPanel && (
+                    <DrawerItem
+                      className="w-60"
+                      isActive={false}
+                      icon={<PiPresentationChart />}
+                      to="/admin/shared-bot-analytics"
+                      labelComponent={t('app.adminConsoles')}
+                      onClick={closeSmallDrawer}
+                    />
+                  )}
+                  {isAdminPanel && (
+                    <DrawerItem
+                      className="w-60"
+                      isActive={false}
+                      icon={<PiChatCenteredDotsDuotone />}
+                      to="/"
+                      labelComponent={t('app.backChat')}
+                      onClick={closeSmallDrawer}
+                    />
+                  )}
+                  <div className="flex w-full items-center bg-houndoc-primary">
+                  <LogoContainer
+                    body={
+                      <Menu
+                        className="mx-2 flex h-10 justify-start"
+                        onSignOut={props.onSignOut}
+                        onSelectLanguage={props.onSelectLanguage}
+                        onClearConversations={props.onClearConversations}
+                        onClickDrawerOptions={props.onClickDrawerOptions}
+                      />
+                    }
+                  />
+                  </div>
+                </div>
+              </nav>
             </div>
-          </div>
-        </nav>
-      </div>
 
-      <div
-        ref={smallDrawer}
-        className={`lg:hidden ${opened ? 'visible' : 'hidden'}`}>
-        <ButtonIcon
-          className="fixed left-64 top-0 z-50 text-white"
-          onClick={switchOpen}>
-          <PiX />
-        </ButtonIcon>
-        <div
-          className="fixed z-40 h-dvh w-screen bg-dark-gray/90"
-          onClick={switchOpen}></div>
-      </div>
+            <div
+              ref={smallDrawer}
+              className={`lg:hidden ${opened ? 'visible' : 'hidden'}`}>
+              <ButtonIcon
+                className="fixed left-64 top-0 z-50 text-white"
+                onClick={switchOpen}>
+                <PiX />
+              </ButtonIcon>
+              <div
+                className="fixed z-40 h-dvh w-screen bg-dark-gray/90"
+                onClick={switchOpen}></div>
+            </div>
+            </>
+        }
+      />
     </>
   );
 };

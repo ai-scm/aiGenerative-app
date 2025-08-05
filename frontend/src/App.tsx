@@ -13,7 +13,7 @@ import AppContent from './layouts/AppContent';
 import { ErrorBoundary } from 'react-error-boundary';
 import ErrorFallback from './pages/ErrorFallback';
 // Usar la versión segura temporalmente
-import { useClearStorageOnUnloadSafe } from './custom-components/hooks';
+import { useAddCustomUrl, useClearStorageOnUnloadSafe } from './custom-components/hooks';
 
 const customProviderEnabled =
   import.meta.env.VITE_APP_CUSTOM_PROVIDER_ENABLED === 'true';
@@ -23,6 +23,16 @@ const socialProviderFromEnv = import.meta.env.VITE_APP_SOCIAL_PROVIDERS?.split(
 
 const App: React.FC = () => {
   const { t, i18n } = useTranslation();
+  // const [enableClearCache, setEnableClearCache] = React.useState(false);
+  const { saveCurrentUrl } = useAddCustomUrl();
+
+  useEffect(() => {
+    const hasSavedUrl = sessionStorage.getItem('url_Saved');
+    if (!hasSavedUrl) {
+      saveCurrentUrl();
+      sessionStorage.setItem('url_Saved', 'true');
+    }
+  }, [saveCurrentUrl]);
 
   
 
@@ -49,7 +59,7 @@ const App: React.FC = () => {
     },
   });
 
-  useClearStorageOnUnloadSafe();
+    useClearStorageOnUnloadSafe();
 
   I18n.putVocabularies(translations);
   I18n.setLanguage(i18n.language);
