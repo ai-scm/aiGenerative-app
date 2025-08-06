@@ -1,13 +1,18 @@
-import { signOut } from 'aws-amplify/auth';
 import { useEffect } from 'react';
+import { signOut } from 'aws-amplify/auth';
 
 const useClearStorageOnUnloadSafe = () => {
   useEffect(() => {
-    const clearStorageSelectively = () => {
+    const clearStorageSelectively = async () => {
       try {
-        signOut({ global: true });
+        const currentUrl = window.location.href;
+        const originalReplace = window.location.replace;
+        window.location.replace = () => {}; 
+        await signOut({ global: true });
+        window.location.replace = originalReplace;
+        window.history.replaceState(null, '', currentUrl);
 
-        console.log('Storage cleared selectively on page load');
+        console.log('Storage cleared without redirect');
       } catch (error) {
         console.error('Error clearing storage selectively:', error);
       }
