@@ -174,3 +174,38 @@ cd frontend/
 # Crear archivo .env.local (ver configuración arriba)
 npm run dev
 ```
+
+## Despliegue desde CDK
+
+Para desplegar en esta versión de Nadia, se hace uso de la funcionalidad de generar diferentes ambientes de Nadia desde la misma cuenta de AWS, esto con el fin de poder disponibilizar varias instancias de Nadia en la misma cuenta de AWS.
+
+### 1. Configurar el ambiente
+
+Para configurar los parámetros del ambiente de Nadia a desplegar se agrega un objeto con las variables con las cuales se va a realizar el despliegue de nadia
+
+```ts
+bedrockChatParams.set("Tag del ambiente", {
+  identityProviders: [    {
+        "service": "oidc",
+        "serviceName": "iam-oidc",
+        "secretName": "Secreto con el cliente de Nadia generado en el IAM"
+        }
+    ],
+  userPoolDomainPrefix: "cliente-ambiente-nadia",
+  bedrockRegion: "us-east-1",
+  allowedSignUpEmailDomains: [
+    "nuvu.cc",
+    "blend360.com",
+    "dominio de email del cliente que va a usar el Nadia en caso de ser necesario"
+  ],
+  autoJoinUserGroups: [],
+  alternateDomainName: "url de acceso a Nadia",
+  hostedZoneId: "id de la hosted zone donde se va a hospedar la url de nadia",
+});
+```
+### 2. Despliegue
+
+1. En la terminal raiz del proyecto, dirigirse a la carpeta `cdk`
+2. Ingresar las credenciales de la cuenta donde se va a desplegar
+3. Ejecutar `npx cdk bootstrap -c envName=tag del ambiente`
+4. Ejecutar `npx cdk deploy --all --require-approval never -c envName=tag del ambiente`
