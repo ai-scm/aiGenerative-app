@@ -82,6 +82,21 @@ def get_conversation(request: Request, conversation_id: str):
     output = fetch_conversation(current_user.id, conversation_id)
     return output
 
+@router.get(
+    "/conversation/{conversation_id}/related-documents",
+    response_model=list[RelatedDocument],
+)
+def get_related_documents(
+    request: Request, conversation_id: str
+) -> list[RelatedDocument]:
+    """Get related documents"""
+    current_user: User = request.state.current_user
+
+    related_documents = find_related_documents_by_conversation_id(
+        user_id=current_user.id,
+        conversation_id=conversation_id,
+    )
+    return [related_document.to_schema() for related_document in related_documents]
 
 @router.get(
     "/conversation/{conversation_id}/{message_id}",
@@ -112,28 +127,4 @@ def get_message(request: Request, conversation_id: str, message_id: str):
         create_time=conversation.create_time,
     )
 
-@router.get(
-    "/related-documents/conversation/{conversation_id}",
-    response_model=list[RelatedDocument],
-)
-def get_related_documents(
-    request: Request, conversation_id: str
-) -> list[RelatedDocument]:
-    """Get related documents"""
-    current_user: User = request.state.current_user
 
-    related_documents = find_related_documents_by_conversation_id(
-        user_id=current_user.id,
-        conversation_id=conversation_id,
-    )
-    return [related_document.to_schema() for related_document in related_documents]
-
-CONVERSATION_TABLE_NAME = os.environ.get("CONVERSATION_TABLE_NAME", "")
-
-@router.get("/all-items")
-def get_all_items(request: Request):
-    """Get all items"""
-    dynamodb_client = boto3.client("dynamodb")
-    response = dynamodb_client.scan(TableName=CONVERSATION_TABLE_NAME)
-    items = response.get("Items", [])
-    return [item for item in items]
