@@ -5,14 +5,14 @@ from pathlib import Path
 json_path = Path("config.app.json")
 
 # Ruta del archivo CSS a generar
-css_path = Path("/../../frontend/src/config/colors.css")
+css_path = Path("../frontend/src/config/colors.css")
 
 # Leer el archivo JSON
 with open(json_path, "r") as file:
     config = json.load(file)
 
 # Extraer los colores
-colors = config.get("COLORS", {})
+colors = config.get("colors", {})
 
 # Mapeo de nombres de variables CSS a los valores del JSON
 css_variables = {
