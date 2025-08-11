@@ -1,5 +1,5 @@
 from app.routes.schemas.base import BaseSchema
-from app.routes.schemas.conversation import Content, MessageOutput, type_model_name
+from app.routes.schemas.conversation import Content, MessageOutput, ToolResult, type_model_name
 from pydantic import Field
 
 
@@ -28,3 +28,11 @@ class ChatOutputWithoutBotId(BaseSchema):
 class MessageRequestedResponse(BaseSchema):
     conversation_id: str
     message_id: str
+
+
+class RelatedDocument(BaseSchema):
+    content: ToolResult
+    source_id: str
+    source_name: str | None = None
+    source_link: str | None = None
+    page_number: int | None = None

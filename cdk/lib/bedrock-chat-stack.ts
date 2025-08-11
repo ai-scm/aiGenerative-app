@@ -113,6 +113,8 @@ export class BedrockChatStack extends cdk.Stack {
       ],
       destinationBucket: sourceBucket,
       logRetention: logs.RetentionDays.THREE_MONTHS,
+      memoryLimit: 512,
+      ephemeralStorageSize: cdk.Size.mebibytes(1024),
     });
     // CodeBuild used for api publication
     const apiPublishCodebuild = new ApiPublishCodebuild(

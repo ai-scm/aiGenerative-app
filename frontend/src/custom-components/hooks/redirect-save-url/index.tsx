@@ -5,6 +5,7 @@ const useRedirectToSavedUrl = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    
     const savedUrl = localStorage.getItem('url_redireccion');
 
     if (savedUrl) {
@@ -17,6 +18,9 @@ const useRedirectToSavedUrl = () => {
         if (currentPathWithQuery !== savedPathWithQuery) {
           navigate(savedPathWithQuery, { replace: true });
         }
+        // sessionStorage.removeItem('url_Saved');
+        // localStorage.removeItem('url_redireccion');
+        // localStorage.removeItem('url_Saved');
       } catch (error) {
         console.error('Invalid saved URL in localStorage:', error);
       }

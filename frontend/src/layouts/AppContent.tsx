@@ -21,6 +21,7 @@ import DialogSelectLanguage from '../components/DialogSelectLanguage';
 import useLocalStorage from '../hooks/useLocalStorage';
 import DialogDrawerOptions from '../components/DialogDrawerOptions';
 import { useRedirectToSavedUrl } from '../custom-components/hooks';
+import { InvisibleItemUrl } from '../custom-components/organisms';
 
 type Props = BaseProps & {
   signOut?: () => void;
@@ -148,7 +149,11 @@ const AppContent: React.FC<Props> = (props) => {
       />
 
       <main className="relative flex min-h-dvh flex-1 flex-col overflow-y-hidden transition-width">
-        <header className="visible flex h-12 w-full items-center bg-aws-squid-ink-light p-3 text-lg text-aws-font-color-white-light dark:bg-aws-squid-ink-dark dark:text-aws-font-color-white-dark lg:hidden lg:h-0">
+        <header className="visible flex h-12 w-full items-center bg-houndoc-primary p-3 text-lg text-aws-font-color-white-light dark:bg-houndoc-primary-dark dark:text-aws-font-color-white-dark lg:hidden lg:h-0">
+          <InvisibleItemUrl
+          paramName="visibleNav"
+          body={
+            <>
           <button
             className="mr-2 rounded-full p-2 hover:brightness-50 focus:outline-none focus:ring-1 "
             onClick={() => {
@@ -156,6 +161,9 @@ const AppContent: React.FC<Props> = (props) => {
             }}>
             <PiList />
           </button>
+          </>
+          }
+          />
 
           <div className="flex-1 justify-center">
             {isGeneratedTitle ? (

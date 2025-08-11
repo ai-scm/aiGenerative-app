@@ -1,51 +1,18 @@
 import { useEffect } from 'react';
+import { signOut } from 'aws-amplify/auth';
 
-/**
- * Hook alternativo que limpia el storage de forma más selectiva
- * Preserva datos críticos de autenticación pero limpia datos de sesión temporales
- */
 const useClearStorageOnUnloadSafe = () => {
-   useEffect(() => {
-    const clearStorageSelectively = () => {
+  useEffect(() => {
+    const clearStorageSelectively = async () => {
       try {
-        // Si realmente quieres saltarte la limpieza en caso de flujo de autenticación, déjalo comentado
-        // const searchParams = new URLSearchParams(window.location.search);
-        // const hasAuthParams =
-        //   searchParams.has('code') ||
-        //   searchParams.has('state') ||
-        //   searchParams.has('id_token') ||
-        //   searchParams.has('access_token');
+        const currentUrl = window.location.href;
+        const originalReplace = window.location.replace;
+        window.location.replace = () => {}; 
+        await signOut({ global: true });
+        window.location.replace = originalReplace;
+        window.history.replaceState(null, '', currentUrl);
 
-        // if (hasAuthParams) {
-        //   console.log('Auth flow detected, skipping storage clear');
-        //   return;
-        // }
-
-        const keysToPreserve = [
-          'amplify-authenticator-state',
-          'amplify-signin-with-hostedUI',
-          'url_redireccion',
-        ];
-
-        // const cognitoKeys = Object.keys(localStorage).filter((key) =>
-        //   key.startsWith('CognitoIdentityServiceProvider')
-        // );
-
-        const allKeysToPreserve = [...keysToPreserve];
-
-        Object.keys(localStorage).forEach((key) => {
-          if (!allKeysToPreserve.some((preserveKey) => key.includes(preserveKey))) {
-            localStorage.removeItem(key);
-          }
-        });
-
-        Object.keys(sessionStorage).forEach((key) => {
-          if (!allKeysToPreserve.some((preserveKey) => key.includes(preserveKey))) {
-            sessionStorage.removeItem(key);
-          }
-        });
-
-        console.log('Storage cleared selectively on page load');
+        console.log('Storage cleared without redirect');
       } catch (error) {
         console.error('Error clearing storage selectively:', error);
       }
