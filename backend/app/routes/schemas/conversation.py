@@ -196,7 +196,8 @@ class ChatInput(BaseSchema):
     bot_id: str | None = Field(None)
     continue_generate: bool = Field(False)
     enable_reasoning: bool = Field(False)
-
+    user_id: str | None = None
+    keycloak_attributes: dict | None = None
 
 class ChatOutput(BaseSchema):
     conversation_id: str
