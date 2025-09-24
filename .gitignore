@@ -8,3 +8,10 @@ __pycache__/
 AmazonQ.md
 memory-bank
 .clinerules
+
+
+.vscode/launch.json
+.vscode/settings.json
+.vscode/*
+
+.github

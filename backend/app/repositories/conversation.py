@@ -53,6 +53,12 @@ def store_conversation(
         "LastMessageId": conversation.last_message_id,
         "ShouldContinue": conversation.should_continue,
     }
+    #Inlcuir frontend_session_id si existe
+    if conversation.userId:
+        item_params["UserId"] = conversation.userId
+    
+    if conversation.attributes:
+        item_params["Attributes"] = json.dumps(conversation.attributes)
 
     if conversation.bot_id:
         item_params["BotId"] = conversation.bot_id

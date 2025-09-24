@@ -60,6 +60,8 @@ def post_message(request: Request, message_input: ChatInputWithoutBotId):
         bot_id=bot_id,
         continue_generate=message_input.continue_generate,
         enable_reasoning=message_input.enable_reasoning,
+        userId = message_input.userId,
+        attributes=message_input.attributes
     )
 
     try:

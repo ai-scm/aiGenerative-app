@@ -701,7 +701,8 @@ class ConversationModel(BaseModel):
     last_message_id: str
     bot_id: str | None
     should_continue: bool
-
+    userId: str | None = None
+    attributes: dict | None = None
 
 class ConversationMeta(BaseModel):
     id: str
