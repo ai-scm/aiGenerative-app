@@ -152,8 +152,8 @@ def prepare_conversation(
             last_message_id="",
             bot_id=chat_input.bot_id,
             should_continue=False,
-            user_id=chat_input.user_id,
-            keycloak_attributes=chat_input.keycloak_attributes,
+            userId=chat_input.userId,
+            attributes=chat_input.attributes,
         )
 
     # Append user chat input to the conversation

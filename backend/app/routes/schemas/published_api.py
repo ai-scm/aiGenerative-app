@@ -2,11 +2,6 @@ from app.routes.schemas.base import BaseSchema
 from app.routes.schemas.conversation import Content, MessageOutput, ToolResult, type_model_name
 from pydantic import Field
 
-#nuevo esquema para atributos
-class UserAttributes(BaseSchema):
-    sigla: str | None = None
-    dependencia: str | None = None
-    unidad: str | None = None
 class MessageInputWithoutMessageId(BaseSchema):
     content: list[Content]
     model: type_model_name
@@ -21,8 +16,8 @@ class ChatInputWithoutBotId(BaseSchema):
     message: MessageInputWithoutMessageId
     continue_generate: bool = Field(False)
     enable_reasoning: bool = Field(False)
-    user_id: str | None = None
-    attributes: UserAttributes | None = None
+    userId: str | None = None
+    attributes: dict | None = None
 
 
 class ChatOutputWithoutBotId(BaseSchema):
@@ -34,7 +29,6 @@ class ChatOutputWithoutBotId(BaseSchema):
 class MessageRequestedResponse(BaseSchema):
     conversation_id: str
     message_id: str
-    secret: str = "secret"
 
 class RelatedDocument(BaseSchema):
     content: ToolResult

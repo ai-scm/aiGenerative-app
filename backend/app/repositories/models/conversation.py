@@ -701,8 +701,8 @@ class ConversationModel(BaseModel):
     last_message_id: str
     bot_id: str | None
     should_continue: bool
-    user_id: str | None = None
-    keycloak_attributes: dict | None = None
+    userId: str | None = None
+    attributes: dict | None = None
 
 class ConversationMeta(BaseModel):
     id: str

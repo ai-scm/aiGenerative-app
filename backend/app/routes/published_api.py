@@ -60,10 +60,9 @@ def post_message(request: Request, message_input: ChatInputWithoutBotId):
         bot_id=bot_id,
         continue_generate=message_input.continue_generate,
         enable_reasoning=message_input.enable_reasoning,
-        user_id = message_input.user_id,
+        userId = message_input.userId,
+        attributes=message_input.attributes
     )
-    if message_input.attributes: 
-        chat_input.keycloak_attributes = message_input.attributes.model_dump()
 
     try:
         _ = sqs_client.send_message(

@@ -54,11 +54,11 @@ def store_conversation(
         "ShouldContinue": conversation.should_continue,
     }
     #Inlcuir frontend_session_id si existe
-    if conversation.user_id:
-        item_params["UserId"] = conversation.user_id
+    if conversation.userId:
+        item_params["UserId"] = conversation.userId
     
-    if conversation.keycloak_attributes:
-        item_params["KeycloakAttributes"] = conversation.keycloak_attributes
+    if conversation.attributes:
+        item_params["Attributes"] = json.dumps(conversation.attributes)
 
     if conversation.bot_id:
         item_params["BotId"] = conversation.bot_id
