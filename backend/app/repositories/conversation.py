@@ -58,7 +58,7 @@ def store_conversation(
         item_params["UserId"] = conversation.userId
     
     if conversation.attributes:
-        item_params["Attributes"] = json.dumps(conversation.attributes)
+        item_params["Attributes"] = conversation.attributes
 
     if conversation.bot_id:
         item_params["BotId"] = conversation.bot_id
