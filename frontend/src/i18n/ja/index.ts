@@ -35,6 +35,11 @@ const translation: typeof en = {
         description:
           '効率性とスケールを最適化したバランスの取れたハイブリッド推論モデル（200Kトークンコンテキストウィンドウ）',
       },
+      'claude-v4.5-sonnet': {
+        label: 'Claude 4.5 (Sonnet)',
+        description:
+          'Claude 4の最新版。推論能力とパフォーマンスがさらに向上',
+      },
       'claude-v3-haiku': {
         label: 'Claude 3 (Haiku)',
         description:
