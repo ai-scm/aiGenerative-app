@@ -28,7 +28,7 @@ const translation: typeof en = {
       'claude-v4.1-opus': {
         label: 'Claude 4.1 (Opus)',
         description:
-          '最も強力なClaudeモデルの最新版。推論能力が向上',
+          '最も強力なOpusの最新版。推論能力が向上',
       },
       'claude-v4-sonnet': {
         label: 'Claude 4 (Sonnet)',
@@ -38,7 +38,7 @@ const translation: typeof en = {
       'claude-v4.5-sonnet': {
         label: 'Claude 4.5 (Sonnet)',
         description:
-          'Claude 4の最新版。推論能力とパフォーマンスがさらに向上',
+          'Sonnetの最新版。Claudeモデル最高レベルのコーディング性能と長時間タスク処理が可能',
       },
       'claude-v3-haiku': {
         label: 'Claude 3 (Haiku)',
