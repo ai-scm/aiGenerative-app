@@ -87,29 +87,29 @@ GLOBAL_INFERENCE_PROFILES = {
         "supported_regions": [
             "us-west-2",
             "us-west-1",
-            "us-east-2",	
+            "us-east-2",
             "us-east-1",
             "sa-east-1",
             "eu-west-3",
             "eu-west-2",
             "eu-west-1",
-            "eu-south-2", 	
+            "eu-south-2",
             "eu-south-1",
-            "eu-north-1",	
-            "eu-central-2", 	
+            "eu-north-1",
+            "eu-central-2",
             "eu-central-1",
-            "ca-central-1",	
-            "ap-southeast-4", 	
-            "ap-southeast-3",	
-            "ap-southeast-2",	
-            "ap-southeast-1",	
+            "ca-central-1",
+            "ap-southeast-4",
+            "ap-southeast-3",
+            "ap-southeast-2",
+            "ap-southeast-1",
             "ap-south-2",
-            "ap-south-1",	
-            "ap-northeast-3", 	
-            "ap-northeast-2",	
+            "ap-south-1",
+            "ap-northeast-3",
+            "ap-northeast-2",
             "ap-northeast-1",
         ]
-    }
+    },
 }
 
 # Regional inference profiles
@@ -139,10 +139,12 @@ REGIONAL_INFERENCE_PROFILES = {
         "supported_regions": {
             "us-east-1": "us",
             "us-east-2": "us",
+            "us-west-1": "us",
             "us-west-2": "us",
             "eu-central-1": "eu",
             "eu-north-1": "eu",
             "eu-west-1": "eu",
+            "eu-west-2": "eu",
             "eu-west-3": "eu",
             "eu-south-1": "eu",
             "eu-south-2": "eu",
@@ -331,10 +333,10 @@ def is_tooluse_supported(model: type_model_name) -> bool:
     ]
 
 
-def is_simultaneous_param_supported(model: type_model_name) -> bool:
-    if model == "claude-v4.5-sonnet":
-        return False
-    return True
+def is_specify_both_temperature_and_top_p_supported(model: type_model_name) -> bool:
+    return model not in [
+        "claude-v4.5-sonnet",
+    ]
 
 
 def is_prompt_caching_supported(
@@ -795,12 +797,18 @@ def compose_args_for_converse_api(
                 ),
             }
 
-        # "claude-v4.5-sonnet" cannot specify temperature and top_p together due to specifications
-        if not is_simultaneous_param_supported(model):
-            if generation_params is not None and generation_params.temperature != DEFAULT_GENERATION_CONFIG["temperature"]:
-                del inference_config["topP"]
-            else:
+        # "claude-v4.5-sonnet" cannot specify temperature and top_p together due to specifications.
+        # https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-anthropic-claude-messages-request-response.html
+        if not is_specify_both_temperature_and_top_p_supported(model):
+            if (
+                inference_config["temperature"]
+                == DEFAULT_GENERATION_CONFIG["temperature"]
+                and inference_config["topP"] != DEFAULT_GENERATION_CONFIG["top_p"]
+            ):
                 del inference_config["temperature"]
+
+            else:
+                del inference_config["topP"]
 
         system_prompts = [
             {
