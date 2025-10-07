@@ -32,6 +32,7 @@ const BaseParametersSchema = z.object({
 
   // Bedrock configuration
   bedrockRegion: z.string().default("us-east-1"),
+  enableBedrockGlobalInference: z.boolean().default(true),
   enableBedrockCrossRegionInference: z.boolean().default(true),
 });
 
@@ -232,6 +233,9 @@ export function resolveBedrockChatParameters(
       "publishedApiAllowedIpV6AddressRanges"
     ),
     enableRagReplicas: app.node.tryGetContext("enableRagReplicas"),
+    enableBedrockGlobalInference: app.node.tryGetContext(
+      "enableBedrockGlobalInference"
+    ),
     enableBedrockCrossRegionInference: app.node.tryGetContext(
       "enableBedrockCrossRegionInference"
     ),
@@ -303,6 +307,9 @@ export function resolveApiPublishParameters(): ApiPublishParameters {
     envName: getEnvVar("ENV_NAME"),
     envPrefix: getEnvVar("ENV_PREFIX"),
     bedrockRegion: getEnvVar("BEDROCK_REGION"),
+    enableBedrockGlobalInference: getEnvVar(
+      "ENABLE_BEDROCK_GLOBAL_INFERENCE"
+    ),
     enableBedrockCrossRegionInference: getEnvVar(
       "ENABLE_BEDROCK_CROSS_REGION_INFERENCE"
     ),
