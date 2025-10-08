@@ -175,7 +175,8 @@ export const streamingStateMachine = setup({
           actions: 'reset',
         },
         goodbye: {
-          actions: 'reset',
+          // Don't reset on goodbye - we want to preserve the final content!
+          // The subscription will keep the last text state before unsubscribing.
           target: 'leaving',
         },
       },
