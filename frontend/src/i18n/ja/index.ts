@@ -11,6 +11,9 @@ const translation: typeof en = {
     app: {
       name: 'Bedrock Chat',
       inputMessage: 'お手伝いできることはありますか？',
+      myBots: 'マイボット',
+      discoverBots: 'ボットを探す',
+      pinnedBots: 'ピン留めボット',
       starredBots: 'スター付きのボット',
       recentlyUsedBots: '最近使用したボット',
       conversationHistory: '最近のチャット',
@@ -661,6 +664,7 @@ const translation: typeof en = {
     drawerOptionsDialog: {
       title: 'サイドメニューオプション',
       label: {
+        visibility: '表示設定',
         displayCount: '表示数',
       },
     },
