@@ -45,6 +45,7 @@ export interface BedrockChatStackProps extends StackProps {
   readonly enableIpV6: boolean;
   readonly documentBucket: Bucket;
   readonly enableRagReplicas: boolean;
+  readonly enableBedrockGlobalInference: boolean;
   readonly enableBedrockCrossRegionInference: boolean;
   readonly enableLambdaSnapStart: boolean;
   readonly enableBotStore: boolean;
@@ -220,6 +221,8 @@ export class BedrockChatStack extends cdk.Stack {
       bedrockCustomBotProject: bedrockCustomBotCodebuild.project,
       usageAnalysis,
       largeMessageBucket,
+      enableBedrockGlobalInference:
+        props.enableBedrockGlobalInference,
       enableBedrockCrossRegionInference:
         props.enableBedrockCrossRegionInference,
       enableLambdaSnapStart: props.enableLambdaSnapStart,
@@ -271,6 +274,8 @@ export class BedrockChatStack extends cdk.Stack {
       bedrockRegion: props.bedrockRegion,
       largeMessageBucket,
       documentBucket: props.documentBucket,
+      enableBedrockGlobalInference:
+        props.enableBedrockGlobalInference,
       enableBedrockCrossRegionInference:
         props.enableBedrockCrossRegionInference,
       enableLambdaSnapStart: props.enableLambdaSnapStart,

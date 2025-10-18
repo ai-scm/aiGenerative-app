@@ -570,12 +570,22 @@ The bot store feature allows users to share and discover custom bots. You can co
 - **enableBotStoreReplicas**: Controls whether standby replicas are enabled for the OpenSearch Serverless collection used by bot store (default: `false`). Setting it to `true` improves availability but increases costs, while `false` reduces costs but may affect availability.
   > **Important**: You can't update this property after the collection is already created. If you attempt to modify this property, the collection continues to use the original value.
 
-### Cross-region inference
+### Cross-region and Global inference
 
-[Cross-region inference](https://docs.aws.amazon.com/bedrock/latest/userguide/inference-profiles-support.html) allows Amazon Bedrock to dynamically route model inference requests across multiple AWS regions, enhancing throughput and resilience during peak demand periods. To configure, edit `cdk.json`.
+[Cross-region and Global inference](https://docs.aws.amazon.com/bedrock/latest/userguide/inference-profiles-support.html)
+allows Amazon Bedrock to dynamically route model inference requests across
+multiple AWS regions, enhancing throughput and resilience during peak demand
+periods. Global inference routes the requests to the optimal region based on
+latency and availability anywhere in the world, while cross-region inference
+routes requests within the same AWS region, for example, within the US. Some
+SCPs may restrict on or the other or both and therefore you can configure them
+independently. By default both are enabled.
+
+To configure change the following settings in `cdk.json` or `parameters.ts`:
 
 ```json
-"enableBedrockCrossRegionInference": true
+"enableBedrockGlobalInference": false,
+"enableBedrockCrossRegionInference": false,
 ```
 
 ### Lambda SnapStart

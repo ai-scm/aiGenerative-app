@@ -48,6 +48,9 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 BEDROCK_REGION = os.environ.get("BEDROCK_REGION", "us-east-1")
+ENABLE_BEDROCK_GLOBAL_INFERENCE = (
+    os.environ.get("ENABLE_BEDROCK_GLOBAL_INFERENCE", "false") == "true"
+)
 ENABLE_BEDROCK_CROSS_REGION_INFERENCE = (
     os.environ.get("ENABLE_BEDROCK_CROSS_REGION_INFERENCE", "false") == "true"
 )
@@ -1125,6 +1128,7 @@ def get_regional_inference_profile_id(
 
 def get_model_id(
     model: type_model_name,
+    enable_global: bool = ENABLE_BEDROCK_GLOBAL_INFERENCE,
     enable_cross_region: bool = ENABLE_BEDROCK_CROSS_REGION_INFERENCE,
     bedrock_region: str = BEDROCK_REGION,
 ) -> str:
@@ -1132,8 +1136,8 @@ def get_model_id(
     if not base_model_id:
         raise ValueError(f"Unsupported model: {model}")
 
-    if enable_cross_region:
-        # 1. First, try to use global inference profile if available
+    # 1. First, try to use global inference profile if enabled and available
+    if enable_global:
         global_profile_id = get_global_inference_profile_id(model, bedrock_region)
         if global_profile_id:
             logger.info(
@@ -1141,7 +1145,8 @@ def get_model_id(
             )
             return global_profile_id
 
-        # 2. Fallback to regional cross-region inference profile if available
+    # 2. Fallback to regional cross-region inference profile if enabled and available
+    if enable_cross_region:
         regional_profile_id = get_regional_inference_profile_id(model, bedrock_region)
         if regional_profile_id:
             logger.info(
@@ -1153,6 +1158,6 @@ def get_model_id(
                 f"Region '{bedrock_region}' does not support cross-region inference for model '{model}'."
             )
 
-    # 3. No cross-region inference
+    # 3. Use standalone model (no global or cross-region inference)
     logger.info(f"Using local model ID: {base_model_id} for model '{model}'")
     return base_model_id
