@@ -946,16 +946,19 @@ How would you categorize this email?`,
         },
       },
       advancedConfigration: {
-        existKnowledgeBaseId: {
+        existingKnowledgeBaseId: {
           label: 'ID for the Amazon Bedrock Knowledge Base',
           description:
             'Please specify ID that your existing Amazon Bedrock knowledge base.',
-          createNewKb: {
-            label: 'Create New Knowledge Base',
-          },
-          existing: {
-            label: 'Use your existing knowledge base',
-          },
+        },
+        createDedicatedKnowledgeBase: {
+          label: 'Create a dedicated Knowledge Base',
+        },
+        createTenantInSharedKnowledgeBase: {
+          label: 'Create a tenant in a shared Knowledge Base',
+        },
+        useExistingKnowledgeBase: {
+          label: 'Use your existing Knowledge Base',
         },
       },
     },

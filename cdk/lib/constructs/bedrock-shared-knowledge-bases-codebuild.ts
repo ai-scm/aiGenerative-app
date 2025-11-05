@@ -1,28 +1,23 @@
 import { Construct } from "constructs";
-import { RemovalPolicy } from "aws-cdk-lib";
 import * as codebuild from "aws-cdk-lib/aws-codebuild";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as iam from "aws-cdk-lib/aws-iam";
-import * as logs from "aws-cdk-lib/aws-logs";
 import { NagSuppressions } from "cdk-nag";
 
-export interface ApiPublishCodebuildProps {
+export interface BedrockSharedKnowledgeBasesCodebuildProps {
   readonly envName: string;
   readonly envPrefix: string;
   readonly bedrockRegion: string;
   readonly sourceBucket: s3.Bucket;
 }
 
-export class ApiPublishCodebuild extends Construct {
+export class BedrockSharedKnowledgeBasesCodebuild extends Construct {
   public readonly project: codebuild.Project;
-  constructor(scope: Construct, id: string, props: ApiPublishCodebuildProps) {
-    super(scope, id);
-    const sourceBucket = props.sourceBucket;
 
-    const logGroup = new logs.LogGroup(this, "LogGroup", {
-      retention: logs.RetentionDays.THREE_MONTHS,
-      removalPolicy: RemovalPolicy.DESTROY,
-    });
+  constructor(scope: Construct, id: string, props: BedrockSharedKnowledgeBasesCodebuildProps) {
+    super(scope, id);
+
+    const sourceBucket = props.sourceBucket;
     const project = new codebuild.Project(this, "Project", {
       source: codebuild.Source.s3({
         bucket: sourceBucket,
@@ -51,18 +46,12 @@ export class ApiPublishCodebuild extends Construct {
               "cd cdk",
               "npm ci",
               // Replace cdk's entrypoint. This is a workaround to avoid the issue that cdk synthesize all stacks.
-              "sed -i 's|bin/bedrock-chat.ts|bin/api-publish.ts|' cdk.json",
-              "npx cdk deploy --require-approval never ApiPublishmentStack$PUBLISHED_API_ID",
+              "sed -i 's|bin/bedrock-chat.ts|bin/bedrock-shared-knowledge-bases.ts|' cdk.json",
+              "npx cdk deploy --require-approval never BrChatSharedKbStack",
             ],
           },
         },
       }),
-      logging: {
-        cloudWatch: {
-          enabled: true,
-          logGroup,
-        },
-      },
     });
     sourceBucket.grantRead(project.role!);
 
@@ -82,7 +71,7 @@ export class ApiPublishCodebuild extends Construct {
       },
       {
         id: "AwsPrototyping-CodeBuildProjectPrivilegedModeDisabled",
-        reason: "for runnning on the docker daemon on the docker container",
+        reason: "for running on the docker daemon on the docker container",
       },
     ]);
 

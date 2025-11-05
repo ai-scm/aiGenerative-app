@@ -20,7 +20,6 @@ export interface WebSocketProps {
   readonly auth: Auth;
   readonly bedrockRegion: string;
   readonly documentBucket: s3.IBucket;
-  readonly websocketSessionTable: ITable;
   readonly largeMessageBucket: s3.IBucket;
   readonly accessLogBucket?: s3.Bucket;
   readonly enableBedrockGlobalInference: boolean;
@@ -101,7 +100,7 @@ export class WebSocket extends Construct {
     );
 
     largePayloadSupportBucket.grantRead(handlerRole);
-    props.websocketSessionTable.grantReadWriteData(handlerRole);
+    database.websocketSessionTable.grantReadWriteData(handlerRole);
     props.largeMessageBucket.grantReadWrite(handlerRole);
     props.documentBucket.grantRead(handlerRole);
 
@@ -126,7 +125,7 @@ export class WebSocket extends Construct {
         TABLE_ACCESS_ROLE_ARN: tableAccessRole.roleArn,
         LARGE_MESSAGE_BUCKET: props.largeMessageBucket.bucketName,
         LARGE_PAYLOAD_SUPPORT_BUCKET: largePayloadSupportBucket.bucketName,
-        WEBSOCKET_SESSION_TABLE_NAME: props.websocketSessionTable.tableName,
+        WEBSOCKET_SESSION_TABLE_NAME: database.websocketSessionTable.tableName,
         ENABLE_BEDROCK_GLOBAL_INFERENCE:
           props.enableBedrockGlobalInference.toString(),
         ENABLE_BEDROCK_CROSS_REGION_INFERENCE:
