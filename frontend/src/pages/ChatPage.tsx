@@ -33,10 +33,8 @@ import StatusSyncBot from '../components/StatusSyncBot';
 import Alert from '../components/Alert';
 import useBotSummary from '../hooks/useBotSummary';
 import useModel from '../hooks/useModel';
-import {
-  AgentState,
-  AgentToolsProps,
-} from '../features/agent/xstates/agentThink';
+import { StreamingState } from '../hooks/xstates/streaming.ts';
+import { AgentToolsProps } from '../features/agent/types';
 import { getRelatedDocumentsOfToolUse } from '../features/agent/utils/AgentUtils';
 import { SyncStatus } from '../constants';
 import { BottomHelper } from '../features/helper/components/BottomHelper';
@@ -71,8 +69,7 @@ const ChatPage: React.FC = () => {
   const { pinBot, unpinBot } = useBotPinning();
 
   const {
-    agentThinking,
-    reasoningThinking,
+    streamingState,
     conversationError,
     postingMessage,
     newChat,
@@ -159,6 +156,15 @@ const ChatPage: React.FC = () => {
       return bot.description;
     }
   }, [bot]);
+
+  const isLastAssistantMessageEmpty = useMemo(() => {
+    if (messages.length === 0) {
+      return false;
+    }
+
+    const lastMessage = messages[messages.length - 1];
+    return lastMessage.role === 'assistant' && lastMessage.content.length === 0;
+  }, [messages]);
 
   const disabledInput = useMemo(() => {
     return botId !== null && !isAvailabilityBot && !isLoadingBot;
@@ -342,26 +348,24 @@ const ChatPage: React.FC = () => {
   }> = React.memo((props) => {
     const { chatContent: message } = props;
 
-    const isReasoningActive = reasoningThinking.matches('active');
+    const isReasoningActive = streamingState.matches('streaming');
     const reasoning = useMemo(
-      () => ({
-        content: isReasoningActive ? reasoningThinking.context.content : '',
-      }),
+      () => isReasoningActive ? streamingState.context.reasoning : '',
       [isReasoningActive]
     );
 
     const isAgentThinking = useMemo(
       () =>
-        [AgentState.THINKING, AgentState.LEAVING].some(
-          (v) => v === agentThinking.value
+        [StreamingState.STREAMING, StreamingState.LEAVING].some(
+          (v) => v === streamingState.value
         ),
       []
     );
 
     const tools: AgentToolsProps[] | undefined = useMemo(() => {
       if (isAgentThinking) {
-        if (agentThinking.context.tools.length > 0) {
-          return agentThinking.context.tools;
+        if (streamingState.context.tools.length > 0) {
+          return streamingState.context.tools;
         }
 
         if (bot?.hasAgent) {
@@ -416,7 +420,7 @@ const ChatPage: React.FC = () => {
     const relatedDocumentsForCitation = useMemo(
       () =>
         isAgentThinking
-          ? agentThinking.context.relatedDocuments
+          ? streamingState.context.relatedDocuments
           : relatedDocuments,
       [isAgentThinking]
     );
@@ -570,13 +574,13 @@ const ChatPage: React.FC = () => {
                       botId={botId}
                     />
                   )}
-                  <div className="px-20">
-                    <div className="px-10 text-lg font-bold">
+                  <div className="px-20 text-center">
+                    <div className="text-lg font-bold">
                       {isLoadingBot && botId && (
                         <Skeleton className="h-5 w-32" />
                       )}
                       {!isLoadingBot && bot && (
-                        <div className="flex items-baseline">
+                        <div className="flex items-baseline justify-center">
                           <IconPinnedBot
                             botSharedStatus={bot?.sharedStatus}
                             className="mr-1 shrink-0 text-aws-aqua"
@@ -681,7 +685,7 @@ const ChatPage: React.FC = () => {
         <InputChatContent
           className="mb-7 w-11/12 md:w-10/12 lg:w-4/6 xl:w-3/6"
           dndMode={dndMode}
-          disabledSend={postingMessage || hasError}
+          disabledSend={postingMessage || hasError || isLastAssistantMessageEmpty}
           disabledRegenerate={postingMessage || hasError}
           disabledContinue={postingMessage || hasError}
           disabled={disabledInput}

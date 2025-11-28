@@ -1,7 +1,8 @@
 import logging
-from typing import TypedDict, Any
+from typing import Any, TypedDict
 from urllib.parse import urlparse
 
+from app.repositories.knowledge_base import get_knowledge_base_info
 from app.repositories.models.conversation import (
     RelatedDocumentModel,
     TextToolResultModel,
@@ -9,10 +10,12 @@ from app.repositories.models.conversation import (
 from app.repositories.models.custom_bot import BotModel
 from app.utils import get_bedrock_agent_runtime_client
 from botocore.exceptions import ClientError
+from mypy_boto3_bedrock_agent_runtime.literals import SearchTypeType
 from mypy_boto3_bedrock_agent_runtime.type_defs import (
     KnowledgeBaseRetrievalResultTypeDef,
+    KnowledgeBaseVectorSearchConfigurationTypeDef,
+    RetrieveRequestTypeDef,
 )
-from mypy_boto3_bedrock_runtime.type_defs import GuardrailConverseContentBlockTypeDef
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -44,22 +47,6 @@ def search_result_to_related_document(
     )
 
 
-def to_guardrails_grounding_source(
-    search_results: list[SearchResult],
-) -> GuardrailConverseContentBlockTypeDef | None:
-    """Convert search results to Guardrails Grounding source format."""
-    return (
-        {
-            "text": {
-                "text": "\n\n".join(x["content"] for x in search_results),
-                "qualifiers": ["grounding_source"],
-            }
-        }
-        if len(search_results) > 0
-        else None
-    )
-
-
 def _bedrock_knowledge_base_search(bot: BotModel, query: str) -> list[SearchResult]:
     assert bot.bedrock_knowledge_base is not None
     assert (
@@ -67,6 +54,7 @@ def _bedrock_knowledge_base_search(bot: BotModel, query: str) -> list[SearchResu
         or bot.bedrock_knowledge_base.exist_knowledge_base_id is not None
     ), "Either knowledge_base_id or exist_knowledge_base_id must be set"
 
+    search_type: SearchTypeType
     if bot.bedrock_knowledge_base.search_params.search_type == "semantic":
         search_type = "SEMANTIC"
     elif bot.bedrock_knowledge_base.search_params.search_type == "hybrid":
@@ -81,18 +69,57 @@ def _bedrock_knowledge_base_search(bot: BotModel, query: str) -> list[SearchResu
         if bot.bedrock_knowledge_base.exist_knowledge_base_id is not None
         else bot.bedrock_knowledge_base.knowledge_base_id
     )
+    assert knowledge_base_id is not None, "knowledge_base_id must be set"
 
     try:
-        response = agent_client.retrieve(
-            knowledgeBaseId=knowledge_base_id,
-            retrievalQuery={"text": query},
-            retrievalConfiguration={
+        # Init retrieve parameter
+        retrieve_parameter: RetrieveRequestTypeDef = {
+            "knowledgeBaseId": knowledge_base_id,
+            "retrievalQuery": {"text": query},
+            "retrievalConfiguration": {
                 "vectorSearchConfiguration": {
                     "numberOfResults": limit,
                     "overrideSearchType": search_type,
                 }
             },
+        }
+        if bot.bedrock_knowledge_base.type == "shared":
+            # Specify the Bot ID as a filter condition for the shared Knowledge Base.
+            retrieve_parameter["retrievalConfiguration"]["vectorSearchConfiguration"]["filter"] = {  # type: ignore
+                "listContains": {
+                    "key": "tenants",
+                    # Note: metadata is attached on cdk/lambda/knowledge-base-custom-transformation/index.ts
+                    "value": f"BOT#{bot.id}",  # type: ignore
+                },
+            }
+
+        # Omit overrideSearchType parameter if needed
+        def omit_override_search_type_parameter(
+            retrieve_parameter: RetrieveRequestTypeDef,
+        ):
+            target_parameter: KnowledgeBaseVectorSearchConfigurationTypeDef = (
+                retrieve_parameter.get("retrievalConfiguration", {}).get(
+                    "vectorSearchConfiguration", {}
+                )
+            )
+            # If overrideSearchType exists, remove it
+            if "overrideSearchType" in target_parameter:
+                del target_parameter["overrideSearchType"]
+
+        # Get Knowledge Base from Bedrock Agent API :: get_knowledge_base
+        knowledge_base_info = get_knowledge_base_info(
+            knowledge_base_id=knowledge_base_id
         )
+        # Check the knowledge base resource type
+        if (
+            knowledge_base_info.knowledge_base.knowledge_base_configuration.type
+            == "KENDRA"
+        ):
+            # Omit overrideSearchType option when the type is "KENDRA"
+            omit_override_search_type_parameter(retrieve_parameter)
+
+        # Send retrieve request
+        response = agent_client.retrieve(**retrieve_parameter)
 
         def extract_source_from_retrieval_result(
             retrieval_result: KnowledgeBaseRetrievalResultTypeDef,

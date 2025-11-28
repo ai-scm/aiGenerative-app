@@ -5,9 +5,8 @@ import logging
 import re
 from pathlib import Path
 from typing import TYPE_CHECKING, Annotated, Any, Literal, Self, TypeGuard
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 
-from app.repositories.common import decompose_conv_id
 from app.repositories.models.common import Base64EncodedBytes
 from app.routes.schemas.conversation import (
     AttachmentContent,
@@ -38,7 +37,14 @@ from mypy_boto3_bedrock_runtime.type_defs import (
     ToolUseBlockOutputTypeDef,
     ToolUseBlockTypeDef,
 )
-from pydantic import BaseModel, Discriminator, Field, JsonValue, field_validator
+from pydantic import (
+    BaseModel,
+    Discriminator,
+    Field,
+    JsonValue,
+    field_validator,
+    model_validator,
+)
 
 if TYPE_CHECKING:
     from app.agents.tools.agent_tool import ToolRunResult
@@ -102,9 +108,15 @@ class ImageContentModel(BaseModel):
             body=self.body,
         )
 
-    def to_contents_for_converse(self) -> list[ContentBlockTypeDef]:
+    @property
+    def format(self) -> ImageFormatType | None:
         # e.g. "image/png" -> "png"
         format = self.media_type.split("/")[1] if self.media_type else "unknown"
+        return format if _is_converse_supported_image_format(format) else None
+
+    def to_contents_for_converse(self) -> list[ContentBlockTypeDef]:
+        # e.g. "image/png" -> "png"
+        format = self.format
 
         return (
             [
@@ -115,7 +127,7 @@ class ImageContentModel(BaseModel):
                     },
                 },
             ]
-            if _is_converse_supported_image_format(format)
+            if format is not None
             else []
         )
 
@@ -169,26 +181,45 @@ class AttachmentContentModel(BaseModel):
             file_name=self.file_name,
         )
 
-    def to_contents_for_converse(self) -> list[ContentBlockTypeDef]:
+    @property
+    def format_and_name(self) -> tuple[DocumentFormatType | None, str]:
+        # Use decoded filename for format detection
+        try:
+            path = Path(unquote(self.file_name))
+
+        except:
+            path = Path(self.file_name)
+
         # e.g. "document.txt" -> "txt"
-        format = Path(self.file_name).suffix[1:]
+        format = path.suffix[1:]
 
         # e.g. "document.txt" -> "document"
-        name = Path(self.file_name).stem
+        name = _convert_to_valid_file_name(path.stem)
 
         return (
-            [
-                {
-                    "document": {
-                        "format": format,
-                        "name": _convert_to_valid_file_name(name),
-                        "source": {"bytes": self.body},
-                    },
-                },
-            ]
-            if _is_converse_supported_document_format(format)
-            else []
+            format if _is_converse_supported_document_format(format) else None,
+            name,
         )
+
+    def to_contents_for_converse(self) -> list[ContentBlockTypeDef]:
+        format, name = self.format_and_name
+
+        return [
+            {
+                "document": (
+                    {
+                        "format": format,
+                        "name": name,
+                        "source": {"bytes": self.body},
+                    }
+                    if format is not None
+                    else {
+                        "name": name,
+                        "source": {"bytes": self.body},
+                    }
+                ),
+            }
+        ]
 
 
 class FeedbackModel(BaseModel):
@@ -359,13 +390,22 @@ class DocumentToolResultModel(BaseModel):
 
     def to_content_for_converse(self) -> ToolResultContentBlockOutputTypeDef:
         return {
-            "document": {
-                "format": self.format,
-                "name": self.name,
-                "source": {
-                    "bytes": self.document,
-                },
-            },
+            "document": (
+                {
+                    "format": self.format,
+                    "name": self.name,
+                    "source": {
+                        "bytes": self.document,
+                    },
+                }
+                if self.format
+                else {
+                    "name": self.name,
+                    "source": {
+                        "bytes": self.document,
+                    },
+                }
+            ),
         }
 
 
@@ -416,18 +456,18 @@ def tool_result_model_from_tool_result_content(
         )
 
     elif "document" in content:
-        return DocumentToolResultModel(
-            format=content["document"]["format"],
-            name=content["document"]["name"],
-            document=(
-                content["document"]["source"]["bytes"]
-                if "bytes" in content["document"]["source"]
-                else b""
-            ),
-        )
+        if "format" in content["document"]:
+            return DocumentToolResultModel(
+                format=content["document"]["format"],
+                name=content["document"]["name"],
+                document=(
+                    content["document"]["source"]["bytes"]
+                    if "bytes" in content["document"]["source"]
+                    else b""
+                ),
+            )
 
-    else:
-        raise ValueError(f"Unknown tool result type")
+    raise ValueError(f"Unknown tool result type")
 
 
 class ToolResultContentModelBody(BaseModel):
@@ -571,25 +611,36 @@ class ReasoningContentModel(BaseModel):
         # Ref: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/bedrock-runtime/client/converse.html
         # Ref: https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking
 
-        if self.text:
-            return [
+        return (
+            [
                 {
-                    "reasoningContent": {  # type: ignore
-                        "reasoningText": {
-                            "text": self.text,
-                            "signature": self.signature,
-                        },
-                    }
-                }
+                    "reasoningContent": (
+                        {
+                            "reasoningText": (
+                                {
+                                    "text": self.text,
+                                    "signature": self.signature,
+                                }
+                                if self.signature
+                                else {
+                                    "text": self.text,
+                                }
+                            ),
+                        }
+                        if self.text
+                        else (
+                            {
+                                "redactedContent": self.redacted_content,
+                            }
+                            if self.redacted_content
+                            else {}
+                        )
+                    ),
+                },
             ]
-        else:
-            return [
-                {
-                    "reasoningContent": {  # type: ignore
-                        "redactedContent": {"data": self.redacted_content},
-                    }
-                }
-            ]
+            if self.text or self.redacted_content
+            else []
+        )
 
 
 ContentModel = Annotated[
@@ -639,6 +690,19 @@ class SimpleMessageModel(BaseModel):
             role=self.role,
             content=[content.to_content() for content in self.content],
         )
+
+    def continue_from(self, message: SimpleMessageModel):
+        if (
+            len(message.content) > 0
+            and isinstance(message.content[-1], TextContentModel)
+            and len(self.content) > 0
+            and isinstance(self.content[0], TextContentModel)
+        ):
+            message.content[-1].body += self.content[0].body
+            self.content = [
+                *message.content,
+                *self.content[1:],
+            ]
 
 
 class MessageModel(BaseModel):
@@ -690,6 +754,42 @@ class MessageModel(BaseModel):
             used_chunks=None,
             thinking_log=None,
         )
+
+    @model_validator(mode="after")
+    def check_duplicated_reasoning_content(self) -> Self:
+        """
+        There is a possibility that duplicate `ReasoningContentModel` is recorded in DynamoDB.
+        So delete `ReasoningContentModel`s in `content` that has the same one in `thinking_log`.
+        """
+        if self.thinking_log:
+            self.content = [
+                content
+                for content in self.content
+                if not (
+                    isinstance(content, ReasoningContentModel)
+                    and any(
+                        isinstance(log_content, ReasoningContentModel)
+                        and log_content.text == content.text
+                        for log in self.thinking_log
+                        for log_content in log.content
+                    )
+                )
+            ]
+
+        return self
+
+    def continue_from(self, message: SimpleMessageModel):
+        if (
+            len(message.content) > 0
+            and isinstance(message.content[-1], TextContentModel)
+            and len(self.content) > 0
+            and isinstance(self.content[0], TextContentModel)
+        ):
+            message.content[-1].body += self.content[0].body
+            self.content = [
+                *message.content,
+                *self.content[1:],
+            ]
 
 
 class ConversationModel(BaseModel):

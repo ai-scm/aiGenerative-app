@@ -8,6 +8,9 @@ const translation = {
     app: {
       name: 'Nadia',
       inputMessage: 'How can I Help You?',
+      myBots: 'My Bots',
+      discoverBots: 'Discover Bots',
+      pinnedBots: 'Pinned Bots',
       starredBots: 'Starred Bots',
       recentlyUsedBots: 'Recently Used Bots',
       conversationHistory: 'Recent Chats',
@@ -20,12 +23,27 @@ const translation = {
       'claude-v4-opus': {
         label: 'Claude 4 (Opus)',
         description:
-          'Most powerful hybrid reasoning model for complex tasks, coding, and AI agents with 200K token context window.',
+          'Powerful hybrid reasoning model for complex tasks, coding, and AI agents with 200K token context window.',
+      },
+      'claude-v4.1-opus': {
+        label: 'Claude 4.1 (Opus)',
+        description:
+          'Latest version of the most powerful Opus model with enhanced reasoning capabilities.',
       },
       'claude-v4-sonnet': {
         label: 'Claude 4 (Sonnet)',
         description:
           'Balanced hybrid reasoning model optimized for efficiency at scale with 200K token context window.',
+      },
+      'claude-v4.5-sonnet': {
+        label: 'Claude 4.5 (Sonnet)',
+        description:
+          'The latest version of the Sonnet model that achieves the highest level of coding performance and extended task processing',
+      },
+      'claude-v4.5-haiku': {
+        label: 'Claude 4.5 (Haiku)',
+        description:
+          'The fastest and most intelligent Haiku model with near-frontier performance and extended thinking capabilities',
       },
       'claude-v3-haiku': {
         label: 'Claude 3 (Haiku)',
@@ -121,6 +139,16 @@ const translation = {
         label: 'Meta Llama 3.2 90B Instruct',
         description:
           'Large multimodal model with advanced image understanding and visual reasoning capabilities for sophisticated visual intelligence applications.',
+      },
+      'gpt-oss-20b': {
+        label: 'GPT-OSS 20B',
+        description:
+          'Open-weight 20B parameter model with 128K context window and reasoning capabilities.',
+      },
+      'gpt-oss-120b': {
+        label: 'GPT-OSS 120B',
+        description:
+          'Open-weight 120B parameter model with 128K context window and advanced reasoning capabilities.',
       },
     },
     agent: {
@@ -425,6 +453,7 @@ How would you categorize this email?`,
         newBot: 'Create New Bot',
         create: 'Create',
         edit: 'Edit',
+        save: 'Save',
         delete: 'Delete',
         share: 'Share',
         apiSettings: 'API Publish Settings',
@@ -629,6 +658,7 @@ How would you categorize this email?`,
     drawerOptionsDialog: {
       title: 'Side Menu Options',
       label: {
+        visibility: 'Visibility',
         displayCount: 'Display Count',
       },
     },
@@ -936,16 +966,19 @@ How would you categorize this email?`,
         },
       },
       advancedConfigration: {
-        existKnowledgeBaseId: {
+        existingKnowledgeBaseId: {
           label: 'ID for the Amazon Bedrock Knowledge Base',
           description:
             'Please specify ID that your existing Amazon Bedrock knowledge base.',
-          createNewKb: {
-            label: 'Create New Knowledge Base',
-          },
-          existing: {
-            label: 'Use your existing knowledge base',
-          },
+        },
+        createDedicatedKnowledgeBase: {
+          label: 'Create a dedicated Knowledge Base',
+        },
+        createTenantInSharedKnowledgeBase: {
+          label: 'Create a tenant in a shared Knowledge Base',
+        },
+        useExistingKnowledgeBase: {
+          label: 'Use your existing Knowledge Base',
         },
       },
     },
@@ -1053,11 +1086,11 @@ How would you categorize this email?`,
         hint: 'Use this policy to validate if model responses are grounded in the reference source and relevant to user’s query to filter model hallucination.',
         groundingThreshold: {
           label: 'Grounding',
-          hint: 'Validate if the model responses are grounded and factually correct based on the information provided in the reference source, and block responses that are below the defined threshold of grounding. 0: blocks nothing, 0.99: blocks almost everything',
+          hint: 'Validate if the model responses are grounded and factually correct based on the information provided in the reference source, and block responses that are below the defined threshold of grounding. 0: blocks nothing, 1: blocks almost everything',
         },
         relevanceThreshold: {
           label: 'Relevance',
-          hint: "Validate if the model responses are relevant to the user's query and block responses that are below the defined threshold of relevance. 0: blocks nothing, 0.99: blocks almost everything",
+          hint: "Validate if the model responses are relevant to the user's query and block responses that are below the defined threshold of relevance. 0: blocks nothing, 1: blocks almost everything",
         },
       },
     },

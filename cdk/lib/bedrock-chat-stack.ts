@@ -18,12 +18,14 @@ import { Embedding } from "./constructs/embedding";
 import { UsageAnalysis } from "./constructs/usage-analysis";
 import { TIdentityProvider, identityProvider } from "./utils/identity-provider";
 import { ApiPublishCodebuild } from "./constructs/api-publish-codebuild";
+import { WebAclForCognito } from "./constructs/webacl-for-cognito";
 import { WebAclForPublishedApi } from "./constructs/webacl-for-published-api";
 import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as path from "path";
 import { BedrockCustomBotCodebuild } from "./constructs/bedrock-custom-bot-codebuild";
+import { BedrockSharedKnowledgeBasesCodebuild } from "./constructs/bedrock-shared-knowledge-bases-codebuild";
 import { BotStore, Language } from "./constructs/bot-store";
 import { Duration } from "aws-cdk-lib";
 
@@ -36,21 +38,27 @@ export interface BedrockChatStackProps extends StackProps {
   readonly userPoolDomainPrefix: string;
   readonly publishedApiAllowedIpV4AddressRanges: string[];
   readonly publishedApiAllowedIpV6AddressRanges: string[];
+  readonly allowedIpV4AddressRanges: string[];
+  readonly allowedIpV6AddressRanges: string[];
   readonly allowedSignUpEmailDomains: string[];
   readonly autoJoinUserGroups: string[];
   readonly selfSignUpEnabled: boolean;
   readonly enableIpV6: boolean;
   readonly documentBucket: Bucket;
   readonly enableRagReplicas: boolean;
+  readonly enableBedrockGlobalInference: boolean;
   readonly enableBedrockCrossRegionInference: boolean;
   readonly enableLambdaSnapStart: boolean;
   readonly enableBotStore: boolean;
   readonly enableBotStoreReplicas: boolean;
   readonly botStoreLanguage: Language;
+  readonly globalAvailableModels?: string[];
   readonly tokenValidMinutes: number;
   readonly alternateDomainName?: string;
   readonly hostedZoneId?: string;
   readonly devAccessIamRoleArn?: string;
+  readonly allowedCountries?: string[];
+  readonly logoPath?: string;
 }
 
 export class BedrockChatStack extends cdk.Stack {
@@ -138,6 +146,17 @@ export class BedrockChatStack extends cdk.Stack {
         bedrockRegion: props.bedrockRegion,
       }
     );
+    // CodeBuild used for KnowledgeBase
+    const bedrockSharedKnowledgeBasesCodebuild = new BedrockSharedKnowledgeBasesCodebuild(
+      this,
+      "BedrockSharedKnowledgeBasesCodebuild",
+      {
+        sourceBucket,
+        envName: props.envName,
+        envPrefix: props.envPrefix,
+        bedrockRegion: props.bedrockRegion,
+      }
+    );
 
     const frontend = new Frontend(this, "Frontend", {
       accessLogBucket,
@@ -145,7 +164,21 @@ export class BedrockChatStack extends cdk.Stack {
       enableIpV6: props.enableIpV6,
       alternateDomainName: props.alternateDomainName,
       hostedZoneId: props.hostedZoneId,
+      allowedCountries: props.allowedCountries,
     });
+
+    let cognitoWebAcl: WebAclForCognito | undefined;
+    if (props.allowedIpV4AddressRanges.length > 0 || props.allowedIpV6AddressRanges.length > 0) {
+      cognitoWebAcl = new WebAclForCognito(
+        this,
+        "WebAclForCognito",
+        {
+          envPrefix: props.envPrefix,
+          allowedIpV4AddressRanges: props.allowedIpV4AddressRanges,
+          allowedIpV6AddressRanges: props.allowedIpV6AddressRanges,
+        }
+      );
+    }
 
     const auth = new Auth(this, "Auth", {
       origin: frontend.getOrigin(),
@@ -155,6 +188,7 @@ export class BedrockChatStack extends cdk.Stack {
       autoJoinUserGroups: props.autoJoinUserGroups,
       selfSignUpEnabled: props.selfSignUpEnabled,
       tokenValidity: Duration.minutes(props.tokenValidMinutes),
+      webAclArn: cognitoWebAcl?.webAclArn,
     });
     const largeMessageBucket = new Bucket(this, "LargeMessageBucket", {
       encryption: BucketEncryption.S3_MANAGED,
@@ -190,6 +224,15 @@ export class BedrockChatStack extends cdk.Stack {
       sourceDatabase: database,
     });
 
+    const embedding = new Embedding(this, "Embedding", {
+      bedrockRegion: props.bedrockRegion,
+      database,
+      documentBucket: props.documentBucket,
+      bedrockCustomBotProject: bedrockCustomBotCodebuild.project,
+      bedrockSharedKnowledgeBasesProject: bedrockSharedKnowledgeBasesCodebuild.project,
+      enableRagReplicas: props.enableRagReplicas,
+    });
+
     const backendApi = new Api(this, "BackendApi", {
       envName: props.envName,
       envPrefix: props.envPrefix,
@@ -199,12 +242,18 @@ export class BedrockChatStack extends cdk.Stack {
       documentBucket: props.documentBucket,
       apiPublishProject: apiPublishCodebuild.project,
       bedrockCustomBotProject: bedrockCustomBotCodebuild.project,
+      bedrockSharedKnowledgeBasesProject: bedrockSharedKnowledgeBasesCodebuild.project,
+      embeddingStateMachine: embedding.stateMachine,
       usageAnalysis,
       largeMessageBucket,
+      enableBedrockGlobalInference:
+        props.enableBedrockGlobalInference,
       enableBedrockCrossRegionInference:
         props.enableBedrockCrossRegionInference,
       enableLambdaSnapStart: props.enableLambdaSnapStart,
       openSearchEndpoint: botStore?.openSearchEndpoint,
+      globalAvailableModels: props.globalAvailableModels,
+      logoPath: props.logoPath,
     });
     props.documentBucket.grantReadWrite(backendApi.handler);
     // Add permissions to API handler for BotStore
@@ -215,7 +264,7 @@ export class BedrockChatStack extends cdk.Stack {
       ["aoss:DescribeCollectionItems"],
       ["aoss:DescribeIndex", "aoss:ReadDocument"]
     );
-    
+
     // Add data access policy for developers
     // Get IAM user/role ARN from environment variables
     if (props.devAccessIamRoleArn) {
@@ -226,13 +275,13 @@ export class BedrockChatStack extends cdk.Stack {
         iam.Role.fromRoleArn(this, "DevAccessIamRoleArn", props.devAccessIamRoleArn),
         [
           "aoss:DescribeCollectionItems",
-          "aoss:CreateCollectionItems", 
+          "aoss:CreateCollectionItems",
           "aoss:DeleteCollectionItems",
           "aoss:UpdateCollectionItems"
         ],
         [
-          "aoss:DescribeIndex", 
-          "aoss:ReadDocument", 
+          "aoss:DescribeIndex",
+          "aoss:ReadDocument",
           "aoss:WriteDocument",
           "aoss:CreateIndex",
           "aoss:DeleteIndex",
@@ -245,11 +294,12 @@ export class BedrockChatStack extends cdk.Stack {
     const websocket = new WebSocket(this, "WebSocket", {
       accessLogBucket,
       database,
-      websocketSessionTable: database.websocketSessionTable,
       auth,
       bedrockRegion: props.bedrockRegion,
       largeMessageBucket,
       documentBucket: props.documentBucket,
+      enableBedrockGlobalInference:
+        props.enableBedrockGlobalInference,
       enableBedrockCrossRegionInference:
         props.enableBedrockCrossRegionInference,
       enableLambdaSnapStart: props.enableLambdaSnapStart,
@@ -275,14 +325,6 @@ export class BedrockChatStack extends cdk.Stack {
       maxAge: 3000,
     });
 
-    const embedding = new Embedding(this, "Embedding", {
-      bedrockRegion: props.bedrockRegion,
-      database,
-      documentBucket: props.documentBucket,
-      bedrockCustomBotProject: bedrockCustomBotCodebuild.project,
-      enableRagReplicas: props.enableRagReplicas,
-    });
-
     // WebAcl for published API
     const webAclForPublishedApi = new WebAclForPublishedApi(
       this,
@@ -299,6 +341,9 @@ export class BedrockChatStack extends cdk.Stack {
     });
     new CfnOutput(this, "FrontendURL", {
       value: frontend.getOrigin(),
+    });
+    new CfnOutput(this, "CloudFrontURL", {
+      value: `https://${frontend.cloudFrontWebDistribution.distributionDomainName}`,
     });
 
     // Outputs for API publication
@@ -321,6 +366,9 @@ export class BedrockChatStack extends cdk.Stack {
     new CfnOutput(this, "LargeMessageBucketName", {
       value: largeMessageBucket.bucketName,
       exportName: `${props.envPrefix}${sepHyphen}BedrockClaudeChatLargeMessageBucketName`,
+    });
+    new CfnOutput(this, 'EmbeddingStateMachineArn', {
+      value: embedding.stateMachine.stateMachineArn,
     });
   }
 }

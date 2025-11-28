@@ -8,6 +8,7 @@ const translation = {
     app: {
       name: 'Nadia',
       inputMessage: 'Enviar un mensaje',
+      pinnedBots: 'Bots Fijados',
       starredBots: 'Bots Favoritos',
       recentlyUsedBots: 'Bots Usados Recientemente',
       conversationHistory: 'Historial',
@@ -35,6 +36,11 @@ const translation = {
         description:
           'La última versión, con una capacidad de respuesta aún más rápida y mejor rendimiento respecto a Haiku 3.',
       },
+      'claude-v4.1-opus': {
+        label: 'Claude 4.1 (Opus)',
+        description:
+          'La versión más reciente del modelo Claude más potente con capacidades de razonamiento mejoradas.',
+      },
       'claude-v3-opus': {
         label: 'Claude 3 (Opus)',
         description: 'Modelo potente para tareas altamente complejas.',
@@ -47,6 +53,16 @@ const translation = {
       },
       'mistral-large': {
         label: 'Mistral Grande',
+      },
+      'gpt-oss-20b': {
+        label: 'GPT-OSS 20B',
+        description:
+          'Modelo de peso abierto de 20B parámetros con ventana de contexto de 128K y capacidades de razonamiento.',
+      },
+      'gpt-oss-120b': {
+        label: 'GPT-OSS 120B',
+        description:
+          'Modelo de peso abierto de 120B parámetros con ventana de contexto de 128K y capacidades avanzadas de razonamiento.',
       },
     },
     agent: {
@@ -316,6 +332,7 @@ Las categorías de clasificación son:
         newBot: 'Crear Nuevo Bot',
         create: 'Crear',
         edit: 'Editar',
+        save: 'Guardar',
         delete: 'Eliminar',
         share: 'Compartir',
         apiSettings: 'Configuración de Publicación de API',

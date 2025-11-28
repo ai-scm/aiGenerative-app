@@ -157,6 +157,7 @@ describe("resolveBedrockChatParameters", () => {
         "0.0.0.0/1",
         "128.0.0.0/1",
       ]); // default value
+      expect(result.enableFrontendIpv6).toBe(true); // default value
     });
 
     test("should correctly parse all parameters when specified", () => {
@@ -166,6 +167,7 @@ describe("resolveBedrockChatParameters", () => {
         bedrockRegion: "us-west-2",
         allowedIpV4AddressRanges: ["192.168.0.0/16"],
         allowedIpV6AddressRanges: ["2001:db8::/32"],
+        enableFrontendIpv6: false,
         identityProviders: [{ service: "google", secretName: "GoogleSecret" }],
         userPoolDomainPrefix: "my-app",
         allowedSignUpEmailDomains: ["example.com"],
@@ -188,6 +190,7 @@ describe("resolveBedrockChatParameters", () => {
       expect(result.bedrockRegion).toBe("us-west-2");
       expect(result.allowedIpV4AddressRanges).toEqual(["192.168.0.0/16"]);
       expect(result.allowedIpV6AddressRanges).toEqual(["2001:db8::/32"]);
+      expect(result.enableFrontendIpv6).toBe(false);
       expect(result.identityProviders).toEqual([
         { service: "google", secretName: "GoogleSecret" },
       ]);
@@ -295,6 +298,46 @@ describe("resolveBedrockChatParameters", () => {
       ]);
       // Note: Actual validation is performed in identityProvider function
     });
+
+    // Tests for allowedCountries parameter
+    test("should default allowedCountries to empty array", () => {
+      // Given
+      const app = createTestApp();
+
+      // When
+      const result = resolveBedrockChatParameters(app);
+
+      // Then
+      expect(result.allowedCountries).toEqual([]);
+    });
+
+    test("should parse allowedCountries from CDK context", () => {
+      // Given
+      const app = createTestApp({
+        allowedCountries: ["NZ", "AU"],
+      });
+
+      // When
+      const result = resolveBedrockChatParameters(app);
+
+      // Then
+      expect(result.allowedCountries).toEqual(["NZ", "AU"]);
+    });
+
+    test("should parse allowedCountries from parametersInput", () => {
+      // Given
+      const app = createTestApp();
+      const inputParams = {
+        bedrockRegion: "eu-west-1",
+        allowedCountries: ["US", "GB"],
+      };
+
+      // When
+      const result = resolveBedrockChatParameters(app, inputParams);
+
+      // Then
+      expect(result.allowedCountries).toEqual(["US", "GB"]);
+    });
   });
 
   test("should correctly parse parameters mimicking cdk.json context properties", () => {
@@ -306,6 +349,7 @@ describe("resolveBedrockChatParameters", () => {
         "0000:0000:0000:0000:0000:0000:0000:0000/1",
         "8000:0000:0000:0000:0000:0000:0000:0000/1",
       ],
+      enableFrontendIpv6: false,
       identityProviders: [],
       userPoolDomainPrefix: "",
       allowedSignUpEmailDomains: [],
@@ -337,6 +381,7 @@ describe("resolveBedrockChatParameters", () => {
       "0000:0000:0000:0000:0000:0000:0000:0000/1",
       "8000:0000:0000:0000:0000:0000:0000:0000/1",
     ]);
+    expect(result.enableFrontendIpv6).toBe(false);
     expect(result.identityProviders).toEqual([]);
     expect(result.userPoolDomainPrefix).toBe("");
     expect(result.allowedSignUpEmailDomains).toEqual([]);
@@ -691,12 +736,12 @@ describe("resolveBedrockCustomBotParameters", () => {
         ENV_NAME: "testEnv",
         ENV_PREFIX: "test-prefix",
         BEDROCK_REGION: "us-east-1",
-        PK: "env-pk",
-        SK: "env-sk",
+        OWNER_USER_ID: "env-pk",
+        BOT_ID: "env-sk",
         BEDROCK_CLAUDE_CHAT_DOCUMENT_BUCKET_NAME: "env-bucket",
         KNOWLEDGE: '{"env": "knowledge"}',
-        BEDROCK_KNOWLEDGE_BASE: '{"env": "kb"}',
-        BEDROCK_GUARDRAILS: '{"env": "guardrails"}',
+        KNOWLEDGE_BASE: '{"env": "kb"}',
+        GUARDRAILS: '{"env": "guardrails"}',
         ENABLE_RAG_REPLICAS: "true",
       };
 
@@ -708,8 +753,8 @@ describe("resolveBedrockCustomBotParameters", () => {
         expect(result.bedrockRegion).toBe("us-east-1");
         expect(result.envName).toBe("testEnv");
         expect(result.envPrefix).toBe("test-prefix");
-        expect(result.pk).toBe("env-pk");
-        expect(result.sk).toBe("env-sk");
+        expect(result.ownerUserId).toBe("env-pk");
+        expect(result.botId).toBe("env-sk");
         expect(result.documentBucketName).toBe("env-bucket");
         expect(result.knowledge).toBe('{"env": "knowledge"}');
         expect(result.knowledgeBase).toBe('{"env": "kb"}');

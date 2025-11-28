@@ -8,6 +8,7 @@ const translation = {
     app: {
       name: 'Bedrock Chat',
       inputMessage: 'Bisakah Saya Membantu Anda?',
+      pinnedBots: 'Bot yang Dipin',
       starredBots: 'Bot Favorit',
       recentlyUsedBots: 'Bot yang Baru Digunakan',
       conversationHistory: 'Riwayat',
@@ -34,6 +35,11 @@ const translation = {
         label: 'Claude 3.5 (Haiku)',
         description:
           'Versi terbaru, menawarkan respons yang lebih cepat dan kemampuan yang ditingkatkan dibandingkan Haiku 3.',
+      },
+      'claude-v4.1-opus': {
+        label: 'Claude 4.1 (Opus)',
+        description:
+          'Versi terbaru dari model Claude terkuat dengan kemampuan penalaran yang ditingkatkan.',
       },
       'claude-v3-opus': {
         label: 'Claude 3 (Opus)',
@@ -339,6 +345,7 @@ const translation = {
         newBot: 'Buat Bot Baru',
         create: 'Buat',
         edit: 'Ubah',
+        save: 'Simpan',
         delete: 'Hapus',
         share: 'Bagikan',
         apiSettings: 'Pengaturan Publikasi API',
@@ -719,16 +726,19 @@ const translation = {
         },
       },
       advancedConfigration: {
-        existKnowledgeBaseId: {
+        existingKnowledgeBaseId: {
           label: 'ID Amazon Bedrock Knowledge Base',
           description:
             'Masukkan ID Amazon Bedrock Knowledge Base eksisting Anda.',
-          createNewKb: {
-            label: 'Buat Knowledge Base baru',
-          },
-          existing: {
-            label: 'Gunakan Knowledge Base eksisting',
-          },
+        },
+        createDedicatedKnowledgeBase: {
+          label: 'Buat Knowledge Base berdedikasi',
+        },
+        createTenantInSharedKnowledgeBase: {
+          label: 'Buat penyewa di Knowledge Base bersama',
+        },
+        useExistingKnowledgeBase: {
+          label: 'Gunakan Knowledge Base eksisting',
         },
       },
     },
@@ -818,11 +828,11 @@ const translation = {
         hint: 'Gunakan kebijakan ini untuk memvalidasi apakah respons model didasarkan pada sumber referensi dan relevan dengan pertanyaan pengguna, sehingga dapat mengurangi kemungkinan halusinasi model.',
         groundingThreshold: {
           label: 'Grounding',
-          hint: 'Validasi apakah respons model memilik dasar dan secara faktual benar berdasarkan informasi yang diberikan dalam sumber referensi, dan blok respons yang berada di bawah ambang batas grounding yang ditentukan. 0: tidak memblokir apa pun, 0.99: memblokir hampir semuanya',
+          hint: 'Validasi apakah respons model memilik dasar dan secara faktual benar berdasarkan informasi yang diberikan dalam sumber referensi, dan blok respons yang berada di bawah ambang batas grounding yang ditentukan. 0: tidak memblokir apa pun, 1: memblokir hampir semuanya',
         },
         relevanceThreshold: {
           label: 'Relevansi',
-          hint: 'Validasi apakah respons model relevan dengan pertanyaan pengguna dan blok respons yang berada di bawah ambang batas relevansi yang ditentukan. 0: tidak memblokir apa pun, 0.99: memblokir hampir semuanya',
+          hint: 'Validasi apakah respons model relevan dengan pertanyaan pengguna dan blok respons yang berada di bawah ambang batas relevansi yang ditentukan. 0: tidak memblokir apa pun, 1: memblokir hampir semuanya',
         },
       },
     },

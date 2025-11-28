@@ -35,6 +35,10 @@ type_os_token_filter = Literal[
     "icu_folding",
 ]
 
+# Knowledge Base Type
+# Ref: https://docs.aws.amazon.com/bedrock/latest/APIReference/API_agent_KnowledgeBaseConfiguration.html#bedrock-Type-agent_KnowledgeBaseConfiguration-type
+type_kb_resource_type = Literal["VECTOR", "KENDRA", "SQL"]
+
 
 class SearchParams(BaseSchema):
     max_results: int
@@ -85,6 +89,7 @@ class WebCrawlingFilters(BaseSchema):
 
 
 class BedrockKnowledgeBaseInput(BaseSchema):
+    type: Literal["dedicated", "shared"] | None = None
     embeddings_model: type_kb_embeddings_model
     open_search: OpenSearchParams
     chunking_configuration: (
@@ -105,6 +110,7 @@ class BedrockKnowledgeBaseInput(BaseSchema):
 
 
 class BedrockKnowledgeBaseOutput(BaseSchema):
+    type: Literal["dedicated", "shared"] | None = None
     embeddings_model: type_kb_embeddings_model
     open_search: OpenSearchParams
     chunking_configuration: (

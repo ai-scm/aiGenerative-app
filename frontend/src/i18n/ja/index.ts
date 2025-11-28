@@ -11,6 +11,9 @@ const translation: typeof en = {
     app: {
       name: 'Bedrock Chat',
       inputMessage: 'お手伝いできることはありますか？',
+      myBots: 'マイボット',
+      discoverBots: 'ボットを探す',
+      pinnedBots: 'ピン留めボット',
       starredBots: 'スター付きのボット',
       recentlyUsedBots: '最近使用したボット',
       conversationHistory: '最近のチャット',
@@ -22,11 +25,27 @@ const translation: typeof en = {
     model: {
       'claude-v4-opus': {
         label: 'Claude 4 (Opus)',
-        description: '複雑なタスク、コーディング、AIエージェント向けの最も強力なハイブリッド推論モデル（200Kトークンコンテキストウィンドウ）',
+        description:
+          '複雑なタスク、コーディング、AIエージェント向けの強力なハイブリッド推論モデル（200Kトークンコンテキストウィンドウ）',
+      },
+      'claude-v4.1-opus': {
+        label: 'Claude 4.1 (Opus)',
+        description:
+          '最も強力なOpusの最新版。推論能力が向上',
       },
       'claude-v4-sonnet': {
         label: 'Claude 4 (Sonnet)',
         description: '効率性とスケールを最適化したバランスの取れたハイブリッド推論モデル（200Kトークンコンテキストウィンドウ）',
+      },
+      'claude-v4.5-sonnet': {
+        label: 'Claude 4.5 (Sonnet)',
+        description:
+          'Sonnetの最新版。Claudeモデル最高レベルのコーディング性能と長時間タスク処理が可能',
+      },
+      'claude-v4.5-haiku': {
+        label: 'Claude 4.5 (Haiku)',
+        description:
+          'Haikuシリーズ最速かつ最高性能。フロンティアレベルの性能と拡張思考機能を搭載',
       },
       'claude-v3-haiku': {
         label: 'Claude 3 (Haiku)',
@@ -104,6 +123,16 @@ const translation: typeof en = {
       'llama3-2-90b-instruct': {
         label: 'Meta Llama 3.2 90B Instruct',
         description: '高度な画像理解と視覚的推論機能を備えた大規模マルチモーダルモデル。複雑な推論と画像テキスト検索に優れた性能を発揮する',
+      },
+      'gpt-oss-20b': {
+        label: 'GPT-OSS 20B',
+        description:
+          '128Kコンテキストウィンドウと推論機能を持つオープンウェイト20Bパラメータモデル',
+      },
+      'gpt-oss-120b': {
+        label: 'GPT-OSS 120B',
+        description:
+          '128Kコンテキストウィンドウと高度な推論機能を持つオープンウェイト120Bパラメータモデル',
       },
     },
     agent: {
@@ -386,6 +415,7 @@ const translation: typeof en = {
         newBot: 'ボットを新規作成',
         create: '新規作成',
         edit: '更新',
+        save: '保存',
         delete: '削除',
         share: '共有',
         copy: 'コピー',
@@ -578,6 +608,7 @@ const translation: typeof en = {
     drawerOptionsDialog: {
       title: 'サイドメニューオプション',
       label: {
+        visibility: '表示設定',
         displayCount: '表示数',
       },
     },
@@ -864,15 +895,19 @@ const translation: typeof en = {
         },
       },
       advancedConfigration: {
-        existKnowledgeBaseId: {
+        existingKnowledgeBaseId: {
           label: '既存のAmazon Bedrock Knowledge BaseのID',
-          description: '既存のAmazon Bedrock Knowledge Baseを使用することができる',
-          createNewKb: {
-            label: '新規のナレッジを作成する',
-          },
-          existing: {
-            label: '外部のナレッジ(Knowledge Base)を利用する',
-          },
+          description:
+            '既存のAmazon Bedrock Knowledge Baseを利用できます',
+        },
+        createDedicatedKnowledgeBase: {
+          label: '専用のKnowledge Baseを作成する',
+        },
+        createTenantInSharedKnowledgeBase: {
+          label: '共有のKnowledge Baseにテナントを作成する',
+        },
+        useExistingKnowledgeBase: {
+          label: '外部のKnowledge Baseを利用する',
         },
       },
     },
@@ -974,11 +1009,11 @@ const translation: typeof en = {
         hint: 'このポリシーを使用して、モデル応答が参照ソースに基づいており、ユーザーの質問に関連しているかどうかを検証し、モデルの幻覚をフィルタリングします。',
         groundingThreshold: {
           label: '根拠',
-          hint: 'モデル応答が参照ソースに基づいて事実に即しているかどうかを確認し、定義された根拠の閾値を下回る応答をブロックします。0: 何もブロックしない, 0.99: ほぼすべてをブロックする',
+          hint: 'モデル応答が参照ソースに基づいて事実に即しているかどうかを確認し、定義された根拠の閾値を下回る応答をブロックします。0: 何もブロックしない, 1: ほぼすべてをブロックする',
         },
         relevanceThreshold: {
           label: '関連性',
-          hint: 'モデル応答がユーザーの質問に関連しているかどうかを確認し、関連性の閾値を下回る応答をブロックします。0: 何もブロックしない, 0.99: ほぼすべてをブロックする',
+          hint: 'モデル応答がユーザーの質問に関連しているかどうかを確認し、関連性の閾値を下回る応答をブロックします。0: 何もブロックしない, 1: ほぼすべてをブロックする',
         },
       },
     },

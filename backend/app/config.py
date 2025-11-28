@@ -27,7 +27,7 @@ DEFAULT_GENERATION_CONFIG: GenerationParams = {
     "top_k": 250,
     "top_p": 0.999,
     "temperature": 1.0,
-    "stop_sequences": ["Human: ", "Assistant: "],
+    "stop_sequences": [],
     # Budget tokens must NOT exceeds max_tokens
     "reasoning_params": {"budget_tokens": 1024},
 }
@@ -69,11 +69,29 @@ BEDROCK_PRICING = {
             "cache_write_input": 0.01875,
             "cache_read_input": 0.0015,
         },
+        "claude-v4.1-opus": {
+            "input": 0.015,
+            "output": 0.075,
+            "cache_write_input": 0.01875,
+            "cache_read_input": 0.0015,
+        },
         "claude-v4-sonnet": {
             "input": 0.003,
             "output": 0.015,
             "cache_write_input": 0.00375,
             "cache_read_input": 0.0003,
+        },
+        "claude-v4.5-sonnet": {
+            "input": 0.003,
+            "output": 0.015,
+            "cache_write_input": 0.00375,
+            "cache_read_input": 0.0003,
+        },
+        "claude-v4.5-haiku": {
+            "input": 0.001,
+            "output": 0.005,
+            "cache_write_input": 0.00125,
+            "cache_read_input": 0.0001,
         },
         "claude-v3-haiku": {"input": 0.00025, "output": 0.00125},
         "claude-v3.5-haiku": {
@@ -136,11 +154,29 @@ BEDROCK_PRICING = {
             "cache_write_input": 0.01875,
             "cache_read_input": 0.0015,
         },
+        "claude-v4.1-opus": {
+            "input": 0.015,
+            "output": 0.075,
+            "cache_write_input": 0.01875,
+            "cache_read_input": 0.0015,
+        },
         "claude-v4-sonnet": {
             "input": 0.003,
             "output": 0.015,
             "cache_write_input": 0.00375,
             "cache_read_input": 0.0003,
+        },
+        "claude-v4.5-sonnet": {
+            "input": 0.003,
+            "output": 0.015,
+            "cache_write_input": 0.00375,
+            "cache_read_input": 0.0003,
+        },
+        "claude-v4.5-haiku": {
+            "input": 0.001,
+            "output": 0.005,
+            "cache_write_input": 0.00125,
+            "cache_read_input": 0.0001,
         },
         "claude-v3.7-sonnet": {
             "input": 0.00300,
@@ -178,10 +214,19 @@ BEDROCK_PRICING = {
         "llama3-2-3b-instruct": {"input": 0.00015, "output": 0.00015},
         "llama3-2-11b-instruct": {"input": 0.00016, "output": 0.00016},
         "llama3-2-90b-instruct": {"input": 0.00072, "output": 0.00072},
+        # OpenAI GPT-OSS models
+        "gpt-oss-20b": {"input": 0.00015, "output": 0.00030},
+        "gpt-oss-120b": {"input": 0.00030, "output": 0.00060},
     },
     "ap-northeast-1": {},
     "default": {
         "claude-v4-opus": {
+            "input": 0.015,
+            "output": 0.075,
+            "cache_write_input": 0.01875,
+            "cache_read_input": 0.0015,
+        },
+        "claude-v4.1-opus": {
             "input": 0.015,
             "output": 0.075,
             "cache_write_input": 0.01875,
@@ -192,6 +237,18 @@ BEDROCK_PRICING = {
             "output": 0.015,
             "cache_write_input": 0.00375,
             "cache_read_input": 0.0003,
+        },
+        "claude-v4.5-sonnet": {
+            "input": 0.003,
+            "output": 0.015,
+            "cache_write_input": 0.00375,
+            "cache_read_input": 0.0003,
+        },
+        "claude-v4.5-haiku": {
+            "input": 0.001,
+            "output": 0.005,
+            "cache_write_input": 0.00125,
+            "cache_read_input": 0.0001,
         },
         "claude-v3-haiku": {"input": 0.00025, "output": 0.00125},
         "claude-v3.5-haiku": {
@@ -248,6 +305,9 @@ BEDROCK_PRICING = {
         "llama3-2-3b-instruct": {"input": 0.00015, "output": 0.00015},
         "llama3-2-11b-instruct": {"input": 0.00016, "output": 0.00016},
         "llama3-2-90b-instruct": {"input": 0.00072, "output": 0.00072},
+        # OpenAI GPT-OSS models
+        "gpt-oss-20b": {"input": 0.00015, "output": 0.00030},
+        "gpt-oss-120b": {"input": 0.00030, "output": 0.00060},
     },
     # EU regions (eu-central-1, eu-west-1, eu-west-3)
     "eu-central-1": {

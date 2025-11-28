@@ -19,6 +19,7 @@
   },
   "context": {
     "@aws-cdk/aws-lambda:recognizeLayerVersion": true,
+    "@aws-cdk/aws-lambda:recognizeVersionProps": true,
     "@aws-cdk/core:checkSecretUsage": true,
     "@aws-cdk/core:target-partitions": ["aws", "aws-cn"],
     "@aws-cdk-containers/ecs-service-extensions:enableDefaultLogDriver": true,
@@ -52,11 +53,14 @@
     "@aws-cdk/core:includePrefixInUniqueNameGeneration": true,
     "@aws-cdk/aws-opensearchservice:enableOpensearchMultiAzWithStandby": true,
     "bedrockRegion": "us-east-1",
+    "enableFrontendIpv6": true,
+    "enableFrontendWaf": true,
     "allowedIpV4AddressRanges": ["0.0.0.0/1", "128.0.0.0/1"],
     "allowedIpV6AddressRanges": [
       "0000:0000:0000:0000:0000:0000:0000:0000/1",
       "8000:0000:0000:0000:0000:0000:0000:0000/1"
     ],
+    "allowedCountries": [],
     "identityProviders": [],
     "userPoolDomainPrefix": "",
     "allowedSignUpEmailDomains": [],
@@ -68,11 +72,13 @@
       "8000:0000:0000:0000:0000:0000:0000:0000/1"
     ],
     "enableRagReplicas": true,
+    "enableBedrockGlobalInference": true,
     "enableBedrockCrossRegionInference": true,
     "enableLambdaSnapStart": true,
     "enableBotStore": true,
     "enableBotStoreReplicas": false,
     "botStoreLanguage": "en",
+    "globalAvailableModels": [],
     "tokenValidMinutes": 30,
     "alternateDomainName": "",
     "hostedZoneId": "",

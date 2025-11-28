@@ -26,7 +26,7 @@ import { FeedbackDialog } from '../custom-components/organisms';
 import UploadedAttachedFile from './UploadedAttachedFile';
 import { TEXT_FILE_EXTENSIONS } from '../constants/supportedAttachedFiles';
 import AgentToolList from '../features/agent/components/AgentToolList';
-import { AgentToolsProps } from '../features/agent/xstates/agentThink';
+import { AgentToolsProps } from '../features/agent/types';
 import { convertThinkingLogToAgentToolProps } from '../features/agent/utils/AgentUtils';
 import { convertUsedChunkToRelatedDocument } from '../utils/MessageUtils';
 import ReasoningCard from '../features/reasoning/components/ReasoningCard';
@@ -36,7 +36,7 @@ import Tooltip from './Tooltip';
 
 type Props = BaseProps & {
   tools?: AgentToolsProps[];
-  reasoning?: ReasoningContext;
+  reasoning?: string;
   chatContent?: DisplayMessageContent;
   isStreaming?: boolean;
   relatedDocuments?: RelatedDocument[];
@@ -90,7 +90,7 @@ const ChatMessage: React.FC<Props> = (props) => {
   }, [props.relatedDocuments, chatContent]);
 
   const reasoning = useMemo(() => {
-    if (props.reasoning != null && props.reasoning.content != '') {
+    if (props.reasoning) {
       return props.reasoning;
     }
 
@@ -104,9 +104,7 @@ const ChatMessage: React.FC<Props> = (props) => {
     );
 
     if (reasoningContent) {
-      return {
-        content: reasoningContent.text,
-      };
+      return reasoningContent.text;
     }
 
     return undefined;
@@ -199,12 +197,6 @@ const ChatMessage: React.FC<Props> = (props) => {
         )}
 
         <div className="ml-5 grow ">
-          {chatContent?.role == 'assistant' && reasoning?.content && (
-            <ReasoningCard
-              content={reasoning.content}
-              className="mx-auto mb-3 mt-0 flex w-full max-w-5xl flex-col rounded border border-gray bg-aws-paper-light text-aws-font-color-light/80 dark:bg-aws-paper-dark dark:text-aws-font-color-dark/80"
-            />
-          )}
           {chatContent?.role === 'assistant' &&
             tools != null &&
             tools.length > 0 && (
@@ -219,7 +211,15 @@ const ChatMessage: React.FC<Props> = (props) => {
                   </div>
                 ))}
               </div>
-            )}
+            )
+          }
+          {chatContent?.role == 'assistant' && reasoning && (
+            // ReasoningCard for ReasoningContent in assistant message itself.
+            <ReasoningCard
+              content={reasoning}
+              className="mx-auto mb-3 mt-0 flex w-full max-w-5xl flex-col rounded border border-gray bg-aws-paper-light text-aws-font-color-light/80 dark:bg-aws-paper-dark dark:text-aws-font-color-dark/80"
+            />
+          )}
           {chatContent?.role === 'user' && !isEdit && (
             <div>
               {chatContent.content.some(

@@ -1,3 +1,6 @@
+import base64
+from hashlib import md5
+
 from app.routes.schemas.bot_kb import (
     type_kb_chunking_strategy,
     type_kb_embeddings_model,
@@ -7,9 +10,10 @@ from app.routes.schemas.bot_kb import (
     type_os_character_filter,
     type_os_token_filter,
     type_os_tokenizer,
+    type_kb_resource_type,
 )
-from typing import Self
-from pydantic import BaseModel, validator, model_validator
+from typing import Literal
+from pydantic import BaseModel
 
 
 class SearchParamsModel(BaseModel):
@@ -60,7 +64,20 @@ class WebCrawlingFiltersModel(BaseModel):
     include_patterns: list[str]
 
 
+class KnowledgeBaseConfiguration(BaseModel):
+    type: type_kb_resource_type
+
+
+class KnowledgeBase(BaseModel):
+    knowledge_base_configuration: KnowledgeBaseConfiguration
+
+
+class BedrockAgentGetKnowledgeBaseResponse(BaseModel):
+    knowledge_base: KnowledgeBase
+
+
 class BedrockKnowledgeBaseModel(BaseModel):
+    type: Literal["dedicated", "shared"] | None = None
     embeddings_model: type_kb_embeddings_model
     open_search: OpenSearchParamsModel
     chunking_configuration: (
@@ -79,4 +96,31 @@ class BedrockKnowledgeBaseModel(BaseModel):
     web_crawling_scope: type_kb_web_crawling_scope = "DEFAULT"
     web_crawling_filters: WebCrawlingFiltersModel = WebCrawlingFiltersModel(
         exclude_patterns=[], include_patterns=[]
+    )
+
+
+def calc_knowledge_base_hash(knowledge_base: BedrockKnowledgeBaseModel) -> str:
+    """Calculate hashcode of Knowledge Base settings.
+
+    Args:
+        knowledge_base (BedrockKnowledgeBaseModel): Knowledge Base settings
+
+    Returns:
+        str: BASE32 encoded MD5 hashcode of JSON-formatted Knowledge Base settings.
+    """
+    return (
+        base64.b32encode(
+            md5(
+                knowledge_base.model_dump_json(
+                    exclude={
+                        "knowledge_base_id",
+                        "exist_knowledge_base_id",
+                        "data_source_ids",
+                    }
+                ).encode(),
+                usedforsecurity=False,
+            ).digest()
+        )
+        .decode()
+        .rstrip("=")
     )

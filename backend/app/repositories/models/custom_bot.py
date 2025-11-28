@@ -2,7 +2,6 @@ import logging
 from typing import Annotated, Any, Dict, List, Literal, Optional, Self, Type, get_args
 
 from app.config import DEFAULT_GENERATION_CONFIG
-from app.config import GenerationParams as GenerationParamsDict
 from app.repositories.models.common import DynamicBaseModel, Float, SecureString
 from app.repositories.models.custom_bot_guardrails import BedrockGuardrailsModel
 from app.repositories.models.custom_bot_kb import BedrockKnowledgeBaseModel
@@ -39,7 +38,6 @@ from app.utils import (
 )
 from pydantic import (
     BaseModel,
-    ConfigDict,
     Discriminator,
     Field,
     ValidationInfo,
@@ -444,6 +442,35 @@ class BotModel(BaseModel):
                 )
         return self
 
+    @model_validator(mode="after")
+    def validate_knowledge_base_type(self) -> Self:
+        if self.bedrock_knowledge_base is not None:
+            if self.bedrock_knowledge_base.exist_knowledge_base_id is not None or (
+                len(self.knowledge.source_urls) == 0
+                and len(self.knowledge.sitemap_urls) == 0
+                and len(self.knowledge.filenames) == 0
+                and len(self.knowledge.s3_urls) == 0
+            ):
+                # Clear Knowledge Base ID if the Knowledge Base is not needed.
+                self.bedrock_knowledge_base.type = None
+                self.bedrock_knowledge_base.knowledge_base_id = None
+
+            elif self.bedrock_knowledge_base.type is None:
+                # Otherwise, if the type of Knowledge Base is omitted, it will default to `dedicated`.
+                self.bedrock_knowledge_base.type = "dedicated"
+
+        return self
+
+    @model_validator(mode="after")
+    def validate_guardrails(self) -> Self:
+        if self.bedrock_guardrails is not None:
+            if not self.bedrock_guardrails.is_guardrail_enabled:
+                # Clear Guardrail ARN if the Guardrail is not needed.
+                self.bedrock_guardrails.guardrail_arn = ""
+                self.bedrock_guardrails.guardrail_version = ""
+
+        return self
+
     @field_validator("published_api_stack_name", mode="after")
     def validate_published_api_stack_name(
         cls, value: str | None, info: ValidationInfo
@@ -461,17 +488,17 @@ class BotModel(BaseModel):
             or len(self.knowledge.sitemap_urls) > 0
             or len(self.knowledge.filenames) > 0
             or len(self.knowledge.s3_urls) > 0
-            or self.has_bedrock_knowledge_base()
+            or self.has_existing_knowledge_base()
         )
 
     def is_agent_enabled(self) -> bool:
         # Always consider agents active, even if they have a knowledge base
         return len(self.agent.tools) > 0 or self.has_knowledge()
 
-    def has_bedrock_knowledge_base(self) -> bool:
-        return self.bedrock_knowledge_base is not None and (
-            self.bedrock_knowledge_base.knowledge_base_id is not None
-            or self.bedrock_knowledge_base.exist_knowledge_base_id is not None
+    def has_existing_knowledge_base(self) -> bool:
+        return (
+            self.bedrock_knowledge_base is not None
+            and self.bedrock_knowledge_base.exist_knowledge_base_id is not None
         )
 
     def is_pinned(self) -> bool:
@@ -603,6 +630,84 @@ class BotModel(BaseModel):
                 bot_input.active_models.model_dump()  # type: ignore
             ),
             usage_stats=UsageStatsModel(usage_count=0),
+        )
+
+    @classmethod
+    def from_dynamo_item(cls, item: dict) -> Self:
+        return BotModel(
+            id=item["BotId"],
+            owner_user_id=item["PK"],
+            title=item["Title"],
+            description=item["Description"],
+            instruction=item["Instruction"],
+            create_time=float(item["CreateTime"]),
+            last_used_time=float(item.get("LastUsedTime", item["CreateTime"])),
+            # Note: SharedScope is set to None for private shared_scope to use sparse index
+            shared_scope=item.get("SharedScope", "private"),
+            shared_status=item["SharedStatus"],
+            allowed_cognito_groups=item.get("AllowedCognitoGroups", []),
+            allowed_cognito_users=item.get("AllowedCognitoUsers", []),
+            # Note: IsStarred is set to False for non-starred bots to use sparse index
+            is_starred=item.get("IsStarred", False),
+            generation_params=GenerationParamsModel.model_validate(
+                {
+                    **item.get("GenerationParams", DEFAULT_GENERATION_CONFIG),
+                    # For backward compatibility
+                    "reasoning_params": item.get("GenerationParams", {}).get(
+                        "reasoning_params",
+                        {
+                            "budget_tokens": DEFAULT_GENERATION_CONFIG["reasoning_params"]["budget_tokens"],  # type: ignore
+                        },
+                    ),
+                }
+            ),
+            agent=(
+                AgentModel.model_validate(item["AgentData"])
+                if "AgentData" in item
+                else AgentModel(tools=[])
+            ),
+            knowledge=KnowledgeModel(
+                **{**item["Knowledge"], "s3_urls": item["Knowledge"].get("s3_urls", [])}
+            ),
+            prompt_caching_enabled=item.get("PromptCachingEnabled", True),
+            sync_status=item["SyncStatus"],
+            sync_status_reason=item["SyncStatusReason"],
+            sync_last_exec_id=item["LastExecId"],
+            published_api_stack_name=item.get("ApiPublishmentStackName", None),
+            published_api_datetime=item.get("ApiPublishedDatetime", None),
+            published_api_codebuild_id=item.get("ApiPublishCodeBuildId", None),
+            display_retrieved_chunks=item.get("DisplayRetrievedChunks", False),
+            conversation_quick_starters=item.get("ConversationQuickStarters", []),
+            bedrock_knowledge_base=(
+                BedrockKnowledgeBaseModel(
+                    **{
+                        **item["BedrockKnowledgeBase"],
+                        "chunking_configuration": item["BedrockKnowledgeBase"].get(
+                            "chunking_configuration", None
+                        ),
+                        "parsing_model": item["BedrockKnowledgeBase"].get(
+                            "parsing_model", "disabled"
+                        ),
+                    }
+                )
+                if "BedrockKnowledgeBase" in item
+                else None
+            ),
+            bedrock_guardrails=(
+                BedrockGuardrailsModel(**item["GuardrailsParams"])
+                if "GuardrailsParams" in item
+                else None
+            ),
+            active_models=(
+                ActiveModelsModel.model_validate(item.get("ActiveModels"))
+                if item.get("ActiveModels")
+                else default_active_models  # for backward compatibility
+            ),
+            usage_stats=(
+                UsageStatsModel.model_validate(item.get("UsageStats"))
+                if item.get("UsageStats")
+                else UsageStatsModel(usage_count=0)  # for backward compatibility
+            ),
         )
 
     def to_output(self) -> BotOutput:
@@ -812,7 +917,6 @@ class BotMeta(BaseModel):
     last_used_time: Float
     is_starred: bool
     sync_status: type_sync_status
-    has_bedrock_knowledge_base: bool
     # Whether the bot is owned by the user
     owned: bool
 
@@ -852,7 +956,6 @@ class BotMeta(BaseModel):
             last_used_time=item.get("LastUsedTime", item["CreateTime"]),
             is_starred=_is_starred,
             sync_status=item["SyncStatus"],
-            has_bedrock_knowledge_base=bool(item.get("BedrockKnowledgeBase")),
             owned=owned,
             is_origin_accessible=is_origin_accessible,
             shared_scope=item.get("SharedScope", "private"),
@@ -881,7 +984,6 @@ class BotMeta(BaseModel):
             last_used_time=item.get("LastUsedTime", item["CreateTime"]),
             is_starred=_is_starred,
             sync_status=item["SyncStatus"],
-            has_bedrock_knowledge_base=bool(item.get("BedrockKnowledgeBase")),
             owned=owned,
             is_origin_accessible=is_origin_accessible,
             shared_scope="private",
@@ -930,7 +1032,6 @@ class BotMeta(BaseModel):
             last_used_time=float(source.get("LastUsedTime", source["CreateTime"])),
             is_starred=source.get("IsStarred", False),
             sync_status=source["SyncStatus"],
-            has_bedrock_knowledge_base=bool(source.get("BedrockKnowledgeBase")),
             owned=source["PK"] == user_id,
             is_origin_accessible=True,  # Always True as it's from direct search result
             shared_scope=source.get("SharedScope", "private"),

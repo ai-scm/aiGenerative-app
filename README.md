@@ -11,7 +11,6 @@
 
 [English](https://github.com/aws-samples/bedrock-chat/blob/v3/README.md) | [日本語](https://github.com/aws-samples/bedrock-chat/blob/v3/docs/README_ja-JP.md) | [한국어](https://github.com/aws-samples/bedrock-chat/blob/v3/docs/README_ko-KR.md) | [中文](https://github.com/aws-samples/bedrock-chat/blob/v3/docs/README_zh-CN.md) | [Français](https://github.com/aws-samples/bedrock-chat/blob/v3/docs/README_fr-FR.md) | [Deutsch](https://github.com/aws-samples/bedrock-chat/blob/v3/docs/README_de-DE.md) | [Español](https://github.com/aws-samples/bedrock-chat/blob/v3/docs/README_es-ES.md) | [Italian](https://github.com/aws-samples/bedrock-chat/blob/v3/docs/README_it-IT.md) | [Norsk](https://github.com/aws-samples/bedrock-chat/blob/v3/docs/README_nb-NO.md) | [ไทย](https://github.com/aws-samples/bedrock-chat/blob/v3/docs/README_th-TH.md) | [Bahasa Indonesia](https://github.com/aws-samples/bedrock-chat/blob/v3/docs/README_id-ID.md) | [Bahasa Melayu](https://github.com/aws-samples/bedrock-chat/blob/v3/docs/README_ms-MY.md) | [Tiếng Việt](https://github.com/aws-samples/bedrock-chat/blob/v3/docs/README_vi-VN.md) | [Polski](https://github.com/aws-samples/bedrock-chat/blob/v3/docs/README_pl-PL.md) | [Português Brasil](https://github.com/aws-samples/bedrock-chat/blob/v3/docs/README_pt-BR.md)
 
-
 A multilingual generative AI platform powered by [Amazon Bedrock](https://aws.amazon.com/bedrock/).
 Supports chat, custom bots with knowledge (RAG), bot sharing via a bot store, and task automation using agents.
 
@@ -42,6 +41,21 @@ You can also import existing [Amazon Bedrock's KnowledgeBase](https://aws.amazon
 > [!Important]
 > For governance reasons, only allowed users are able to create customized bots. To allow the creation of customized bots, the user must be a member of group called `CreatingBotAllowed`, which can be set up via the management console > Amazon Cognito User pools or aws cli. Note that the user pool id can be referred by accessing CloudFormation > BedrockChatStack > Outputs > `AuthUserPoolIdxxxx`.
 
+### Multi-Tenant Usage of Knowledge Base
+
+In Amazon Bedrock Knowledge Bases, by default, the number of Knowledge Bases that can be created in a single AWS account is limited to 100. To work around this limitation, you can use 'multi-tenant' mode, where a Knowledge Base with common settings is shared among multiple bots, and files uploaded by each bot are filtered by attaching the Bot ID as metadata.
+
+Newly created bots will have multi-tenant mode enabled by default. To migrate existing bots to multi-tenant mode, change the bot's knowledge settings to "Create a tenant in a shared Knowledge Base."
+
+To migrate multiple bots to multi-tenant mode in bulk, execute commands like the following:
+
+```bash
+aws dynamodb execute-statement --statement "UPDATE \"$BotTableNameV3\" SET BedrockKnowledgeBase.type='shared' SET SyncStatus='QUEUED' WHERE PK='$UserID' AND SK='BOT#$BotID'"
+# Execute for all target bots
+
+aws stepfunctions start-execution --state-machine-arn $EmbeddingStateMachineArn
+```
+
 ### Administrative features
 
 API Management, Mark bots as essential, Analyze usage for bots. [detail](./docs/ADMINISTRATOR.md)
@@ -68,6 +82,17 @@ By using the [Agent functionality](./docs/AGENT.md), your chatbot can automatica
 
 </details>
 
+## 🎓Workshop
+
+A comprehensive workshop is available [here](https://catalog.us-east-1.prod.workshops.aws/workshops/4bf8d30b-f7c9-440a-a853-9394a41909d2/en-US).
+
+<details>
+<summary>Screenshot</summary>
+
+![](./docs/imgs/workshop.png)
+
+</details>
+
 ## 🚀 Super-easy Deployment
 
 - In the us-east-1 region, open [Bedrock Model access](https://us-east-1.console.aws.amazon.com/bedrock/home?region=us-east-1#/modelaccess) > `Manage model access` > Check all of models you wish to use and then `Save changes`.
@@ -78,6 +103,12 @@ By using the [Agent functionality](./docs/AGENT.md), your chatbot can automatica
 ![](./docs/imgs/model_screenshot.png)
 
 </details>
+
+### Supported regions
+
+Please make sure that you deploy Bedrock Chat in a region [where OpenSearch Serverless and Ingestion APIs are available](https://docs.aws.amazon.com/general/latest/gr/opensearch-service.html), if you want to use bots and create knowledge bases (OpenSearch Serverless is the default choice). As of August 2025, the following regions are supported: us-east-1, us-east-2, us-west-1, us-west-2, ap-south-1, ap-northeast-1, ap-northeast-2, ap-southeast-1, ap-southeast-2, ca-central-1, eu-central-1, eu-west-1, eu-west-2, eu-south-2, eu-north-1, sa-east-1
+
+For the **bedrock-region** parameter you need to choose a region [where Bedrock is available](https://docs.aws.amazon.com/general/latest/gr/bedrock.html).
 
 - Open [CloudShell](https://console.aws.amazon.com/cloudshell/home) at the region where you want to deploy
 - Run deployment via following commands. If you want to specify the version to deploy or need to apply security policies, please specify the appropriate parameters from [Optional Parameters](#optional-parameters).
@@ -114,7 +145,15 @@ Example usage:
     "selfSignUpEnabled": false,
     "enableLambdaSnapStart": true,
     "allowedIpV4AddressRanges": ["192.168.1.0/24"],
-    "allowedSignUpEmailDomains": ["example.com"]
+    "allowedCountries": ["US", "CA"],
+    "allowedSignUpEmailDomains": ["example.com"],
+    "globalAvailableModels": [
+      "claude-v3.7-sonnet",
+      "claude-v3.5-sonnet",
+      "amazon-nova-pro",
+      "amazon-nova-lite",
+      "llama3-3-70b-instruct"
+    ]
   }
 }'
 ```
@@ -125,10 +164,13 @@ The override JSON must follow the same structure as cdk.json. You can override a
 - `enableLambdaSnapStart`
 - `allowedIpV4AddressRanges`
 - `allowedIpV6AddressRanges`
+- `allowedCountries`
 - `allowedSignUpEmailDomains`
 - `bedrockRegion`
 - `enableRagReplicas`
 - `enableBedrockCrossRegionInference`
+- `globalAvailableModels`: accepts a list of model IDs to enable. The default value is an empty list, which enables all models.
+- `logoPath`: relative path to the logo asset within the frontend `public/` directory that appears at the top of the navigation drawer.
 - And other context values defined in cdk.json
 
 > [!Note]
@@ -167,7 +209,7 @@ It's an architecture built on AWS managed services, eliminating the need for inf
 - [Amazon Cognito](https://aws.amazon.com/cognito/): User authentication
 - [Amazon Bedrock](https://aws.amazon.com/bedrock/): Managed service to utilize foundational models via APIs
 - [Amazon Bedrock Knowledge Bases](https://aws.amazon.com/bedrock/knowledge-bases/): Provides a managed interface for Retrieval-Augmented Generation ([RAG](https://aws.amazon.com/what-is/retrieval-augmented-generation/)), offering services for embedding and parsing documents
-- [Amazon EventBridge Pipes](https://aws.amazon.com/eventbridge/pipes/): Receiving event from DynamoDB stream and launching Step Functions to embed external knowledge
+- [Amazon EventBridge Pipes](https://aws.amazon.com/eventbridge/pipes/): Receiving deletion event of bots from DynamoDB stream and delete CloudFormation stack related to the bot
 - [AWS Step Functions](https://aws.amazon.com/step-functions/): Orchestrating ingestion pipeline to embed external knowledge into Bedrock Knowledge Bases
 - [Amazon OpenSearch Serverless](https://aws.amazon.com/opensearch-service/features/serverless/): Serves as the backend database for Bedrock Knowledge Bases, providing full-text search and vector search capabilities, enabling accurate retrieval of relevant information
 - [Amazon Athena](https://aws.amazon.com/athena/): Query service to analyze S3 bucket
@@ -197,11 +239,22 @@ cd cdk
 npm ci
 ```
 
-- If necessary, edit the following entries in [cdk.json](./cdk/cdk.json) if necessary.
+- If necessary, edit the following entries in [cdk.json](./cdk/cdk.json).
 
   - `bedrockRegion`: Region where Bedrock is available. **NOTE: Bedrock does NOT support all regions for now.**
   - `allowedIpV4AddressRanges`, `allowedIpV6AddressRanges`: Allowed IP Address range.
   - `enableLambdaSnapStart`: Defaults to true. Set to false if deploying to a [region that doesn't support Lambda SnapStart for Python functions](https://docs.aws.amazon.com/lambda/latest/dg/snapstart.html#snapstart-supported-regions).
+  - `globalAvailableModels`: Defaults to all. If set (list of model IDs), allows to globally control which models appear in dropdown menus across chats for all users and during bot creation in the Bedrock Chat application.
+  - `logoPath`: Relative path under `frontend/public` that points to the image displayed at the top of the application drawer.
+    The following model IDs are supported (please make sure that they are also enabled in the Bedrock console under Model access in your deployment region):
+
+- **Claude Models:** `claude-v4-opus`, `claude-v4.1-opus`, `claude-v4-sonnet`, `claude-v3.5-sonnet`, `claude-v3.5-sonnet-v2`, `claude-v3.7-sonnet`, `claude-v3.5-haiku`, `claude-v3-haiku`, `claude-v3-opus`
+- **Amazon Nova Models:** `amazon-nova-pro`, `amazon-nova-lite`, `amazon-nova-micro`
+- **Mistral Models:** `mistral-7b-instruct`, `mixtral-8x7b-instruct`, `mistral-large`, `mistral-large-2`
+- **DeepSeek Models:** `deepseek-r1`
+- **Meta Llama Models:** `llama3-3-70b-instruct`, `llama3-2-1b-instruct`, `llama3-2-3b-instruct`, `llama3-2-11b-instruct`, `llama3-2-90b-instruct`
+
+The full list can be found in [index.ts](./frontend/src/constants/index.ts).
 
 - Before deploying the CDK, you will need to work with Bootstrap once for the region you are deploying to.
 
@@ -243,7 +296,14 @@ The traditional way to configure parameters is by editing the `cdk.json` file. T
   "context": {
     "bedrockRegion": "us-east-1",
     "allowedIpV4AddressRanges": ["0.0.0.0/1", "128.0.0.0/1"],
-    "selfSignUpEnabled": true
+    "selfSignUpEnabled": true,
+    "globalAvailableModels": [
+      "claude-v3.7-sonnet",
+      "claude-v3.5-sonnet",
+      "amazon-nova-pro",
+      "amazon-nova-lite",
+      "llama3-3-70b-instruct"
+    ]
   }
 }
 ```
@@ -258,6 +318,13 @@ bedrockChatParams.set("default", {
   bedrockRegion: "us-east-1",
   allowedIpV4AddressRanges: ["192.168.0.0/16"],
   selfSignUpEnabled: true,
+  globalAvailableModels: [
+    "claude-v3.7-sonnet",
+    "claude-v3.5-sonnet",
+    "amazon-nova-pro",
+    "amazon-nova-lite",
+    "llama3-3-70b-instruct",
+  ],
 });
 
 // Define parameters for additional environments
@@ -461,6 +528,26 @@ By default, this sample does not restrict the domains for sign-up email addresse
 
 This sample supports external identity provider. Currently we support [Google](./docs/idp/SET_UP_GOOGLE.md) and [custom OIDC provider](./docs/idp/SET_UP_CUSTOM_OIDC.md).
 
+### Optional Frontend WAF
+
+For CloudFront distributions, AWS WAF WebACLs must be created in the us-east-1 region. In some organizations, creating resources outside the primary region is restricted by policy. In such environments, CDK deployment can fail when attempting to provision the Frontend WAF in us-east-1.
+
+To accommodate these restrictions, the Frontend WAF stack is optional. When disabled, the CloudFront distribution is deployed without a WebACL. This means you won’t have IP allow/deny controls at the frontend edge. Authentication and all other application controls continue to work as usual. Note that this setting only affects the Frontend WAF (CloudFront scope); the Published API WAF (regional) remains unaffected.
+
+To disable the Frontend WAF set the following in `parameter.ts` (Recommended Type-Safe Method):
+
+```ts
+bedrockChatParams.set("default", {
+  enableFrontendWaf: false,
+});
+```
+
+Or if using the legacy `cdk/cdk.json` set the following:
+
+```json
+"enableFrontendWaf": false
+```
+
 ### Add new users to groups automatically
 
 This sample has the following groups to give permissions to users:
@@ -509,12 +596,22 @@ The bot store feature allows users to share and discover custom bots. You can co
 - **enableBotStoreReplicas**: Controls whether standby replicas are enabled for the OpenSearch Serverless collection used by bot store (default: `false`). Setting it to `true` improves availability but increases costs, while `false` reduces costs but may affect availability.
   > **Important**: You can't update this property after the collection is already created. If you attempt to modify this property, the collection continues to use the original value.
 
-### Cross-region inference
+### Cross-region and Global inference
 
-[Cross-region inference](https://docs.aws.amazon.com/bedrock/latest/userguide/inference-profiles-support.html) allows Amazon Bedrock to dynamically route model inference requests across multiple AWS regions, enhancing throughput and resilience during peak demand periods. To configure, edit `cdk.json`.
+[Cross-region and Global inference](https://docs.aws.amazon.com/bedrock/latest/userguide/inference-profiles-support.html)
+allows Amazon Bedrock to dynamically route model inference requests across
+multiple AWS regions, enhancing throughput and resilience during peak demand
+periods. Global inference routes the requests to the optimal region based on
+latency and availability anywhere in the world, while cross-region inference
+routes requests within the same AWS region, for example, within the US. Some
+SCPs may restrict on or the other or both and therefore you can configure them
+independently. By default both are enabled.
+
+To configure change the following settings in `cdk.json` or `parameters.ts`:
 
 ```json
-"enableBedrockCrossRegionInference": true
+"enableBedrockGlobalInference": false,
+"enableBedrockCrossRegionInference": false,
 ```
 
 ### Lambda SnapStart
@@ -547,6 +644,40 @@ When these parameters are provided, the deployment will automatically:
 
 > [!Note]
 > The domain must be managed by Route 53 in your AWS account. The hosted zone ID can be found in the Route 53 console.
+
+### Configure allowed countries (geo restriction)
+
+You can restrict access to Bedrock-Chat based on the country the client is accessing it from.
+Use the `allowedCountries` parameter in [cdk.json](./cdk/cdk.json) which takes a list of [ISO-3166 Country Codes](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes).
+For example a New Zealand based business may decide that only IP addresses from New Zealand (NZ) and Australia (AU) can access the portal and everyone else should be denied access.
+To configure this behaviour use the following setting in [cdk.json](./cdk/cdk.json):
+
+```json
+{
+  "allowedCountries": ["NZ", "AU"]
+}
+```
+
+Or, using `parameter.ts` (Recommended Type-Safe Method):
+
+```ts
+// Define parameters for the default environment
+bedrockChatParams.set("default", {
+  allowedCountries: ["NZ", "AU"],
+});
+```
+
+### Disable IPv6 support
+
+The frontend gets both IP and IPv6 addresses by default. In some rare
+circumstances, you may need to disable IPv6 support explicitly. To do this, set
+the following parameter in [parameter.ts](./cdk/parameter.ts) or similarly in [cdk.json](./cdk/cdk.json):
+
+```ts
+"enableFrontendIpv6": false
+```
+
+If left unset the IPv6 support will be enabled by default.
 
 ### Local Development
 
