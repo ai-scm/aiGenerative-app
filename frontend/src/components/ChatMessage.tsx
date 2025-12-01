@@ -30,7 +30,6 @@ import { AgentToolsProps } from '../features/agent/types';
 import { convertThinkingLogToAgentToolProps } from '../features/agent/utils/AgentUtils';
 import { convertUsedChunkToRelatedDocument } from '../utils/MessageUtils';
 import ReasoningCard from '../features/reasoning/components/ReasoningCard';
-import { ReasoningContext } from '../features/reasoning/xstates/reasoningState';
 import { FeedbackButtonIcon } from '../custom-components/molecules';
 import Tooltip from './Tooltip';
 
