@@ -30,13 +30,11 @@ const LLAMA_SUPPORTED_MEDIA_TYPES = [
   'image/webp',
 ];
 
-const DEFAULT_MODEL: Model = 'claude-v3.7-sonnet';
-
 const useModelState = create<{
-  modelId: Model;
+  modelId: Model | undefined;
   setModelId: (m: Model) => void;
 }>((set) => ({
-  modelId: DEFAULT_MODEL,
+  modelId: undefined, // Will be set by useEffect based on config/localStorage
   setModelId: (m) => {
     set({
       modelId: m,
@@ -292,7 +290,7 @@ const useModel = (botId?: string | null, activeModels?: ActiveModels) => {
   const { modelId, setModelId } = useModelState();
   const [recentUseModelId, setRecentUseModelId] = useLocalStorage(
     'recentUseModelId',
-    DEFAULT_MODEL
+    '' // Will use getDefaultModel() if localStorage is empty
   );
 
   // Save the model id by each bot
@@ -312,17 +310,24 @@ const useModel = (botId?: string | null, activeModels?: ActiveModels) => {
     }
   }, [processedActiveModels, availableModels]);
 
-  const getDefaultModel = useCallback(() => {
-    // check default model is available
-    const defaultModelAvailable = filteredModels.some(
-      (m: ModelItem) => m.modelId === DEFAULT_MODEL
-    );
-    if (defaultModelAvailable) {
-      return DEFAULT_MODEL;
+  const getDefaultModel = useCallback((): Model => {
+    // Use the default model from global config if available
+    const configDefaultModel = globalConfig?.defaultModel as Model | undefined;
+
+    if (configDefaultModel) {
+      // Check if the configured default model is available
+      const defaultModelAvailable = filteredModels.some(
+        (m: ModelItem) => m.modelId === configDefaultModel
+      );
+      if (defaultModelAvailable) {
+        return configDefaultModel;
+      }
     }
-    // If the default model is not available, select the first model on the list
-    return filteredModels[0]?.modelId ?? DEFAULT_MODEL;
-  }, [filteredModels]);
+
+    // If config default is not available or not set yet, select the first model
+    // Returns undefined if no models are available
+    return filteredModels[0]?.modelId ?? 'amazon-nova-lite';
+  }, [filteredModels, globalConfig?.defaultModel]);
 
   // select the model via list of activeModels
   const selectModel = useCallback(
@@ -330,7 +335,7 @@ const useModel = (botId?: string | null, activeModels?: ActiveModels) => {
       const modelExists = filteredModels.some(
         (m: ModelItem) => toCamelCase(m.modelId) === toCamelCase(targetModelId)
       );
-      return modelExists ? targetModelId : getDefaultModel();
+      return modelExists ? targetModelId : (getDefaultModel() ?? filteredModels[0]?.modelId ?? 'amazon-nova-lite');
     },
     [filteredModels, getDefaultModel]
   );
@@ -389,13 +394,14 @@ const useModel = (botId?: string | null, activeModels?: ActiveModels) => {
   }, [botId]);
 
   const model = useMemo(() => {
+    if (!modelId) { return undefined; }
     return filteredModels.find(
       (model: ModelItem) => toCamelCase(model.modelId) === toCamelCase(modelId)
     );
   }, [filteredModels, modelId]);
 
   return {
-    modelId,
+    modelId: modelId ?? getDefaultModel(),
     setModelId: (model: Model) => {
       setRecentUseModelId(model);
       if (botId) {
@@ -412,6 +418,7 @@ const useModel = (botId?: string | null, activeModels?: ActiveModels) => {
       }) ?? [],
     availableModels: filteredModels,
     forceReasoningEnabled: model?.forceReasoningEnabled ?? false,
+    getDefaultModel,
   };
 };
 
