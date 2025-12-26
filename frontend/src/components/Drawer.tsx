@@ -515,7 +515,7 @@ const Drawer: React.FC<Props> = (props) => {
                   className={twMerge(
                     opened ? 'w-64' : 'w-0',
                     props.isAdmin ? 'h-20' : 'h-10',
-                    'fixed -bottom-2 z-50 mb-2 flex flex-col items-start transition-width dark:bg-aws-ui-color-dark lg:w-64'
+                    'fixed -bottom-2 z-50 mb-2 flex flex-col items-start transition-width dark:bg-aws-ui-color-dark lg:w-64 bg-white'
                   )}>
                   {props.isAdmin && !isAdminPanel && (
                     <DrawerItem
