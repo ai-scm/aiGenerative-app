@@ -331,7 +331,7 @@ const Drawer: React.FC<Props> = (props) => {
                       pinnedBots?.filter((bot) => bot.available).length ? (
                       <ExpandableDrawerGroup
                         label={t('app.pinnedBots')}
-                        className="flex w-full cursor-pointer items-left transition hover:brightness-75">
+                        className="flex w-full cursor-pointer items-left transition hover:brightness-75 flex-col">
                         {pinnedBots
                           .filter((bot) => bot.available)
                           .map((bot) => (
@@ -350,7 +350,7 @@ const Drawer: React.FC<Props> = (props) => {
                     {drawerOptions.show.starredBots && (
                       <ExpandableDrawerGroup
                         label={t('app.starredBots')}
-                        className="flex w-full cursor-pointer items-left transition hover:brightness-75">
+                        className="flex w-full cursor-pointer items-left transition hover:brightness-75 flex-col">
                         {starredBots === undefined && (
                           <div className="flex flex-col gap-2 p-2">
                             <Skeleton className="bg-aws-sea-blue-light/50 h-10 w-full dark:bg-aws-sea-blue-dark/50" />
