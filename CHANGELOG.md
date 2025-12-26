@@ -26,6 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **UI/UX Improvements**:
+  - Enhanced UI layout for markdown messages and navigation drawer groups.
+  - Improved styling for the navigation drawer's bottom section.
   - Significantly improved message streaming smoothness and reduced CPU usage by optimizing chat component rendering.
   - Fixed visual "flickering" issues when new messages appear.
   - Enhanced scroll behavior when switching between conversations to prevent abrupt jumps.
