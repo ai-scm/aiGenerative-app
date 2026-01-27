@@ -1,211 +1,199 @@
 # Manual de Ejecución en Local - Nadia
 
-Este manual describe los pasos necesarios para ejecutar el proyecto Nadia en un entorno de desarrollo local.
+Este manual describe los pasos para ejecutar Nadia (Frontend + Backend) localmente con IAM-OIDC.
+
+---
+
+## Requisitos Previos
+
+- **Python 3.12+** (cambiar `^3.13.0` → `^3.12.0` en `pyproject.toml`)
+- **Node.js 18+** y npm
+- **Poetry** para Python
+- **Credenciales AWS** con acceso a DynamoDB, S3, Cognito, Bedrock
+
+---
+
+## Frontend
+
+### 1. Instalación
+
+```bash
+cd frontend/
+npm install
+```
+
+### 2. Variables de Entorno
+
+Crear `frontend/.env.local`:
+
+```bash
+# === API Endpoints ===
+# Backend REMOTO (AWS):
+VITE_APP_API_ENDPOINT="<BackendApiUrl de CloudFormation>"
+VITE_APP_WS_ENDPOINT="<WebSocketEndpoint de CloudFormation>"
+
+# Backend LOCAL:
+# VITE_APP_API_ENDPOINT="http://localhost:8000"
+# VITE_APP_WS_ENDPOINT=""
+
+# === Cognito ===
+VITE_APP_USER_POOL_ID="<UserPoolId de CloudFormation>"
+VITE_APP_USER_POOL_CLIENT_ID="<UserPoolClientId de CloudFormation>"
+VITE_APP_REGION="us-east-1"
+
+# === OAuth/OIDC ===
+VITE_APP_REDIRECT_SIGNIN_URL="http://localhost:5173/"
+VITE_APP_REDIRECT_SIGNOUT_URL="http://localhost:5173/"
+# ⚠️ SIN "https://" - solo el dominio
+VITE_APP_COGNITO_DOMAIN="<CognitoDomain de CloudFormation sin https://>"
+
+# === IAM-OIDC (Keycloak) ===
+VITE_APP_USE_STREAMING="true"
+VITE_APP_SOCIAL_PROVIDERS=""
+VITE_APP_CUSTOM_PROVIDER_ENABLED="true"
+VITE_APP_CUSTOM_PROVIDER_NAME="iam-oidc"
+```
+
+### 3. Configurar Cognito (Primera vez)
+
+Añadir `http://localhost:5173/` a Allowed callback URLs:
+
+```bash
+aws cognito-idp update-user-pool-client \
+  --user-pool-id <USER_POOL_ID> \
+  --client-id <CLIENT_ID> \
+  --callback-urls "<FrontendURL de producción>" "http://localhost:5173/" \
+  --logout-urls "<FrontendURL de producción>" "http://localhost:5173/" \
+  --supported-identity-providers "iam-oidc" "COGNITO" \
+  --allowed-o-auth-flows code \
+  --allowed-o-auth-scopes openid email \
+  --allowed-o-auth-flows-user-pool-client \
+  --region us-east-1
+```
+
+### 4. Configurar Keycloak (Primera vez)
+
+Añadir a **Valid redirect URIs** del cliente en Keycloak:
+```
+<ApprovedRedirectURI de CloudFormation>
+```
+
+### 5. Ejecución
+
+```bash
+npm run dev
+```
+
+Frontend: `http://localhost:5173/`
+
+---
 
 ## Backend
 
-### Instalación y Configuración
-
-#### 1. Instalación de Poetry
-
-Instalar Poetry en el sistema local:
+### 1. Instalación
 
 ```bash
-sudo apt install python3-poetry
-```
-
-#### 2. Configuración del Proyecto
-
-1. Navegar a la carpeta del backend desde la terminal
-2. Modificar el archivo `pyproject.toml`:
-   - Cambiar la versión de Python a `python = "^3.12.0"`
-   - Esto permite compatibilidad con Python 3.12 (por defecto requiere Python 3.13+)
-
-#### 3. Configuración del Ambiente Virtual
-
-1. Generar y activar un ambiente virtual llamado `.venv`
-2. Ejecutar los siguientes comandos:
-
-```bash
+cd backend/
+python -m venv .venv
+source .venv/bin/activate
 pip install poetry
-poetry lock
-poetry install
+poetry lock && poetry install
 ```
 
-#### 4. Ejecución del Proyecto
+### 2. Variables de Entorno
 
-Para ejecutar el backend, usar el siguiente comando:
+| Variable                      | Descripción              | CloudFormation Output         |
+| ----------------------------- | ------------------------ | ----------------------------- |
+| `CONVERSATION_TABLE_NAME`     | Tabla conversaciones     | `ConversationTableNameV3`     |
+| `BOT_TABLE_NAME`              | Tabla bots               | `BotTableNameV3`              |
+| `ACCOUNT`                     | ID cuenta AWS            | `aws sts get-caller-identity` |
+| `REGION`                      | Región                   | `us-east-1`                   |
+| `BEDROCK_REGION`              | Región Bedrock           | `us-east-1`                   |
+| `USER_POOL_ID`                | Cognito User Pool        | `AuthUserPoolId`              |
+| `CLIENT_ID`                   | Cognito Client           | `AuthUserPoolClientId`        |
+| `DOCUMENT_BUCKET`             | Bucket documentos        | `DocumentBucketName`          |
+| `LARGE_MESSAGE_BUCKET`        | Bucket mensajes          | `LargeMessageBucketName`      |
+| `TABLE_ACCESS_ROLE_ARN`       | Rol acceso tablas        | `TableAccessRoleArn`          |
+| `CORS_ALLOW_ORIGINS`          | CORS                     | `http://localhost:5173`       |
+| `OPENSEARCH_DOMAIN_ENDPOINT`  | OpenSearch (opcional)    | `BotStoreOpenSearchEndpoint`  |
+| `EMBEDDING_STATE_MACHINE_ARN` | State Machine (opcional) | `EmbeddingStateMachineArn`    |
+
+### 3. Configuración VSCode
+
+Ver `.vscode/launch.json` con valores configurados.
+
+### 4. Ejecución
 
 ```bash
 poetry run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### Configuración de Debug en VSCode
+Backend: `http://localhost:8000/docs`
 
-#### 1. Configuración de Debug
+---
 
-Crear o modificar el archivo `.vscode/launch.json` con la siguiente configuración:
-
-```json
-{
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Python Debugger: FastAPI",
-            "type": "debugpy",
-            "request": "launch",
-            "module": "uvicorn",
-            "args": [
-                "app.main:app",
-                "--reload",
-                "--host",
-                "0.0.0.0",
-                "--port",
-                "8000"
-            ],
-            "env": {
-                "CONVERSATION_TABLE_NAME": "tag de ambiente de nadia-BedrockChatStack-DatabaseConversationTable...",
-                "BOT_TABLE_NAME": "tag de ambiente de nadia-BedrockChatStack-DatabaseBotTable....",
-                "ACCOUNT": "id de la cuenta de aws",
-                "REGION": "us-east-1",
-                "BEDROCK_REGION": "us-east-1",
-                "DOCUMENT_BUCKET": "tag de ambiente de nadia-bedrockregionres-useast1documentbucket...",
-                "LARGE_MESSAGE_BUCKET": "tag de ambiente de nadia-bedrockchatstack-largemessagebucket....",
-                "USER_POOL_ID": "id de la user pool de nadia en cognito",
-                "CLIENT_ID": "id del cliente de nadia en tag de ambiente de nadia",
-                "OPENSEARCH_DOMAIN_ENDPOINT": "url del dominio de opensearch de nadia",
-                "AWS_ACCESS_KEY_ID": "",
-                "AWS_SECRET_ACCESS_KEY": "",
-                "AWS_SESSION_TOKEN": "",
-                "CORS_ALLOW_ORIGINS": "https://*",
-                "PUBLISHED_API_ID": "id del bot que está publicado por api",
-                "QUEUE_URL": "https://sqs.us-east-1.amazonaws.com/081899001252/ApiPublishmentStack01K1XHCJ3GERCGNREJBSP27QG1-ChatQueue3053B7B3-EeXgYujhzVLM",
-                "TABLE_ACCESS_ROLE_ARN": "arn:aws:iam::081899001252:role/cattest4-BedrockChatStack-DatabaseTableAccessRole59-w8Eb6JNT5OW7",
-                "ENABLE_BEDROCK_CROSS_REGION_INFERENCE": "true",
-                "LARGE_PAYLOAD_SUPPORT_BUCKET": "cattest4-bedrockchatstack-websocketlargepayloadsup-vq5ypi80qu7s",
-                "WEBSOCKET_SESSION_TABLE_NAME": "cattest4-BedrockChatStack-DatabaseWebsocketSessionTable2302422E-78VZP3VMY4SG",
-                "TABLE_ARN": "arn de CONVERSATION_TABLE_NAME",
-                "AWS_LAMBDA_EXEC_WRAPPER": "/opt/bootstrap",
-                "ENV_NAME": "tag de ambiente de nadia",
-                "ENV_PREFIX": "tag de ambiente de nadia",
-                "PUBLISH_API_CODEBUILD_PROJECT_NAME": "ApiPublishCodebuildProject3-ktehaOkkegkr"
-            },
-            "jinja": true,
-            "console": "integratedTerminal",
-            "python": "${workspaceFolder}/backend/.venv/bin/python",
-            "cwd": "${workspaceFolder}/backend"
-        }
-    ]
-}
-```
-
-#### 2. Modificación del Usuario de Prueba
-
-Editar el archivo `backend/app/main.py` en la función `add_current_user_to_request`:
-
-**Cambiar:**
-```python
-id="test_user", name="test_user", email="user@example.com", groups=[]
-```
-
-**Por:**
-- `id`: ID de un usuario específico (para probar rutas de conversaciones, ej `64b8f498-6031-7002-7574-2683f4532c2a`)
-- `#API...`: Para probar endpoints de API, ej `PUBLISHED_API#01K25C9XD3227C3SYTMF5NJE6N`
-
-### ⚠️ Importante para Despliegue
-
-Antes del despliegue:
-1. Revertir todos los cambios realizados en los archivos de configuración del backend (archivos como `pyproject.toml`)
-2. Eliminar el ambiente virtual creado
-3. Eliminar la carpeta `.vscode`
-
-## Frontend
-
-### Configuración
-
-#### 1. Navegación al Directorio
-
-Desde la terminal, ubicarse en la raíz del proyecto y dirigirse a la carpeta `frontend`.
-
-#### 2. Configuración de Variables de Entorno
-
-Crear un archivo `.env.local` en la carpeta `frontend` con las siguientes variables:
+## Obtener Valores de CloudFormation
 
 ```bash
-VITE_APP_API_ENDPOINT="https://xb04eq0cqi.execute-api.us-east-1.amazonaws.com"
-VITE_APP_WS_ENDPOINT="wss://fkqi935a6l.execute-api.us-east-1.amazonaws.com/dev/"
-VITE_APP_USER_POOL_ID="id de la user pool de nadia en cognito"
-VITE_APP_USER_POOL_CLIENT_ID="id del cliente de nadia en tag de ambiente de nadia"
-VITE_APP_REGION="us-east-1"
-VITE_APP_REDIRECT_SIGNIN_URL="http://localhost:5173/"
-VITE_APP_REDIRECT_SIGNOUT_URL="http://localhost:5173/"
-VITE_APP_COGNITO_DOMAIN="dominio de redirección del cliente de nadia en cognito"
-VITE_APP_USE_STREAMING="true"
-VITE_APP_SOCIAL_PROVIDERS=""
-VITE_APP_CUSTOM_PROVIDER_NAME="iam-oidc"
+aws cloudformation describe-stacks \
+  --stack-name <NOMBRE-DEL-STACK>-BedrockChatStack \
+  --query 'Stacks[0].Outputs' \
+  --output table
 ```
 
-#### 3. Ejecución del Frontend
+---
 
-Ejecutar el siguiente comando en la terminal ubicada en la carpeta `frontend`:
+## Troubleshooting
 
+| Error                        | Solución                                  |
+| ---------------------------- | ----------------------------------------- |
+| `https://https//...`         | Quitar `https://` de COGNITO_DOMAIN       |
+| `redirect_mismatch`          | Añadir URL a Cognito Callback URLs        |
+| `RedirectUri not registered` | Añadir `oauth2/idpresponse` a Keycloak    |
+| Usuario mock                 | Frontend debe enviar Authorization header |
+
+---
+
+## Ejecución Simultánea (Frontend + Backend Local)
+
+### Terminal 1: Backend
 ```bash
+cd backend/
+source .venv/bin/activate
+poetry run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+### Terminal 2: Frontend
+```bash
+cd frontend/
+# En .env.local cambiar:
+# VITE_APP_API_ENDPOINT="http://localhost:8000"
 npm run dev
 ```
+
+---
 
 ## Resumen de Comandos Rápidos
 
 ### Backend
 ```bash
-# Instalación
-sudo apt install python3-poetry
 cd backend/
 pip install poetry
 poetry lock && poetry install
-
-# Ejecución
 poetry run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 ### Frontend
 ```bash
-# Configuración y ejecución
 cd frontend/
-# Crear archivo .env.local (ver configuración arriba)
+npm install
 npm run dev
 ```
 
-## Despliegue desde CDK
+---
 
-Para desplegar en esta versión de Nadia, se hace uso de la funcionalidad de generar diferentes ambientes de Nadia desde la misma cuenta de AWS, esto con el fin de poder disponibilizar varias instancias de Nadia en la misma cuenta de AWS.
+## Antes de Desplegar
 
-### 1. Configurar el ambiente
-
-Para configurar los parámetros del ambiente de Nadia a desplegar se agrega un objeto con las variables con las cuales se va a realizar el despliegue de nadia
-
-```ts
-bedrockChatParams.set("Tag del ambiente", {
-  identityProviders: [    {
-        "service": "oidc",
-        "serviceName": "iam-oidc",
-        "secretName": "Secreto con el cliente de Nadia generado en el IAM"
-        }
-    ],
-  userPoolDomainPrefix: "cliente-ambiente-nadia",
-  bedrockRegion: "us-east-1",
-  allowedSignUpEmailDomains: [
-    "nuvu.cc",
-    "blend360.com",
-    "dominio de email del cliente que va a usar el Nadia en caso de ser necesario"
-  ],
-  autoJoinUserGroups: [],
-  alternateDomainName: "url de acceso a Nadia",
-  hostedZoneId: "id de la hosted zone donde se va a hospedar la url de nadia",
-});
-```
-### 2. Despliegue
-
-1. En la terminal raiz del proyecto, dirigirse a la carpeta `cdk`
-2. Ingresar las credenciales de la cuenta donde se va a desplegar
-3. Ejecutar `npx cdk bootstrap -c envName=tag del ambiente`
-4. Ejecutar `npx cdk deploy --all --require-approval never -c envName=tag del ambiente`
+1. Revertir `pyproject.toml`
+2. Eliminar `.venv/` y `.vscode/`
+3. No commitear `.env.local`
