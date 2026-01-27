@@ -120,7 +120,43 @@ poetry lock && poetry install
 
 ### 3. Configuración VSCode
 
-Ver `.vscode/launch.json` con valores configurados.
+Crear `.vscode/launch.json`:
+
+```json
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Backend: FastAPI Local",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "uvicorn",
+            "args": ["app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"],
+            "env": {
+                "CONVERSATION_TABLE_NAME": "<ConversationTableNameV3 de CloudFormation>",
+                "BOT_TABLE_NAME": "<BotTableNameV3 de CloudFormation>",
+                "ACCOUNT": "<ID de cuenta AWS>",
+                "REGION": "us-east-1",
+                "BEDROCK_REGION": "us-east-1",
+                "DOCUMENT_BUCKET": "<DocumentBucketName de CloudFormation>",
+                "LARGE_MESSAGE_BUCKET": "<LargeMessageBucketName de CloudFormation>",
+                "USER_POOL_ID": "<AuthUserPoolId de CloudFormation>",
+                "CLIENT_ID": "<AuthUserPoolClientId de CloudFormation>",
+                "TABLE_ACCESS_ROLE_ARN": "<TableAccessRoleArn de CloudFormation>",
+                "OPENSEARCH_DOMAIN_ENDPOINT": "<BotStoreOpenSearchEndpoint de CloudFormation>",
+                "CORS_ALLOW_ORIGINS": "http://localhost:5173",
+                "ENABLE_BEDROCK_CROSS_REGION_INFERENCE": "true",
+                "AWS_ACCESS_KEY_ID": "<tu-access-key>",
+                "AWS_SECRET_ACCESS_KEY": "<tu-secret-key>",
+                "AWS_SESSION_TOKEN": "<tu-session-token>"
+            },
+            "console": "integratedTerminal",
+            "python": "${workspaceFolder}/backend/.venv/bin/python",
+            "cwd": "${workspaceFolder}/backend"
+        }
+    ]
+}
+```
 
 ### 4. Ejecución
 
