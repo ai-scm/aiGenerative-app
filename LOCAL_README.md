@@ -92,7 +92,7 @@ aws cloudformation describe-stacks \
 
 ```bash
 cd frontend/
-npm install
+npm ci
 ```
 
 ### 2. Variables de Entorno
@@ -501,6 +501,8 @@ poetry run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ### Backend
 ```bash
 cd backend/
+python3.13 -m venv .venv
+source .venv/bin/activate
 pip install poetry
 poetry lock && poetry install
 poetry run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
@@ -509,7 +511,7 @@ poetry run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ### Frontend
 ```bash
 cd frontend/
-npm install
+npm ci
 npm run dev
 ```
 
