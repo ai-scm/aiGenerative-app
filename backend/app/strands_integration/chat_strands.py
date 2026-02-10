@@ -21,6 +21,11 @@ from app.strands_integration.converters import (
     strands_message_to_message_model,
 )
 from app.strands_integration.handlers import ToolResultCapture, create_callback_handler
+from app.strands_integration.observability import (
+    create_observability_context,
+    complete_observability_context,
+    compose_callback_handlers,
+)
 from app.stream import OnStopInput, OnThinking
 from app.utils import get_current_time
 from app.vector_search import (
@@ -49,6 +54,7 @@ def converse_with_strands(
     on_thinking: Callable[[OnThinking], None] | None = None,
     on_tool_result: Callable[[ToolRunResult], None] | None = None,
     on_reasoning: Callable[[str], None] | None = None,
+    conversation_id: str | None = None,
 ) -> OnStopInput:
     """
     Chat with Strands agents.
@@ -82,6 +88,20 @@ def converse_with_strands(
         on_tool_result=on_tool_result,
     )
 
+    # Observability: create context (no-op if disabled)
+    obs_context = create_observability_context(
+        workflow_id=f"chat_{chat_input.message.model}",
+        title=f"Chat: {chat_input.message.model}",
+        bot_id=bot.id if bot else None,
+        conversation_id=conversation_id,
+    )
+
+    # Set input for agent tracing
+    if obs_context.is_active and messages:
+        user_msgs = [m.content[0].body for m in messages if m.role == "user" and m.content]
+        if user_msgs:
+            obs_context.agent_node.set_input(user_msgs[-1])
+
     prompt_caching_enabled = bot.prompt_caching_enabled if bot is not None else True
     has_tools = bot is not None and bot.is_agent_enabled()
 
@@ -112,6 +132,12 @@ def converse_with_strands(
         on_message=on_message,
     )
 
+    # Compose with observability handler
+    agent.callback_handler = compose_callback_handlers(
+        agent.callback_handler,
+        obs_context,
+    )
+
     # Convert SimpleMessageModel list to Strands Messages format
     strands_messages = simple_message_models_to_strands_messages(
         simple_messages=messages,
@@ -138,6 +164,13 @@ def converse_with_strands(
             )
 
     stop_reason, result_message, metrics = run_agent(agent)
+
+    # Complete observability trace
+    complete_observability_context(
+        context=obs_context,
+        result=None,  # Metrics captured via callback
+        status="completed" if stop_reason != "error" else "failed",
+    )
 
     # Convert Strands Message to MessageModel
     message = strands_message_to_message_model(
