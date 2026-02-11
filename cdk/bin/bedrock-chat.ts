@@ -109,6 +109,9 @@ const chat = new BedrockChatStack(
     devAccessIamRoleArn: params.devAccessIamRoleArn,
     allowedCountries: params.allowedCountries,
     logoPath: params.logoPath,
+    observabilityEnabled: params.observabilityEnabled,
+    kinesisObservabilityStreamArn: params.kinesisObservabilityStreamArn,
+    kinesisStreamName: params.kinesisStreamName,
   }
 );
 if (waf) {

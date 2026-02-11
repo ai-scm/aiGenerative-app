@@ -126,7 +126,12 @@ const BedrockChatParametersSchema = BaseParametersSchema.extend({
   logoPath: z.string().default(""),
 
   // debug parameter
-  devAccessIamRoleArn: z.string().default("")
+  devAccessIamRoleArn: z.string().default(""),
+
+  // Observability configuration
+  observabilityEnabled: z.boolean().default(false),
+  kinesisObservabilityStreamArn: z.string().default(""),
+  kinesisStreamName: z.string().default(""),
 });
 
 /**
@@ -280,6 +285,9 @@ export function resolveBedrockChatParameters(
     titleModel: app.node.tryGetContext("titleModel"),
     logoPath: app.node.tryGetContext("logoPath"),
     devAccessIamRoleArn: app.node.tryGetContext("devAccessIamRoleArn"),
+    observabilityEnabled: app.node.tryGetContext("observabilityEnabled"),
+    kinesisObservabilityStreamArn: app.node.tryGetContext("kinesisObservabilityStreamArn"),
+    kinesisStreamName: app.node.tryGetContext("kinesisStreamName"),
   };
 
   return BedrockChatParametersSchema.parse(contextParams);
