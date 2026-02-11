@@ -54,7 +54,6 @@ def converse_with_strands(
     on_thinking: Callable[[OnThinking], None] | None = None,
     on_tool_result: Callable[[ToolRunResult], None] | None = None,
     on_reasoning: Callable[[str], None] | None = None,
-    conversation_id: str | None = None,
 ) -> OnStopInput:
     """
     Chat with Strands agents.
@@ -90,10 +89,10 @@ def converse_with_strands(
 
     # Observability: create context (no-op if disabled)
     obs_context = create_observability_context(
-        workflow_id=f"chat_{chat_input.message.model}",
-        title=f"Chat: {chat_input.message.model}",
+        workflow_id=f"{chat_input.conversation_id}",
+        title=f"{bot.title}",
         bot_id=bot.id if bot else None,
-        conversation_id=conversation_id,
+        conversation_id=chat_input.conversation_id,
     )
 
     # Set input for agent tracing

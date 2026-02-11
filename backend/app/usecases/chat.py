@@ -588,10 +588,14 @@ def post_process_result(
     # Update bot statistics
     if bot:
         logger.debug("Bot is provided. Updating bot last used time.")
-        # Update bot last used time
-        modify_bot_last_used_time(user, bot)
-        # Update bot stats
-        modify_bot_stats(user, bot, increment=1)
+        try:
+            # Update bot last used time
+            modify_bot_last_used_time(user, bot)
+            # Update bot stats
+            modify_bot_stats(user, bot, increment=1)
+        except RecordNotFoundError:
+            # Published API users don't own the bot and have no alias record
+            logger.info(f"Skipping bot stats update for user {user.id} (no alias record)")
 
     return conversation, message
 

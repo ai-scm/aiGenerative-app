@@ -5,6 +5,7 @@ Observability integration for Strands agents.
 from __future__ import annotations
 
 import logging
+import datetime
 from dataclasses import dataclass
 from typing import Any, Callable, Optional, Protocol
 
@@ -19,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class CallbackHandlerProtocol(Protocol):
-    """Protocol for callback handlers - enables testing with mocks."""
+    """Protocol for callback handlers."""
 
     def __call__(self, **kwargs: Any) -> None: ...
 
@@ -31,8 +32,7 @@ class CallbackHandlerProtocol(Protocol):
 
 @dataclass(frozen=True)
 class ObservabilityContext:
-    """Immutable context for observability t  from observability_logger import AgentLogger, generate_id
-race."""
+    """Immutable context for observability."""
 
     logger: Optional[Any]  # AgentLogger when enabled
     agent_node: Optional[Any]  # AgentNode when enabled
@@ -71,7 +71,6 @@ def _get_observability_module() -> dict[str, Any]:
 class CompositeCallbackHandler:
     """
     Composes multiple callback handlers.
-    Follows: solid_principles (Open/Closed - extensible without modification).
     """
 
     def __init__(self, handlers: list[CallbackHandlerProtocol]):
@@ -127,7 +126,7 @@ def create_observability_context(
         generate_id = module["generate_id"]
 
         # Create trace
-        trace_id = generate_id("trace_") #TODO se tiene que determinar el sufijo para produccion
+        trace_id = ("CONV_" + conversation_id)
         obs_logger = AgentLogger(
             trace_id=trace_id,
             workflow_id=workflow_id,
@@ -137,14 +136,14 @@ def create_observability_context(
         # Router node: entry point
         router_node = obs_logger.router(
             node_id=generate_id("node_"),
-            config={"name": "Chat Entry", "description": "Request entry point"},
+            config={"name": "Entry " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "description": "Request entry point"},
             metadata={"bot_id": bot_id, "conversation_id": conversation_id},
         )
 
         # Agent node: Strands execution
         agent_node = obs_logger.strands.agent(
             node_id=generate_id("node_"),
-            config={"name": "Strands Agent", "description": "Agent execution"},
+            config={"name": "Agent " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "description": "Agent execution"},
             metadata={"workflow_id": workflow_id},
         )
 
