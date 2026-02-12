@@ -49,6 +49,7 @@ from app.usecases.bot import fetch_bot, modify_bot_last_used_time, modify_bot_st
 from app.usecases.global_config import get_title_model
 from app.user import User
 from app.utils import get_current_time
+from app.strands_integration.observability import add_miscellaneous_node
 from app.vector_search import (
     SearchResult,
     search_related_docs,
@@ -525,6 +526,9 @@ def post_process_result(
 ):
     """Post-process OnStopInput and update conversation."""
 
+    # Capture previous last_message_id before it's overwritten (for chaining)
+    prev_last_message_id = conversation.last_message_id
+
     message = result["message"]
     stop_reason = result["stop_reason"]
 
@@ -571,6 +575,20 @@ def post_process_result(
 
         # Store RAG results in ToolResultCapture for citation support
         related_documents.extend(search_results_as_related_documents)
+
+    # Observability: add final output node linked to agent node
+    add_miscellaneous_node(
+        conversation_id=conversation.id,
+        user_msg_id=user_msg_id,
+        assistant_msg_id=assistant_msg_id,
+        metadata={
+            "stop_reason": str(result["stop_reason"]),
+            "input_tokens": result["input_token_count"],
+            "output_tokens": result["output_token_count"],
+            "price": result["price"],
+        },
+        last_message_id=prev_last_message_id,
+    )
 
     # Store conversation before finish streaming so that front-end can avoid 404 issue
     store_conversation(user.id, conversation)

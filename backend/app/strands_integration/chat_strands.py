@@ -91,6 +91,7 @@ def converse_with_strands(
     obs_context = create_observability_context(
         workflow_id=f"{chat_input.conversation_id}",
         title=f"{bot.title}",
+        user_msg_id=chat_input.message.message_id,
         bot_id=bot.id if bot else None,
         conversation_id=chat_input.conversation_id,
     )
@@ -164,13 +165,6 @@ def converse_with_strands(
 
     stop_reason, result_message, metrics = run_agent(agent)
 
-    # Complete observability trace
-    complete_observability_context(
-        context=obs_context,
-        result=None,  # Metrics captured via callback
-        status="completed" if stop_reason != "error" else "failed",
-    )
-
     # Convert Strands Message to MessageModel
     message = strands_message_to_message_model(
         message=result_message,
@@ -203,6 +197,13 @@ def converse_with_strands(
         })}"
     )
     logger.info(f"price: {price}")
+
+    # Observability: complete trace
+    complete_observability_context(
+        context=obs_context,
+        result=None,
+        status="completed" if stop_reason != "error" else "failed",
+    )
 
     return OnStopInput(
         message=message,

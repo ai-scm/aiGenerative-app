@@ -95,6 +95,7 @@ class CompositeCallbackHandler:
 def create_observability_context(
     workflow_id: str,
     title: str,
+    user_msg_id: str,
     bot_id: Optional[str] = None,
     conversation_id: Optional[str] = None,
     config: Optional[ObservabilityConfig] = None,
@@ -105,6 +106,7 @@ def create_observability_context(
     Args:
         workflow_id: Identifier for the workflow type
         title: Human-readable trace title
+        user_msg_id: User message ID (used for deterministic node IDs)
         bot_id: Optional bot identifier
         conversation_id: Optional conversation identifier
         config: Optional config for testing (DI)
@@ -123,10 +125,9 @@ def create_observability_context(
             return ObservabilityContext(logger=None, agent_node=None)
 
         AgentLogger = module["AgentLogger"]
-        generate_id = module["generate_id"]
 
         # Create trace
-        trace_id = ("CONV_" + conversation_id)
+        trace_id = "CONV_" + conversation_id
         obs_logger = AgentLogger(
             trace_id=trace_id,
             workflow_id=workflow_id,
@@ -135,14 +136,14 @@ def create_observability_context(
 
         # Router node: entry point
         router_node = obs_logger.router(
-            node_id=generate_id("node_"),
+            node_id="ENTRY_" + user_msg_id,
             config={"name": "Entry " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "description": "Request entry point"},
             metadata={"bot_id": bot_id, "conversation_id": conversation_id},
         )
 
         # Agent node: Strands execution
         agent_node = obs_logger.strands.agent(
-            node_id=generate_id("node_"),
+            node_id="AGENT_" + user_msg_id,
             config={"name": "Agent " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "description": "Agent execution"},
             metadata={"workflow_id": workflow_id},
         )
@@ -180,6 +181,83 @@ def complete_observability_context(
         context.logger.end(status=status)
     except Exception as e:
         logger.error(f"Failed to complete observability: {e}")
+
+
+def add_miscellaneous_node(
+    conversation_id: str,
+    user_msg_id: str,
+    assistant_msg_id: str,
+    metadata: Optional[dict] = None,
+    last_message_id: Optional[str] = None,
+) -> None:
+    """
+    Add a miscellaneous output node and connect it to the agent node.
+
+    Standalone function — reconnects to the existing trace via
+    AgentLogger(auto_create=False).
+
+    Args:
+        conversation_id: Conversation ID (used to reconstruct trace_id)
+        user_msg_id: User message ID (used to reconstruct agent node_id)
+        assistant_msg_id: Assistant message ID (used for misc node_id)
+        metadata: Optional metadata dict (e.g., OnStopInput result data)
+        last_message_id: Optional previous assistant msg ID (for chaining)
+    """
+    config = get_observability_config()
+    if not config.enabled or not config.is_valid():
+        return
+
+    try:
+        module = _get_observability_module()
+        if not module:
+            return
+
+        AgentLogger = module["AgentLogger"]
+        from observability_logger.models.node import AgentNode, MiscellaneousNode
+
+        trace_id = "CONV_" + conversation_id
+
+        # Reconnect to existing trace
+        obs_logger = AgentLogger(
+            trace_id=trace_id,
+            auto_create=False,
+        )
+
+        # Chain: connect previous MSG → current ENTRY (continuation)
+        if last_message_id:
+            prev_msg_node = MiscellaneousNode(
+                trace_id=trace_id,
+                node_id="MSG_" + last_message_id,
+                name="Final Output",
+                auto_complete=False,
+            )
+            current_entry_node = AgentNode(
+                trace_id=trace_id,
+                node_id="ENTRY_" + user_msg_id,
+                name="Entry",
+            )
+            obs_logger.edge(prev_msg_node, current_entry_node)
+
+        # Create miscellaneous output node
+        miscellaneous_node = obs_logger.miscellaneous(
+            node_id="MSG_" + assistant_msg_id,
+            config={"name": "Final Output", "description": "Format results"}, #TODO discutir con edwin como ponemos el nombre
+            content="",
+            metadata=metadata or {},
+        )
+
+        # Reconstruct agent node reference for edge
+        agent_node = AgentNode(
+            trace_id=trace_id,
+            node_id="AGENT_" + user_msg_id,
+            name="Agent",
+        )
+
+        # Connect: agent -> miscellaneous
+        obs_logger.edge(agent_node, miscellaneous_node)
+
+    except Exception as e:
+        logger.error(f"Failed to add miscellaneous node: {e}")
 
 
 def compose_callback_handlers(

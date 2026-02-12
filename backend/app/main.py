@@ -115,35 +115,32 @@ def add_current_user_to_request(request: Request, call_next: ASGIApp):
         else:
             assert PUBLISHED_API_ID is not None, "PUBLISHED_API_ID is not set."
             request.state.current_user = User.from_published_api_id(PUBLISHED_API_ID)
-    
-    else:
-        authorization = request.headers.get("Authorization")
-        if authorization:
-            token_str = authorization.split(" ")[1]
-            token = HTTPAuthorizationCredentials(scheme="Bearer", credentials=token_str)
-            request.state.current_user = get_current_user(token)
-        else:
-            request.state.current_user = User(
-                id="test_user", name="test_user", email="user@example.com", groups=[]
-            )
-    
-
-    #TODO borrar para version de produccion
+    #TODO descomnetar esto para PRODUCCION
     # else:
-    #     if is_published_api:
-    #         # Local dev: use PUBLISHED_API_ID just like Lambda does
-    #         assert PUBLISHED_API_ID is not None, "PUBLISHED_API_ID is not set."
-    #         request.state.current_user = User.from_published_api_id(PUBLISHED_API_ID)
+    #     authorization = request.headers.get("Authorization")
+    #     if authorization:
+    #         token_str = authorization.split(" ")[1]
+    #         token = HTTPAuthorizationCredentials(scheme="Bearer", credentials=token_str)
+    #         request.state.current_user = get_current_user(token)
     #     else:
-    #         authorization = request.headers.get("Authorization")
-    #         if authorization:
-    #             token_str = authorization.split(" ")[1]
-    #             token = HTTPAuthorizationCredentials(scheme="Bearer", credentials=token_str)
-    #             request.state.current_user = get_current_user(token)
-    #         else:
-    #             request.state.current_user = User(
-    #                 id="test_user", name="test_user", email="user@example.com", groups=[]
-    #             )
+    #         request.state.current_user = User(
+    #             id="test_user", name="test_user", email="user@example.com", groups=[]
+    #         )
+    else:
+        if is_published_api:
+            # Local dev: use PUBLISHED_API_ID
+            assert PUBLISHED_API_ID is not None, "PUBLISHED_API_ID is not set."
+            request.state.current_user = User.from_published_api_id(PUBLISHED_API_ID)
+        else:
+            authorization = request.headers.get("Authorization")
+            if authorization:
+                token_str = authorization.split(" ")[1]
+                token = HTTPAuthorizationCredentials(scheme="Bearer", credentials=token_str)
+                request.state.current_user = get_current_user(token)
+            else:
+                request.state.current_user = User(
+                    id="test_user", name="test_user", email="user@example.com", groups=[]
+                )
 
     response = call_next(request)  # type: ignore
     return response
