@@ -62,6 +62,7 @@ export interface BedrockChatStackProps extends StackProps {
   readonly allowedCountries?: string[];
   readonly logoPath?: string;
   readonly kinesisObservabilityStreamArn?: string;
+  readonly kinesisObservabilityKeyArn?: string;
   readonly kinesisStreamName?: string;
 }
 
@@ -138,6 +139,7 @@ export class BedrockChatStack extends cdk.Stack {
         envPrefix: props.envPrefix,
         bedrockRegion: props.bedrockRegion,
         kinesisObservabilityStreamArn: props.kinesisObservabilityStreamArn,
+        kinesisObservabilityKeyArn: props.kinesisObservabilityKeyArn,
         kinesisStreamName: props.kinesisStreamName,
       }
     );
@@ -263,6 +265,7 @@ export class BedrockChatStack extends cdk.Stack {
       titleModel: props.titleModel,
       logoPath: props.logoPath,
       kinesisObservabilityStreamArn: props.kinesisObservabilityStreamArn,
+      kinesisObservabilityKeyArn: props.kinesisObservabilityKeyArn,
       kinesisStreamName: props.kinesisStreamName,
     });
     props.documentBucket.grantReadWrite(backendApi.handler);

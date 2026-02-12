@@ -25,6 +25,7 @@ interface ApiPublishmentStackProps extends StackProps {
   readonly largeMessageBucketName: string;
   readonly corsOptions?: apigateway.CorsOptions;
   readonly kinesisObservabilityStreamArn?: string;
+  readonly kinesisObservabilityKeyArn?: string;
   readonly kinesisStreamName?: string;
 }
 
@@ -74,8 +75,18 @@ export class ApiPublishmentStack extends Stack {
     if (props.kinesisObservabilityStreamArn) {
       handlerRole.addToPolicy(
         new iam.PolicyStatement({
-          actions: ["kinesis:PutRecord", "kinesis:PutRecords"],
+          actions: ["kinesis:PutRecord", "kinesis:PutRecords", "kinesis:DescribeStream"],
           resources: [props.kinesisObservabilityStreamArn],
+        })
+      );
+    }
+
+    // KMS permissions for encrypted Kinesis stream
+    if (props.kinesisObservabilityKeyArn) {
+      handlerRole.addToPolicy(
+        new iam.PolicyStatement({
+          actions: ["kms:GenerateDataKey", "kms:Decrypt"],
+          resources: [props.kinesisObservabilityKeyArn],
         })
       );
     }

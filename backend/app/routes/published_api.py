@@ -30,7 +30,7 @@ if not LOCAL_SYNC_MODE:
     sqs_client = boto3.client("sqs")
 else:
     sqs_client = None
-    logger.info("🔧 LOCAL_SYNC_MODE enabled: bypassing SQS, calling chat() directly")
+    logger.info("LOCAL_SYNC_MODE enabled: bypassing SQS, calling chat() directly")
 
 
 @router.get("/health")

@@ -241,7 +241,7 @@ def add_miscellaneous_node(
         # Create miscellaneous output node
         miscellaneous_node = obs_logger.miscellaneous(
             node_id="MSG_" + assistant_msg_id,
-            config={"name": "Final Output", "description": "Format results"}, #TODO discutir con edwin como ponemos el nombre
+            config={"name": "Output " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "description": "Format results"},
             content="",
             metadata=metadata or {},
         )

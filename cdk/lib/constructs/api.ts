@@ -51,6 +51,7 @@ export interface ApiProps {
   readonly titleModel?: string;
   readonly logoPath?: string;
   readonly kinesisObservabilityStreamArn?: string;
+  readonly kinesisObservabilityKeyArn?: string;
   readonly kinesisStreamName?: string;
 }
 
@@ -243,8 +244,19 @@ export class Api extends Construct {
       handlerRole.addToPolicy(
         new iam.PolicyStatement({
           effect: iam.Effect.ALLOW,
-          actions: ["kinesis:PutRecord", "kinesis:PutRecords"],
+          actions: ["kinesis:PutRecord", "kinesis:PutRecords", "kinesis:DescribeStream"],
           resources: [props.kinesisObservabilityStreamArn],
+        })
+      );
+    }
+
+    // KMS permissions for encrypted Kinesis stream
+    if (props.kinesisObservabilityKeyArn) {
+      handlerRole.addToPolicy(
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          actions: ["kms:GenerateDataKey", "kms:Decrypt"],
+          resources: [props.kinesisObservabilityKeyArn],
         })
       );
     }

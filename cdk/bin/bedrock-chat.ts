@@ -110,6 +110,7 @@ const chat = new BedrockChatStack(
     allowedCountries: params.allowedCountries,
     logoPath: params.logoPath,
     kinesisObservabilityStreamArn: params.kinesisObservabilityStreamArn,
+    kinesisObservabilityKeyArn: params.kinesisObservabilityKeyArn,
     kinesisStreamName: params.kinesisStreamName,
   }
 );

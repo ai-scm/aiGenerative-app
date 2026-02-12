@@ -74,6 +74,7 @@ new ApiPublishmentStack(app, `ApiPublishmentStack${params.publishedApiId}`, {
     allowCredentials: true,
   },
   kinesisObservabilityStreamArn: params.kinesisObservabilityStreamArn,
+  kinesisObservabilityKeyArn: params.kinesisObservabilityKeyArn,
   kinesisStreamName: params.kinesisStreamName,
 });
 
