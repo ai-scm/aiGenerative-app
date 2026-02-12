@@ -50,6 +50,9 @@ export interface ApiProps {
   readonly defaultModel?: string;
   readonly titleModel?: string;
   readonly logoPath?: string;
+  readonly kinesisObservabilityStreamArn?: string;
+  readonly kinesisObservabilityKeyArn?: string;
+  readonly kinesisStreamName?: string;
 }
 
 export class Api extends Construct {
@@ -205,8 +208,7 @@ export class Api extends Construct {
         effect: iam.Effect.ALLOW,
         actions: ["aoss:DescribeIndex", "aoss:ReadDocument"],
         resources: [
-          `arn:aws:aoss:${Stack.of(this).region}:${
-            Stack.of(this).account
+          `arn:aws:aoss:${Stack.of(this).region}:${Stack.of(this).account
           }:collection/*`,
         ],
       })
@@ -228,8 +230,7 @@ export class Api extends Construct {
           "secretsmanager:TagResource",
         ],
         resources: [
-          `arn:aws:secretsmanager:${Stack.of(this).region}:${
-            Stack.of(this).account
+          `arn:aws:secretsmanager:${Stack.of(this).region}:${Stack.of(this).account
           }:secret:firecrawl/*/*`,
         ],
       })
@@ -237,6 +238,28 @@ export class Api extends Construct {
     props.usageAnalysis?.resultOutputBucket.grantReadWrite(handlerRole);
     props.usageAnalysis?.ddbBucket.grantRead(handlerRole);
     props.largeMessageBucket.grantReadWrite(handlerRole);
+
+    // Kinesis permissions for observability
+    if (props.kinesisObservabilityStreamArn) {
+      handlerRole.addToPolicy(
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          actions: ["kinesis:PutRecord", "kinesis:PutRecords", "kinesis:DescribeStream"],
+          resources: [props.kinesisObservabilityStreamArn],
+        })
+      );
+    }
+
+    // KMS permissions for encrypted Kinesis stream
+    if (props.kinesisObservabilityKeyArn) {
+      handlerRole.addToPolicy(
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          actions: ["kms:GenerateDataKey", "kms:Decrypt"],
+          resources: [props.kinesisObservabilityKeyArn],
+        })
+      );
+    }
 
     const handler = new PythonFunction(this, "HandlerV2", {
       entry: path.join(__dirname, "../../../backend"),
@@ -275,7 +298,7 @@ export class Api extends Construct {
           props.enableBedrockGlobalInference.toString(),
         ENABLE_BEDROCK_CROSS_REGION_INFERENCE:
           props.enableBedrockCrossRegionInference.toString(),
-        GLOBAL_AVAILABLE_MODELS: props.globalAvailableModels 
+        GLOBAL_AVAILABLE_MODELS: props.globalAvailableModels
           ? JSON.stringify(props.globalAvailableModels)
           : "[]",
         DEFAULT_MODEL: props.defaultModel || "",
@@ -283,6 +306,8 @@ export class Api extends Construct {
         OPENSEARCH_DOMAIN_ENDPOINT: props.openSearchEndpoint || "",
         LOGO_PATH: props.logoPath || "",
         USE_STRANDS: "true",
+        KINESIS_OBSERVABILTY_LOGGER_STREAM_ARN: props.kinesisObservabilityStreamArn || "",
+        KINESIS_STREAM_NAME: props.kinesisStreamName || "",
         AWS_LAMBDA_EXEC_WRAPPER: "/opt/bootstrap",
         PORT: "8000",
       },
@@ -296,8 +321,7 @@ export class Api extends Construct {
           this,
           "LwaLayer",
           // https://github.com/awslabs/aws-lambda-web-adapter?tab=readme-ov-file#lambda-functions-packaged-as-zip-package-for-aws-managed-runtimes
-          `arn:aws:lambda:${
-            Stack.of(this).region
+          `arn:aws:lambda:${Stack.of(this).region
           }:753240598075:layer:LambdaAdapterLayerX86:23`
         ),
       ],

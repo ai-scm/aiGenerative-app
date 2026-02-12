@@ -61,6 +61,9 @@ export interface BedrockChatStackProps extends StackProps {
   readonly devAccessIamRoleArn?: string;
   readonly allowedCountries?: string[];
   readonly logoPath?: string;
+  readonly kinesisObservabilityStreamArn?: string;
+  readonly kinesisObservabilityKeyArn?: string;
+  readonly kinesisStreamName?: string;
 }
 
 export class BedrockChatStack extends cdk.Stack {
@@ -135,6 +138,9 @@ export class BedrockChatStack extends cdk.Stack {
         envName: props.envName,
         envPrefix: props.envPrefix,
         bedrockRegion: props.bedrockRegion,
+        kinesisObservabilityStreamArn: props.kinesisObservabilityStreamArn,
+        kinesisObservabilityKeyArn: props.kinesisObservabilityKeyArn,
+        kinesisStreamName: props.kinesisStreamName,
       }
     );
     // CodeBuild used for KnowledgeBase
@@ -258,6 +264,9 @@ export class BedrockChatStack extends cdk.Stack {
       defaultModel: props.defaultModel,
       titleModel: props.titleModel,
       logoPath: props.logoPath,
+      kinesisObservabilityStreamArn: props.kinesisObservabilityStreamArn,
+      kinesisObservabilityKeyArn: props.kinesisObservabilityKeyArn,
+      kinesisStreamName: props.kinesisStreamName,
     });
     props.documentBucket.grantReadWrite(backendApi.handler);
     // Add permissions to API handler for BotStore

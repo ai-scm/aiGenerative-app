@@ -11,6 +11,9 @@ export interface ApiPublishCodebuildProps {
   readonly envPrefix: string;
   readonly bedrockRegion: string;
   readonly sourceBucket: s3.Bucket;
+  readonly kinesisObservabilityStreamArn?: string;
+  readonly kinesisObservabilityKeyArn?: string;
+  readonly kinesisStreamName?: string;
 }
 
 export class ApiPublishCodebuild extends Construct {
@@ -36,6 +39,9 @@ export class ApiPublishCodebuild extends Construct {
         ENV_NAME: { value: props.envName },
         ENV_PREFIX: { value: props.envPrefix },
         BEDROCK_REGION: { value: props.bedrockRegion },
+        KINESIS_OBSERVABILTY_LOGGER_STREAM_ARN: { value: props.kinesisObservabilityStreamArn ?? "" },
+        KINESIS_OBSERVABILITY_KEY_ARN: { value: props.kinesisObservabilityKeyArn ?? "" },
+        KINESIS_STREAM_NAME: { value: props.kinesisStreamName ?? "" },
       },
       buildSpec: codebuild.BuildSpec.fromObject({
         version: 0.2,
