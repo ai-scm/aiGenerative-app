@@ -50,7 +50,6 @@ export interface ApiProps {
   readonly defaultModel?: string;
   readonly titleModel?: string;
   readonly logoPath?: string;
-  readonly observabilityEnabled?: boolean;
   readonly kinesisObservabilityStreamArn?: string;
   readonly kinesisStreamName?: string;
 }
@@ -240,7 +239,7 @@ export class Api extends Construct {
     props.largeMessageBucket.grantReadWrite(handlerRole);
 
     // Kinesis permissions for observability
-    if (props.observabilityEnabled && props.kinesisObservabilityStreamArn) {
+    if (props.kinesisObservabilityStreamArn) {
       handlerRole.addToPolicy(
         new iam.PolicyStatement({
           effect: iam.Effect.ALLOW,
@@ -295,7 +294,6 @@ export class Api extends Construct {
         OPENSEARCH_DOMAIN_ENDPOINT: props.openSearchEndpoint || "",
         LOGO_PATH: props.logoPath || "",
         USE_STRANDS: "true",
-        OBSERVABILITY_ENABLED: (props.observabilityEnabled ?? false).toString(),
         KINESIS_OBSERVABILTY_LOGGER_STREAM_ARN: props.kinesisObservabilityStreamArn || "",
         KINESIS_STREAM_NAME: props.kinesisStreamName || "",
         AWS_LAMBDA_EXEC_WRAPPER: "/opt/bootstrap",

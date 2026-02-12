@@ -32,21 +32,23 @@ def load_observability_config() -> ObservabilityConfig:
     """
     Load config from environment - fail-fast validation.
 
+    Observability is enabled when KINESIS_OBSERVABILTY_LOGGER_STREAM_ARN is set.
+
     Environment Variables:
-        OBSERVABILITY_ENABLED: Feature flag (default: false)
-        KINESIS_OBSERVABILTY_LOGGER_STREAM_ARN: Full ARN for logging
+        KINESIS_OBSERVABILTY_LOGGER_STREAM_ARN: Full ARN for logging (presence enables observability)
         KINESIS_STREAM_NAME: Stream name (required when enabled)
         AWS_REGION: AWS region (default: us-east-1)
     """
-    enabled = os.getenv("OBSERVABILITY_ENABLED", "false").lower() == "true"
-    kinesis_arn = os.getenv("KINESIS_OBSERVABILTY_LOGGER_STREAM_ARN")
-    kinesis_name = os.getenv("KINESIS_STREAM_NAME")
+    kinesis_arn = os.getenv("KINESIS_OBSERVABILTY_LOGGER_STREAM_ARN", "")
+    kinesis_name = os.getenv("KINESIS_STREAM_NAME", "")
     aws_region = os.getenv("AWS_REGION", "us-east-1")
+
+    enabled = bool(kinesis_arn)
 
     config = ObservabilityConfig(
         enabled=enabled,
-        kinesis_stream_arn=kinesis_arn,
-        kinesis_stream_name=kinesis_name,
+        kinesis_stream_arn=kinesis_arn or None,
+        kinesis_stream_name=kinesis_name or None,
         aws_region=aws_region,
     )
 
@@ -54,7 +56,7 @@ def load_observability_config() -> ObservabilityConfig:
         print(f"Observability Config Loading: Enabled={enabled}, Region={aws_region}")
         if not config.is_valid():
             logger.warning(
-                "OBSERVABILITY_ENABLED=true but KINESIS_STREAM_NAME not set. "
+                "KINESIS_OBSERVABILTY_LOGGER_STREAM_ARN is set but KINESIS_STREAM_NAME is missing. "
                 "Observability will be disabled."
             )
     return config

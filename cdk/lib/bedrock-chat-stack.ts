@@ -61,7 +61,6 @@ export interface BedrockChatStackProps extends StackProps {
   readonly devAccessIamRoleArn?: string;
   readonly allowedCountries?: string[];
   readonly logoPath?: string;
-  readonly observabilityEnabled?: boolean;
   readonly kinesisObservabilityStreamArn?: string;
   readonly kinesisStreamName?: string;
 }
@@ -138,6 +137,8 @@ export class BedrockChatStack extends cdk.Stack {
         envName: props.envName,
         envPrefix: props.envPrefix,
         bedrockRegion: props.bedrockRegion,
+        kinesisObservabilityStreamArn: props.kinesisObservabilityStreamArn,
+        kinesisStreamName: props.kinesisStreamName,
       }
     );
     // CodeBuild used for KnowledgeBase
@@ -261,7 +262,6 @@ export class BedrockChatStack extends cdk.Stack {
       defaultModel: props.defaultModel,
       titleModel: props.titleModel,
       logoPath: props.logoPath,
-      observabilityEnabled: props.observabilityEnabled,
       kinesisObservabilityStreamArn: props.kinesisObservabilityStreamArn,
       kinesisStreamName: props.kinesisStreamName,
     });
