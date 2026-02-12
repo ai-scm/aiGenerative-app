@@ -9,7 +9,7 @@ phases:
   build:
     commands:
       - zip -r $PRODUCT_NAME.zip . -x "buildspec.yml" -x "version.txt"
-      - VERSION=dev.$(cat version.txt)
+      - VERSION=$(cat version.txt)
   post_build:
     commands:
       - echo Build completed on `date`
