@@ -52,7 +52,6 @@ export interface ApiProps {
   readonly logoPath?: string;
   readonly kinesisObservabilityStreamArn?: string;
   readonly kinesisObservabilityKeyArn?: string;
-  readonly kinesisStreamName?: string;
 }
 
 export class Api extends Construct {
@@ -307,7 +306,6 @@ export class Api extends Construct {
         LOGO_PATH: props.logoPath || "",
         USE_STRANDS: "true",
         KINESIS_OBSERVABILTY_LOGGER_STREAM_ARN: props.kinesisObservabilityStreamArn || "",
-        KINESIS_STREAM_NAME: props.kinesisStreamName || "",
         AWS_LAMBDA_EXEC_WRAPPER: "/opt/bootstrap",
         PORT: "8000",
       },

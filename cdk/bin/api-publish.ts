@@ -75,7 +75,6 @@ new ApiPublishmentStack(app, `ApiPublishmentStack${params.publishedApiId}`, {
   },
   kinesisObservabilityStreamArn: params.kinesisObservabilityStreamArn,
   kinesisObservabilityKeyArn: params.kinesisObservabilityKeyArn,
-  kinesisStreamName: params.kinesisStreamName,
 });
 
 cdk.Tags.of(app).add("CDKEnvironment", params.envName);

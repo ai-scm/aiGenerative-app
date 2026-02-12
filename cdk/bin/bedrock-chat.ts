@@ -111,7 +111,6 @@ const chat = new BedrockChatStack(
     logoPath: params.logoPath,
     kinesisObservabilityStreamArn: params.kinesisObservabilityStreamArn,
     kinesisObservabilityKeyArn: params.kinesisObservabilityKeyArn,
-    kinesisStreamName: params.kinesisStreamName,
   }
 );
 if (waf) {

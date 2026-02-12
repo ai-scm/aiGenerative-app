@@ -26,7 +26,6 @@ interface ApiPublishmentStackProps extends StackProps {
   readonly corsOptions?: apigateway.CorsOptions;
   readonly kinesisObservabilityStreamArn?: string;
   readonly kinesisObservabilityKeyArn?: string;
-  readonly kinesisStreamName?: string;
 }
 
 export class ApiPublishmentStack extends Stack {
@@ -123,7 +122,6 @@ export class ApiPublishmentStack extends Stack {
         LARGE_MESSAGE_BUCKET: props.largeMessageBucketName,
         TABLE_ACCESS_ROLE_ARN: props.tableAccessRoleArn,
         KINESIS_OBSERVABILTY_LOGGER_STREAM_ARN: props.kinesisObservabilityStreamArn || "",
-        KINESIS_STREAM_NAME: props.kinesisStreamName || "",
       },
       role: handlerRole,
       logRetention: logs.RetentionDays.THREE_MONTHS,
@@ -159,7 +157,6 @@ export class ApiPublishmentStack extends Stack {
           BEDROCK_REGION: props.bedrockRegion,
           TABLE_ACCESS_ROLE_ARN: props.tableAccessRoleArn,
           KINESIS_OBSERVABILTY_LOGGER_STREAM_ARN: props.kinesisObservabilityStreamArn || "",
-          KINESIS_STREAM_NAME: props.kinesisStreamName || "",
         },
         role: handlerRole,
         logRetention: logs.RetentionDays.THREE_MONTHS,
