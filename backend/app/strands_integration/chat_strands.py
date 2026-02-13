@@ -21,12 +21,22 @@ from app.strands_integration.converters import (
     strands_message_to_message_model,
 )
 from app.strands_integration.handlers import ToolResultCapture, create_callback_handler
+from app.strands_integration.observability import (
+    create_observability_context,
+    complete_observability_context,
+    compose_callback_handlers,
+)
 from app.stream import OnStopInput, OnThinking
 from app.utils import get_current_time
 from app.vector_search import (
     SearchResult,
 )
+
+from strands import Agent
+from strands.telemetry.metrics import EventLoopMetrics
+from strands.types.event_loop import StopReason
 from strands.types.content import Message
+from strands.types.exceptions import MaxTokensReachedException
 
 logger = logging.getLogger(__name__)
 
@@ -77,6 +87,21 @@ def converse_with_strands(
         on_tool_result=on_tool_result,
     )
 
+    # Observability: create context (no-op if disabled)
+    obs_context = create_observability_context(
+        workflow_id=f"{chat_input.conversation_id}",
+        title=f"{bot.title}",
+        user_msg_id=chat_input.message.message_id,
+        bot_id=bot.id if bot else None,
+        conversation_id=chat_input.conversation_id,
+    )
+
+    # Set input for agent tracing
+    if obs_context.is_active and messages:
+        user_msgs = [m.content[0].body for m in messages if m.role == "user" and m.content]
+        if user_msgs:
+            obs_context.agent_node.set_input(user_msgs[-1])
+
     prompt_caching_enabled = bot.prompt_caching_enabled if bot is not None else True
     has_tools = bot is not None and bot.is_agent_enabled()
 
@@ -107,6 +132,12 @@ def converse_with_strands(
         on_message=on_message,
     )
 
+    # Compose with observability handler
+    agent.callback_handler = compose_callback_handlers(
+        agent.callback_handler,
+        obs_context,
+    )
+
     # Convert SimpleMessageModel list to Strands Messages format
     strands_messages = simple_message_models_to_strands_messages(
         simple_messages=messages,
@@ -116,25 +147,37 @@ def converse_with_strands(
         prompt_caching_enabled=prompt_caching_enabled,
     )
 
-    result = agent(strands_messages)
+    def run_agent(agent: Agent) -> tuple[StopReason, Message, EventLoopMetrics]:
+        try:
+            result = agent(strands_messages)
+            return (
+                result.stop_reason,
+                result.message,
+                result.metrics,
+            )
+
+        except MaxTokensReachedException:
+            return (
+                "max_tokens",
+                agent.messages[-1],
+                agent.event_loop_metrics,
+            )
+
+    stop_reason, result_message, metrics = run_agent(agent)
 
     # Convert Strands Message to MessageModel
     message = strands_message_to_message_model(
-        message=result.message,
+        message=result_message,
         model_name=chat_input.message.model,
         create_time=get_current_time(),
         thinking_log=thinking_log,
     )
 
     # Extract token usage from metrics
-    input_tokens = result.metrics.accumulated_usage.get("inputTokens", 0)
-    output_tokens = result.metrics.accumulated_usage.get("outputTokens", 0)
-    cache_read_input_tokens = result.metrics.accumulated_usage.get(
-        "cacheReadInputTokens", 0
-    )
-    cache_write_input_tokens = result.metrics.accumulated_usage.get(
-        "cacheWriteInputTokens", 0
-    )
+    input_tokens = metrics.accumulated_usage.get("inputTokens", 0)
+    output_tokens = metrics.accumulated_usage.get("outputTokens", 0)
+    cache_read_input_tokens = metrics.accumulated_usage.get("cacheReadInputTokens", 0)
+    cache_write_input_tokens = metrics.accumulated_usage.get("cacheWriteInputTokens", 0)
 
     # Calculate price using the same function as chat_legacy
     price = calculate_price(
@@ -155,9 +198,16 @@ def converse_with_strands(
     )
     logger.info(f"price: {price}")
 
+    # Observability: complete trace
+    complete_observability_context(
+        context=obs_context,
+        result=None,
+        status="completed" if stop_reason != "error" else "failed",
+    )
+
     return OnStopInput(
         message=message,
-        stop_reason=result.stop_reason,
+        stop_reason=stop_reason,
         input_token_count=input_tokens,
         output_token_count=output_tokens,
         cache_read_input_count=cache_read_input_tokens,

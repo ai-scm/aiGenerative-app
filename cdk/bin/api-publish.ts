@@ -51,19 +51,19 @@ new ApiPublishmentStack(app, `ApiPublishmentStack${params.publishedApiId}`, {
   usagePlan: {
     throttle:
       params.publishedApiThrottleRateLimit !== undefined &&
-      params.publishedApiThrottleBurstLimit !== undefined
+        params.publishedApiThrottleBurstLimit !== undefined
         ? {
-            rateLimit: params.publishedApiThrottleRateLimit,
-            burstLimit: params.publishedApiThrottleBurstLimit,
-          }
+          rateLimit: params.publishedApiThrottleRateLimit,
+          burstLimit: params.publishedApiThrottleBurstLimit,
+        }
         : undefined,
     quota:
       params.publishedApiQuotaLimit !== undefined &&
-      params.publishedApiQuotaPeriod !== undefined
+        params.publishedApiQuotaPeriod !== undefined
         ? {
-            limit: params.publishedApiQuotaLimit,
-            period: apigateway.Period[params.publishedApiQuotaPeriod],
-          }
+          limit: params.publishedApiQuotaLimit,
+          period: apigateway.Period[params.publishedApiQuotaPeriod],
+        }
         : undefined,
   },
   deploymentStage: params.publishedApiDeploymentStage,
@@ -73,6 +73,8 @@ new ApiPublishmentStack(app, `ApiPublishmentStack${params.publishedApiId}`, {
     allowHeaders: apigateway.Cors.DEFAULT_HEADERS,
     allowCredentials: true,
   },
+  kinesisObservabilityStreamArn: params.kinesisObservabilityStreamArn,
+  kinesisObservabilityKeyArn: params.kinesisObservabilityKeyArn,
 });
 
 cdk.Tags.of(app).add("CDKEnvironment", params.envName);

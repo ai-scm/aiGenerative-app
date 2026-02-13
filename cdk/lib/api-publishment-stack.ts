@@ -24,6 +24,8 @@ interface ApiPublishmentStackProps extends StackProps {
   readonly deploymentStage?: string;
   readonly largeMessageBucketName: string;
   readonly corsOptions?: apigateway.CorsOptions;
+  readonly kinesisObservabilityStreamArn?: string;
+  readonly kinesisObservabilityKeyArn?: string;
 }
 
 export class ApiPublishmentStack extends Stack {
@@ -67,6 +69,26 @@ export class ApiPublishmentStack extends Stack {
         resources: ["*"],
       })
     );
+
+    // Kinesis permissions for observability
+    if (props.kinesisObservabilityStreamArn) {
+      handlerRole.addToPolicy(
+        new iam.PolicyStatement({
+          actions: ["kinesis:PutRecord", "kinesis:PutRecords", "kinesis:DescribeStream"],
+          resources: [props.kinesisObservabilityStreamArn],
+        })
+      );
+    }
+
+    // KMS permissions for encrypted Kinesis stream
+    if (props.kinesisObservabilityKeyArn) {
+      handlerRole.addToPolicy(
+        new iam.PolicyStatement({
+          actions: ["kms:GenerateDataKey", "kms:Decrypt"],
+          resources: [props.kinesisObservabilityKeyArn],
+        })
+      );
+    }
     const largeMessageBucket = s3.Bucket.fromBucketName(
       this,
       "LargeMessageBucket",
@@ -99,6 +121,7 @@ export class ApiPublishmentStack extends Stack {
         BEDROCK_REGION: props.bedrockRegion,
         LARGE_MESSAGE_BUCKET: props.largeMessageBucketName,
         TABLE_ACCESS_ROLE_ARN: props.tableAccessRoleArn,
+        KINESIS_OBSERVABILTY_LOGGER_STREAM_ARN: props.kinesisObservabilityStreamArn || "",
       },
       role: handlerRole,
       logRetention: logs.RetentionDays.THREE_MONTHS,
@@ -133,6 +156,7 @@ export class ApiPublishmentStack extends Stack {
           ENABLE_BEDROCK_CROSS_REGION_INFERENCE: props.enableBedrockCrossRegionInference.toString(),
           BEDROCK_REGION: props.bedrockRegion,
           TABLE_ACCESS_ROLE_ARN: props.tableAccessRoleArn,
+          KINESIS_OBSERVABILTY_LOGGER_STREAM_ARN: props.kinesisObservabilityStreamArn || "",
         },
         role: handlerRole,
         logRetention: logs.RetentionDays.THREE_MONTHS,

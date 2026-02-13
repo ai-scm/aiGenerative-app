@@ -205,7 +205,7 @@ Frontend: `http://localhost:5173/`
 
 ```bash
 cd backend/
-python -m venv .venv
+python3.13 -m venv .venv
 source .venv/bin/activate
 pip install poetry
 poetry lock && poetry install

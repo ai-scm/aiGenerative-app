@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 from time import sleep
 
@@ -10,16 +11,26 @@ from app.routes.schemas.published_api import (
     MessageRequestedResponse,
     RelatedDocument
 )
-from app.usecases.chat import chat, fetch_conversation
+from app.usecases.chat import chat, chat_output_from_message, fetch_conversation
 from app.user import User
 from app.repositories.conversation import find_related_documents_by_conversation_id
 from fastapi import APIRouter, HTTPException, Request
 from ulid import ULID
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter(tags=["published_api"])
 
-sqs_client = boto3.client("sqs")
+LOCAL_SYNC_MODE = os.environ.get("LOCAL_SYNC_MODE", "false").lower() == "true"
 QUEUE_URL = os.environ.get("QUEUE_URL", "")
+
+#TODO borrar para version de produccion
+
+if not LOCAL_SYNC_MODE:
+    sqs_client = boto3.client("sqs")
+else:
+    sqs_client = None
+    logger.info("LOCAL_SYNC_MODE enabled: bypassing SQS, calling chat() directly")
 
 
 @router.get("/health")
@@ -64,12 +75,24 @@ def post_message(request: Request, message_input: ChatInputWithoutBotId):
         attributes=message_input.attributes
     )
 
-    try:
-        _ = sqs_client.send_message(
-            QueueUrl=QUEUE_URL, MessageBody=chat_input.model_dump_json()
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    #TODO borrar para version de produccion
+
+    if LOCAL_SYNC_MODE:
+        # Bypass SQS — call chat() directly (same path as sqs_consumer Lambda)
+        user = User.from_published_api_id(chat_input.bot_id)
+        try:
+            conversation, message = chat(user=user, chat_input=chat_input)
+            logger.info(f"LOCAL_SYNC_MODE: chat() completed for conversation {conversation_id}")
+        except Exception as e:
+            logger.error(f"LOCAL_SYNC_MODE: chat() failed: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    else:
+        try:
+            _ = sqs_client.send_message(
+                QueueUrl=QUEUE_URL, MessageBody=chat_input.model_dump_json()
+            )
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
 
     return MessageRequestedResponse(
         conversation_id=conversation_id, message_id=response_message_id

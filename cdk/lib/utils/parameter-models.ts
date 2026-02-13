@@ -126,7 +126,11 @@ const BedrockChatParametersSchema = BaseParametersSchema.extend({
   logoPath: z.string().default(""),
 
   // debug parameter
-  devAccessIamRoleArn: z.string().default("")
+  devAccessIamRoleArn: z.string().default(""),
+
+  // Observability configuration
+  kinesisObservabilityStreamArn: z.string().default(""),
+  kinesisObservabilityKeyArn: z.string().default(""),
 });
 
 /**
@@ -150,6 +154,10 @@ const ApiPublishParametersSchema = BaseParametersSchema.extend({
   publishedApiDeploymentStage: z.string().default("api"),
   publishedApiId: z.string().optional(),
   publishedApiAllowedOrigins: z.string().default('["*"]'),
+
+  // Observability configuration
+  kinesisObservabilityStreamArn: z.string().default(""),
+  kinesisObservabilityKeyArn: z.string().default(""),
 });
 
 /**
@@ -280,6 +288,8 @@ export function resolveBedrockChatParameters(
     titleModel: app.node.tryGetContext("titleModel"),
     logoPath: app.node.tryGetContext("logoPath"),
     devAccessIamRoleArn: app.node.tryGetContext("devAccessIamRoleArn"),
+    kinesisObservabilityStreamArn: app.node.tryGetContext("kinesisObservabilityStreamArn"),
+    kinesisObservabilityKeyArn: app.node.tryGetContext("kinesisObservabilityKeyArn"),
   };
 
   return BedrockChatParametersSchema.parse(contextParams);
@@ -357,6 +367,8 @@ export function resolveApiPublishParameters(): ApiPublishParameters {
     publishedApiDeploymentStage: getEnvVar("PUBLISHED_API_DEPLOYMENT_STAGE"),
     publishedApiId: getEnvVar("PUBLISHED_API_ID"),
     publishedApiAllowedOrigins: getEnvVar("PUBLISHED_API_ALLOWED_ORIGINS"),
+    kinesisObservabilityStreamArn: getEnvVar("KINESIS_OBSERVABILTY_LOGGER_STREAM_ARN"),
+    kinesisObservabilityKeyArn: getEnvVar("KINESIS_OBSERVABILITY_KEY_ARN"),
   };
 
   return ApiPublishParametersSchema.parse(envVars);
