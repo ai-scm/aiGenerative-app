@@ -18,14 +18,13 @@ class ObservabilityConfig:
 
     enabled: bool
     kinesis_stream_arn: Optional[str]
-    kinesis_stream_name: Optional[str]
     aws_region: str
 
     def is_valid(self) -> bool:
         """Validate configuration is complete for enabled state."""
         if not self.enabled:
             return True
-        return bool(self.kinesis_stream_name)
+        return bool(self.kinesis_stream_arn)
 
 
 def load_observability_config() -> ObservabilityConfig:
@@ -36,11 +35,9 @@ def load_observability_config() -> ObservabilityConfig:
 
     Environment Variables:
         KINESIS_OBSERVABILTY_LOGGER_STREAM_ARN: Full ARN for logging (presence enables observability)
-        KINESIS_STREAM_NAME: Stream name (required when enabled)
         AWS_REGION: AWS region (default: us-east-1)
     """
     kinesis_arn = os.getenv("KINESIS_OBSERVABILTY_LOGGER_STREAM_ARN", "")
-    kinesis_name = os.getenv("KINESIS_STREAM_NAME", "")
     aws_region = os.getenv("AWS_REGION", "us-east-1")
 
     enabled = bool(kinesis_arn)
@@ -48,17 +45,11 @@ def load_observability_config() -> ObservabilityConfig:
     config = ObservabilityConfig(
         enabled=enabled,
         kinesis_stream_arn=kinesis_arn or None,
-        kinesis_stream_name=kinesis_name or None,
         aws_region=aws_region,
     )
 
     if enabled:
         print(f"Observability Config Loading: Enabled={enabled}, Region={aws_region}")
-        if not config.is_valid():
-            logger.warning(
-                "KINESIS_OBSERVABILTY_LOGGER_STREAM_ARN is set but KINESIS_STREAM_NAME is missing. "
-                "Observability will be disabled."
-            )
     return config
 
 
