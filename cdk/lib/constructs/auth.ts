@@ -208,7 +208,7 @@ export class Auth extends Construct {
       }
     );
 
-    if (props.autoJoinUserGroups.length >= 1) {
+    if (props.autoJoinUserGroups.length >= 1 || props.identityProviders.length >= 1) {
       /**
        * Create a Cognito trigger to add a new user to the group specified with `autoJoinUserGroups`.
        *
