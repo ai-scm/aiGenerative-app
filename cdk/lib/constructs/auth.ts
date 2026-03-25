@@ -247,6 +247,36 @@ export class Auth extends Construct {
         "cognito-idp:AdminListGroupsForUser"
       );
 
+      const syncOidcRolesFunction = new PythonFunction(
+        this,
+        "SyncOidcRoles",
+        {
+          runtime: Runtime.PYTHON_3_13,
+          index: "sync_oidc_roles.py",
+          entry: path.join(
+            __dirname,
+            "../../../backend/auth/sync_oidc_roles"
+          ),
+          timeout: Duration.minutes(1),
+          environment: {
+            USER_POOL_ID: userPool.userPoolId,
+            AUTO_JOIN_USER_GROUPS: JSON.stringify(props.autoJoinUserGroups),
+          },
+          logRetention: logs.RetentionDays.THREE_MONTHS,
+        }
+      );
+      syncOidcRolesFunction.addPermission("CognitoTrigger", {
+        principal: new iam.ServicePrincipal("cognito-idp.amazonaws.com"),
+        sourceArn: userPool.userPoolArn,
+        scope: userPool,
+      });
+      userPool.grant(
+        syncOidcRolesFunction,
+        "cognito-idp:AdminAddUserToGroup",
+        "cognito-idp:CreateGroup",
+        "cognito-idp:AdminListGroupsForUser"
+      );
+
       const cognitoTriggerRegistrationFunction = new SingletonFunction(
         this,
         "CognitoTriggerRegistrationFunction",
@@ -284,11 +314,12 @@ export class Auth extends Construct {
         properties: {
           Triggers: {
             PostConfirmation: addUserToGroupsFunction.functionArn,
-            PostAuthentication: addUserToGroupsFunction.functionArn,
+            PostAuthentication: syncOidcRolesFunction.functionArn,
           },
         },
       });
       cognitoTrigger.node.addDependency(addUserToGroupsFunction);
+      cognitoTrigger.node.addDependency(syncOidcRolesFunction);
     }
 
     if (props.webAclArn) {
