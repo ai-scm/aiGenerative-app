@@ -55,8 +55,7 @@ def sync_oidc_roles(event: dict, user_pool_id: str, username: str):
     roles_str = roles_claim.replace('[', '').replace(']', '').replace('"', '')
     roles_list = [r.strip() for r in roles_str.split(',') if r.strip()]
     
-    TARGET_PREFIX = "nadia-"
-    required_groups = {role for role in roles_list if role.startswith(TARGET_PREFIX)}
+    required_groups = set(roles_list)
     
     if not required_groups:
         return
