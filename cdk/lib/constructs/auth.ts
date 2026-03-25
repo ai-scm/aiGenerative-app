@@ -242,7 +242,9 @@ export class Auth extends Construct {
       });
       userPool.grant(
         addUserToGroupsFunction,
-        "cognito-idp:AdminAddUserToGroup"
+        "cognito-idp:AdminAddUserToGroup",
+        "cognito-idp:CreateGroup",
+        "cognito-idp:AdminListGroupsForUser"
       );
 
       const cognitoTriggerRegistrationFunction = new SingletonFunction(
