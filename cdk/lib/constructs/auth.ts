@@ -137,7 +137,7 @@ export class Auth extends Construct {
                 // Replace this with the actual idp attribute key.
                 email: ProviderAttribute.other("EMAIL"),
                 custom: {
-                  "kc_roles": ProviderAttribute.other("roles")
+                  "custom:kc_roles": ProviderAttribute.other("roles")
                 }
               },
               scopes: ["openid", "email"],
