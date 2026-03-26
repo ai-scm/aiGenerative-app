@@ -42,7 +42,7 @@ def handler(event: dict, context: LambdaContext) -> dict:
 
 def sync_oidc_roles(event: dict, user_pool_id: str, username: str):
     user_attributes = event.get("request", {}).get("userAttributes", {})
-    roles_claim = user_attributes.get("custom:groups", "")
+    roles_claim = user_attributes.get("custom:kc_roles", "")
     
     if not roles_claim:
         return

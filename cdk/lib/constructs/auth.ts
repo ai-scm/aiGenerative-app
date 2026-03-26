@@ -13,6 +13,7 @@ import {
   UserPoolIdentityProviderGoogle,
   CfnUserPoolGroup,
   UserPoolIdentityProviderOidc,
+  StringAttribute,
 } from "aws-cdk-lib/aws-cognito";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
@@ -56,8 +57,10 @@ export class Auth extends Construct {
         email: true,
       },
       removalPolicy: RemovalPolicy.DESTROY,
+      customAttributes: {
+        kc_roles: new StringAttribute({ mutable: true, maxLen: 2048 }),
+      },
     });
-
     const clientProps = (() => {
       const defaultProps = {
         idTokenValidity: props.tokenValidity,
@@ -136,6 +139,9 @@ export class Auth extends Construct {
                 // This is an example of mapping the email attribute.
                 // Replace this with the actual idp attribute key.
                 email: ProviderAttribute.other("EMAIL"),
+                custom: {
+                  "kc_roles": ProviderAttribute.other("roles")
+                }
               },
               scopes: ["openid", "email"],
             }
@@ -265,7 +271,7 @@ export class Auth extends Construct {
           logRetention: logs.RetentionDays.THREE_MONTHS,
         }
       );
-      syncOidcRolesFunction.addPermission("CognitoTrigger", {
+      syncOidcRolesFunction.addPermission("CognitoTriggerOidc", {
         principal: new iam.ServicePrincipal("cognito-idp.amazonaws.com"),
         sourceArn: userPool.userPoolArn,
         scope: userPool,
