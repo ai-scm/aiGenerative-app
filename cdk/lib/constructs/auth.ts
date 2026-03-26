@@ -276,6 +276,7 @@ export class Auth extends Construct {
       userPool.grant(
         syncOidcRolesFunction,
         "cognito-idp:AdminAddUserToGroup",
+        "cognito-idp:AdminRemoveUserFromGroup",
         "cognito-idp:CreateGroup",
         "cognito-idp:AdminListGroupsForUser"
       );

@@ -47,54 +47,73 @@ def sync_oidc_roles(event: dict, user_pool_id: str, username: str):
     if not roles_claim:
         return
         
-    roles_str = roles_claim.replace('[', '').replace(']', '').replace('"', '')
-    roles_list = [r.strip() for r in roles_str.split(',') if r.strip()]
+    # roles_str = roles_claim.replace('[', '').replace(']', '').replace('"', '') # Original line
+    client_roles = set(json.loads(roles_claim))
     
-    required_groups = set(roles_list)
-    
-    if not required_groups:
-        return
-        
+    # 2. Get current Cognito groups
+    user_groups = set()
     try:
+        # TODO: Handle pagination if user has > 50 groups
         response = cognito.admin_list_groups_for_user(
             UserPoolId=user_pool_id,
-            Username=username
+            Username=username,
+            Limit=50
         )
-        current_groups = {g.get("GroupName") for g in response.get("Groups", [])}
+        for group in response.get("Groups", []):
+            user_groups.add(group["GroupName"])
     except Exception as e:
-        logger.warning(f"Error listing current groups for user {username}: {e}")
-        current_groups = set()
+        logger.error(f"Failed to list user groups: {str(e)}")
+        # If we fail to read current groups we cannot safely determine what to remove or add
+        return # Changed from `return event` as this function doesn't return event
         
-    missing_groups = required_groups - current_groups
+    logger.debug(f"Current cognito groups: {user_groups}")
+    logger.debug(f"Target keycloak roles: {client_roles}")
+
+    # 3. Calculate Deltas
+    roles_to_add = client_roles - user_groups
+    roles_to_remove = user_groups - client_roles
     
-    for group in missing_groups:
+    # 4. Process Synchronized Removals (Strict Sync)
+    for role in roles_to_remove:
+        logger.info(f"Removing user '{username}' from OIDC group '{role}' (Strict Sync)")
         try:
-            logger.info(f"Syncing user '{username}' to missing OIDC group '{group}'")
+            cognito.admin_remove_user_from_group(
+                UserPoolId=user_pool_id,
+                Username=username,
+                GroupName=role
+            )
+        except Exception as e:
+            logger.error(f"Failed to remove user from group '{role}': {str(e)}")
+
+    # 5. Process Synchronized Additions
+    for role in roles_to_add:
+        logger.info(f"Syncing user '{username}' to missing OIDC group '{role}'")
+        try: # Added try-except block for adding roles
             cognito.admin_add_user_to_group(
                 UserPoolId=user_pool_id,
                 Username=username,
-                GroupName=group
+                GroupName=role # Changed 'group' to 'role' for consistency
             )
         except cognito.exceptions.ResourceNotFoundException:
             try:
-                logger.info(f"Group '{group}' not found. Creating it (Self-Healing).")
+                logger.info(f"Group '{role}' not found. Creating it (Self-Healing).")
                 cognito.create_group(
                     UserPoolId=user_pool_id,
-                    GroupName=group,
+                    GroupName=role,
                     Description="Auto-generated from Keycloak OIDC"
                 )
                 cognito.admin_add_user_to_group(
                     UserPoolId=user_pool_id,
                     Username=username,
-                    GroupName=group
+                    GroupName=role
                 )
             except cognito.exceptions.GroupExistsException:
                 cognito.admin_add_user_to_group(
                     UserPoolId=user_pool_id,
                     Username=username,
-                    GroupName=group
+                    GroupName=role
                 )
             except Exception as e:
-                logger.error(f"Failed to create and assign group '{group}': {e}")
+                logger.error(f"Failed to create and assign group '{role}': {str(e)}")
         except Exception as e:
-            logger.error(f"Failed to assign user to group '{group}': {e}")
+            logger.error(f"Failed to assign user to group '{role}': {str(e)}")
