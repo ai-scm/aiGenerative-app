@@ -1,4 +1,5 @@
 import os
+import json
 import boto3
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.utilities.typing import LambdaContext
@@ -22,7 +23,6 @@ def handler(event: dict, context: LambdaContext) -> dict:
         # 1. Fallback / Cloned logic from AddUserToGroups to not break native users
         user_status: str = user_attributes.get("cognito:user_status", "")
         if user_status == "FORCE_CHANGE_PASSWORD":
-            import json
             auto_join_groups = json.loads(os.environ.get("AUTO_JOIN_USER_GROUPS", "[]"))
             for group in auto_join_groups:
                 logger.info(f"Adding native user '{user_name}' to default group '{group}'")
