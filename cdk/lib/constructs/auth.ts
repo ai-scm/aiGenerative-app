@@ -57,9 +57,6 @@ export class Auth extends Construct {
         email: true,
       },
       removalPolicy: RemovalPolicy.DESTROY,
-      customAttributes: {
-        kc_roles: new StringAttribute({ mutable: true, maxLen: 2048 }),
-      },
     });
     const clientProps = (() => {
       const defaultProps = {
