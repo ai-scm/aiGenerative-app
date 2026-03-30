@@ -13,6 +13,13 @@ if (isNewTab) {
     }
   }
   keysToRemove.forEach((k) => localStorage.removeItem(k));
+
+  // Limpiar cookies por si la sesión de Amplify o el proveedor se está guardando ahí
+  document.cookie.split(';').forEach((cookie) => {
+    const eqPos = cookie.indexOf('=');
+    const name = eqPos > -1 ? cookie.substring(0, eqPos).trim() : cookie.trim();
+    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+  });
 }
 
 const useClearStorageOnUnloadSafe = () => {
