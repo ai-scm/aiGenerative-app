@@ -27,14 +27,9 @@ const useClearStorageOnUnloadSafe = () => {
     if (isNewTab) {
       const clearStorageSelectively = async () => {
         try {
-          const currentUrl = window.location.href;
-          const originalReplace = window.location.replace;
-          window.location.replace = () => { };
+          console.log('Forcing full signOut due to new tab...');
+          // Permite que Amplify haga la redirección a Cognito para destruir la cookie de SSO globalmente
           await signOut({ global: true });
-          window.location.replace = originalReplace;
-          window.history.replaceState(null, '', currentUrl);
-
-          console.log('Storage cleared without redirect due to new tab');
         } catch (error) {
           console.error('Error clearing storage selectively:', error);
         }
