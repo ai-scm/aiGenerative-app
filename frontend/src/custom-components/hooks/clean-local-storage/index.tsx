@@ -4,28 +4,28 @@ import { getCurrentUser, signOut } from 'aws-amplify/auth';
 const useClearStorageOnUnloadSafe = () => {
   useEffect(() => {
     const clearStorageSelectively = async () => {
+      console.log('clearStorageSelectively');
       try {
-        const isNewTab = !sessionStorage.getItem('tab_initialized');
+
+        let isNewTab = false
+
+        if (!sessionStorage.getItem('new_tab')) {
+          isNewTab = true;
+          await sessionStorage.setItem('new_tab', 'true');
+        }
+        console.log('isNewTab', isNewTab);
 
         if (isNewTab) {
-          localStorage.clear();
-          sessionStorage.clear();
+
+
 
           sessionStorage.setItem('tab_initialized', 'true');
 
-          document.cookie.split(';').forEach((c) => {
-            document.cookie = c
-              .replace(/^ +/, '')
-              .replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/');
-          });
 
-          try {
-            await signOut({ global: true });
-          } catch (e) {
-            // Ignore signout errors if already signed out
-          }
+          await signOut();
 
           console.log('Storage and cookies cleared, signed out because it is a new tab');
+          await sessionStorage.setItem('new_tab', 'false');
           return;
         }
 
