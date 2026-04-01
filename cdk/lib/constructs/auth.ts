@@ -13,6 +13,7 @@ import {
   UserPoolIdentityProviderGoogle,
   CfnUserPoolGroup,
   UserPoolIdentityProviderOidc,
+  StringAttribute,
 } from "aws-cdk-lib/aws-cognito";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
@@ -57,7 +58,6 @@ export class Auth extends Construct {
       },
       removalPolicy: RemovalPolicy.DESTROY,
     });
-
     const clientProps = (() => {
       const defaultProps = {
         idTokenValidity: props.tokenValidity,
@@ -136,6 +136,9 @@ export class Auth extends Construct {
                 // This is an example of mapping the email attribute.
                 // Replace this with the actual idp attribute key.
                 email: ProviderAttribute.other("EMAIL"),
+                custom: {
+                  "custom:kc_roles": ProviderAttribute.other("roles")
+                }
               },
               scopes: ["openid", "email"],
             }
@@ -208,7 +211,7 @@ export class Auth extends Construct {
       }
     );
 
-    if (props.autoJoinUserGroups.length >= 1) {
+    if (props.autoJoinUserGroups.length >= 1 || props.idp.isExist()) {
       /**
        * Create a Cognito trigger to add a new user to the group specified with `autoJoinUserGroups`.
        *
@@ -242,7 +245,40 @@ export class Auth extends Construct {
       });
       userPool.grant(
         addUserToGroupsFunction,
-        "cognito-idp:AdminAddUserToGroup"
+        "cognito-idp:AdminAddUserToGroup",
+        "cognito-idp:CreateGroup",
+        "cognito-idp:AdminListGroupsForUser"
+      );
+
+      const syncOidcRolesFunction = new PythonFunction(
+        this,
+        "SyncOidcRoles",
+        {
+          runtime: Runtime.PYTHON_3_13,
+          index: "sync_oidc_roles.py",
+          entry: path.join(
+            __dirname,
+            "../../../backend/auth/sync_oidc_roles"
+          ),
+          timeout: Duration.minutes(1),
+          environment: {
+            USER_POOL_ID: userPool.userPoolId,
+            AUTO_JOIN_USER_GROUPS: JSON.stringify(props.autoJoinUserGroups),
+          },
+          logRetention: logs.RetentionDays.THREE_MONTHS,
+        }
+      );
+      syncOidcRolesFunction.addPermission("CognitoTriggerOidc", {
+        principal: new iam.ServicePrincipal("cognito-idp.amazonaws.com"),
+        sourceArn: userPool.userPoolArn,
+        scope: userPool,
+      });
+      userPool.grant(
+        syncOidcRolesFunction,
+        "cognito-idp:AdminAddUserToGroup",
+        "cognito-idp:AdminRemoveUserFromGroup",
+        "cognito-idp:CreateGroup",
+        "cognito-idp:AdminListGroupsForUser"
       );
 
       const cognitoTriggerRegistrationFunction = new SingletonFunction(
@@ -282,11 +318,12 @@ export class Auth extends Construct {
         properties: {
           Triggers: {
             PostConfirmation: addUserToGroupsFunction.functionArn,
-            PostAuthentication: addUserToGroupsFunction.functionArn,
+            PostAuthentication: syncOidcRolesFunction.functionArn,
           },
         },
       });
       cognitoTrigger.node.addDependency(addUserToGroupsFunction);
+      cognitoTrigger.node.addDependency(syncOidcRolesFunction);
     }
 
     if (props.webAclArn) {

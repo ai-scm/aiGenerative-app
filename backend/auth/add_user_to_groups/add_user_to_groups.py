@@ -27,7 +27,7 @@ def handler(event: dict, context: LambdaContext) -> dict:
         add_user_to_groups(USER_POOL_ID, user_name, AUTO_JOIN_USER_GROUPS)
 
     elif trigger_source == "PostAuthentication_Authentication":
-        user_status: str = user_attributes["cognito:user_status"]
+        user_status: str = user_attributes.get("cognito:user_status", "")
         if user_status == "FORCE_CHANGE_PASSWORD":
             add_user_to_groups(USER_POOL_ID, user_name, AUTO_JOIN_USER_GROUPS)
 
