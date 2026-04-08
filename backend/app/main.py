@@ -100,7 +100,6 @@ app.add_exception_handler(ValidationError, error_handler_factory(422))
 app.add_exception_handler(ResourceConflictError, error_handler_factory(409))
 app.add_exception_handler(Exception, error_handler_factory(500))
 
-
 @app.middleware("http")
 def add_current_user_to_request(request: Request, call_next: ASGIApp):
     if is_running_on_lambda():
@@ -122,9 +121,15 @@ def add_current_user_to_request(request: Request, call_next: ASGIApp):
             token = HTTPAuthorizationCredentials(scheme="Bearer", credentials=token_str)
             request.state.current_user = get_current_user(token)
         else:
-            request.state.current_user = User(
-                id="test_user", name="test_user", email="user@example.com", groups=[]
-            )
+
+            if not is_published_api:
+                request.state.current_user = User(
+                    id="test_user", name="test_user", email="user@example.com", groups=[]
+                )
+            else:  
+                request.state.current_user = User(
+                    id=PUBLISHED_API_ID, name=PUBLISHED_API_ID, email="api@blend360.com", groups=[]
+                )
 
     response = call_next(request)  # type: ignore
     return response
