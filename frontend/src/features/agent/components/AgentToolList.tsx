@@ -30,10 +30,11 @@ const AgentToolList: React.FC<AgentToolListProps> = ({messageId, tools, relatedD
       )}
 
       {(isRunning || tools.thought) && (
-        <div className="flex items-center border-b border-gray p-2 last:border-b-0">
-          {isRunning && <PiCircleNotchBold className="mr-2 animate-spin" />}
+        <div className="flex w-full items-center border-b border-gray p-2 last:border-b-0">
+          {isRunning && <PiCircleNotchBold className="mr-2 shrink-0 animate-spin" />}
           {tools.thought ? (
             <ChatMessageMarkdown
+              className="min-w-0 flex-1"
               messageId={messageId}
               relatedDocuments={relatedDocuments}
             >

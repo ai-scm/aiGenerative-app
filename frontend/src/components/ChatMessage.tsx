@@ -195,13 +195,13 @@ const ChatMessage: React.FC<Props> = (props) => {
           </div>
         )}
 
-        <div className="ml-5 grow ">
+        <div className="ml-5 min-w-0 grow">
           {chatContent?.role === 'assistant' &&
             tools != null &&
             tools.length > 0 && (
-              <div className="flex flex-col">
+              <div className="flex w-full flex-col">
                 {tools.map((tools, index) => (
-                  <div key={index} className="mb-3 mt-0">
+                  <div key={index} className="mb-3 mt-0 w-full">
                     <AgentToolList
                       messageId={chatContent.id}
                       tools={tools}
