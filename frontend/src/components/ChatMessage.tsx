@@ -345,7 +345,8 @@ const ChatMessage: React.FC<Props> = (props) => {
             <ChatMessageMarkdown
               isStreaming={props.isStreaming}
               relatedDocuments={relatedDocuments}
-              messageId={chatContent.id}>
+              messageId={chatContent.id}
+              stripThinkingBlocks>
               {chatContent.content
                 .filter((content) => content.contentType === 'text')
                 .map((content) => (content as TextContent).body)

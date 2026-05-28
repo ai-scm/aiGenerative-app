@@ -3,6 +3,7 @@ import {
   RelatedDocument,
 } from '../../../@types/conversation';
 import { AgentToolUse, AgentToolsProps } from '../types';
+import { sanitizeAgentText } from '../../../utils/AgentTextUtils';
 
 export const convertThinkingLogToAgentToolProps = (
   thinkingLog: SimpleMessage[],
@@ -18,14 +19,14 @@ export const convertThinkingLogToAgentToolProps = (
   return thinkingLog.flatMap(message => {
     const reasonings = message.content.flatMap(content => {
       if (content.contentType === 'reasoning' && content.text) {
-        return [content.text];
+        return [sanitizeAgentText(content.text)];
       } else {
         return [];
       }
     });
     const thoughts = message.content.flatMap(content => {
       if (content.contentType === 'text') {
-        return [content.body];
+        return [sanitizeAgentText(content.body)];
       } else {
         return [];
       }

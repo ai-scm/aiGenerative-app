@@ -13,6 +13,7 @@ from app.repositories.models.conversation import (
     ContentModel,
     MessageModel,
     SimpleMessageModel,
+    TextContentModel,
     type_model_name,
 )
 from app.repositories.models.custom_bot_guardrails import BedrockGuardrailsModel
@@ -29,6 +30,10 @@ from strands.types.content import (
 from app.strands_integration.converters.content_converter import (
     content_model_to_strands_content_blocks,
     strands_content_block_to_content_model,
+)
+from app.strands_integration.converters.text_sanitizer import (
+    sanitize_agent_text,
+    sanitize_assistant_response_text,
 )
 
 logger = logging.getLogger(__name__)
@@ -130,10 +135,27 @@ def strands_message_to_simple_message_model(message: Message) -> SimpleMessageMo
     return SimpleMessageModel(
         role=message["role"],
         content=[
-            strands_content_block_to_content_model(content)
+            _sanitize_text_content(
+                strands_content_block_to_content_model(content),
+                role=message["role"],
+            )
             for content in message["content"]
         ],
     )
+
+
+def _sanitize_text_content(
+    content: ContentModel, role: str, strip_thinking_blocks: bool = False
+) -> ContentModel:
+    if role != "assistant" or not isinstance(content, TextContentModel):
+        return content
+
+    sanitized_body = (
+        sanitize_assistant_response_text(content.body)
+        if strip_thinking_blocks
+        else sanitize_agent_text(content.body)
+    )
+    return content.model_copy(update={"body": sanitized_body})
 
 
 def strands_message_to_message_model(
@@ -147,7 +169,11 @@ def strands_message_to_message_model(
     return MessageModel(
         role=message["role"],
         content=[
-            strands_content_block_to_content_model(content)
+            _sanitize_text_content(
+                strands_content_block_to_content_model(content),
+                role=message["role"],
+                strip_thinking_blocks=True,
+            )
             for content in message["content"]
         ],
         model=model_name,

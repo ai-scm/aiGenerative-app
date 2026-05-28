@@ -19,12 +19,14 @@ import remarkMath from 'remark-math';
 import 'katex/dist/katex.min.css';
 import { onlyText } from 'react-children-utilities';
 import RelatedDocumentViewer from './RelatedDocumentViewer';
+import { sanitizeAgentText, sanitizeAssistantResponseText } from '../utils/AgentTextUtils';
 
 type Props = BaseProps & {
   children: string;
   isStreaming?: boolean;
   relatedDocuments?: RelatedDocument[];
   messageId: string;
+  stripThinkingBlocks?: boolean;
 };
 
 const useRelatedDocumentsState = create<{
@@ -94,18 +96,25 @@ const ChatMessageMarkdown: React.FC<Props> = ({
   isStreaming,
   relatedDocuments,
   messageId,
+  stripThinkingBlocks = false,
 }) => {
   const { t } = useTranslation();
+  const sanitizedChildren = useMemo(
+    () => stripThinkingBlocks
+      ? sanitizeAssistantResponseText(children)
+      : sanitizeAgentText(children),
+    [children, stripThinkingBlocks]
+  );
   const sourceIds = useMemo(() => (
     [...new Set(Array.from(
-      children.matchAll(/\[\^(?<sourceId>[\w!?/+\-_~=;.,*&@#$%]+?)\]/g),
+      sanitizedChildren.matchAll(/\[\^(?<sourceId>[\w!?/+\-_~=;.,*&@#$%]+?)\]/g),
       match => match.groups!.sourceId,
     ))]
-  ), [children]);
+  ), [sanitizedChildren]);
 
   const chatWaitingSymbol = useMemo(() => t('app.chatWaitingSymbol'), [t]);
   const text = useMemo(() => {
-    const textRemovedIncompleteCitation = children.replace(/\[\^[^\]]*?$/, '[^');
+    const textRemovedIncompleteCitation = sanitizedChildren.replace(/\[\^[^\]]*?$/, '[^');
     let textReplacedSourceId = textRemovedIncompleteCitation.replace(
       /\[\^(?<sourceId>[\w!?/+\-_~=;.,*&@#$%]+?)\]/g,
       (_, sourceId) => {
@@ -138,7 +147,7 @@ const ChatMessageMarkdown: React.FC<Props> = ({
     }
 
     return textReplacedSourceId;
-  }, [children, isStreaming, sourceIds, chatWaitingSymbol]);
+  }, [sanitizedChildren, isStreaming, sourceIds, chatWaitingSymbol]);
 
   type RemarkPlugins = Exclude<MarkdownOptions['remarkPlugins'], null | undefined>
   const remarkPlugins = useMemo((): RemarkPlugins => [
