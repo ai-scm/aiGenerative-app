@@ -339,6 +339,7 @@ def chat(
         result = converse_with_strands(
             bot=bot,
             chat_input=chat_input,
+            user_msg_id=user_msg_id,
             instructions=instructions,
             generation_params=generation_params,
             guardrail=guardrail,

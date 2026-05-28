@@ -44,6 +44,7 @@ logger = logging.getLogger(__name__)
 def converse_with_strands(
     bot: BotModel | None,
     chat_input: ChatInput,
+    user_msg_id: str | None,
     instructions: list[str],
     generation_params: GenerationParamsModel | None,
     guardrail: BedrockGuardrailsModel | None,
@@ -88,10 +89,12 @@ def converse_with_strands(
     )
 
     # Observability: create context (no-op if disabled)
+    trace_title = bot.title if bot else "Nadia"
+    trace_user_msg_id = user_msg_id or chat_input.message.message_id or "message"
     obs_context = create_observability_context(
         workflow_id=f"{chat_input.conversation_id}",
-        title=f"{bot.title}",
-        user_msg_id=chat_input.message.message_id,
+        title=trace_title,
+        user_msg_id=trace_user_msg_id,
         bot_id=bot.id if bot else None,
         conversation_id=chat_input.conversation_id,
     )
