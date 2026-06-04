@@ -82,7 +82,7 @@ def post_message(request: Request, message_input: ChatInputWithoutBotId):
         user = User.from_published_api_id(chat_input.bot_id)
         try:
             conversation, message = chat(user=user, chat_input=chat_input)
-            logger.info(f"LOCAL_SYNC_MODE: chat() completed for conversation {conversation_id}")
+            logger.info(f"LOCAL_SYNC_MODE: chat() completed for conversation {message}")
         except Exception as e:
             logger.error(f"LOCAL_SYNC_MODE: chat() failed: {e}")
             raise HTTPException(status_code=500, detail=str(e))
