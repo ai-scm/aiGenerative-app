@@ -7,40 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [4.5.1] - 2026-04-01
 ### Added
-- **Documentation**: Added initial Draw.io diagram for API architecture.
+- **Documentation**: Added visual diagrams to help developers understand the API structure.
 
 ### Fixed
-- Fixed an issue that caused the application to reload when a new tab was opened.
-- **Frontend**: Aligned the agent thinking panel.
-- **Strands**: Sanitized internal agent tags.
-- **Strands**: Handled observability for normal chat.
-- **API**: Updated published API user context and fixed conversation log message.
+- **Navigation**: Fixed an issue that caused the application to reload unexpectedly when opening a new tab.
+- **User Interface**: Improved the visual alignment of the AI agent's "thinking" indicator.
+- **AI Agent**: Improved how the AI agent processes internal text for cleaner responses.
+- **Monitoring**: Enhanced the system's ability to track and monitor standard chat conversations.
+- **History**: Fixed minor issues with how user information is recorded and displayed in the conversation history.
 
 ## [4.5.0] - 2026-04-01
 ### Added
-- **Authentication**: Implemented OIDC role synchronization for Cognito users.
-- **Authentication**: Added mapping of Keycloak Client Roles to a dedicated `custom:kc_roles` attribute.
-- **Session Management**: Implemented automatic session and storage clearing on new tab initialization.
-- **Session Management**: Added functionality to conditionally clear Cognito-related local storage keys and perform sign-out only when a new tab is opened.
-- **Session Management**: Added functionality to clear all browser cookies when clearing local storage on unload.
-- **Agent Framework**: Added RTK agent rules.
-- **Observability**: Added observability integration.
-- **Documentation**: Updated `LOCAL_README` with detailed guides, IAM-OIDC configuration, Cognito setup, backend/API modes, and `launch.json` configuration.
+- **Security & Permissions**: Improved the login system to seamlessly synchronize user roles and permissions from external providers.
+- **Privacy & Security**: Enhanced privacy by ensuring all session data and browsing cookies are fully cleared when you log out, close the app, or open a new tab.
+- **AI Capabilities**: Added new rules and integrations to make the AI agent smarter, more reliable, and easier for our team to monitor.
+- **Documentation**: Updated the developer guide with more detailed instructions on setting up the project locally.
 
 ### Changed
-- **Authentication**: Refactored OIDC role synchronization to a dedicated Lambda function to satisfy the Single Responsibility Principle (SRP).
-- **Authentication**: Implemented strict 1:1 sync of OIDC roles by pruning missing Keycloak roles from Cognito and updating IAM permissions.
-- **Session Management**: Refactored storage cleanup hook to verify active user session before triggering global sign-out.
-- **Session Management**: Updated tab initialization logic in `useClearStorageOnUnloadSafe`.
+- **System Infrastructure**: Upgraded the login infrastructure behind the scenes to make it faster, more stable, and easier to maintain.
+- **Security**: Strengthened security by ensuring user permissions are strictly updated and any outdated access is immediately removed.
+- **User Experience**: Improved the logout process to prevent accidental logouts by carefully verifying active sessions before signing you out.
 
 ### Fixed
-- **Authentication**: Implemented pure 1:1 Keycloak to Cognito role mapping.
-- **Authentication**: Deployed post-auth lambda for all OIDC clients.
-- **Authentication**: Removed explicit `customAttributes` from CDK configuration.
-- **Authentication**: Added explicit `custom:` prefix to OIDC attribute mapping key.
-- **Authentication**: Imported `json` module globally in OIDC sync lambda to resolve `NameError`.
-- **Session Management**: Removed manual location override and forced global Amplify signOut on new tab detection.
-- **CDK**: Resolved TypeScript compilation error on `AuthProps idp`.
+- **Authentication**: Fixed several underlying bugs related to user login, role assignment, and authentication flows.
+- **Session Management**: Fixed an issue that could prevent users from being properly logged out across different browser tabs.
+- **Stability**: Resolved internal code errors to ensure smoother future updates and better application stability.
 
 ## [4.4.0] - 2026-02-13
 ### Added
