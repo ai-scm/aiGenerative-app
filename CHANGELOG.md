@@ -5,6 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.5.1] - 2026-04-01
+### Added
+- **Documentation**: Added initial Draw.io diagram for API architecture.
+
+### Fixed
+- Fixed an issue that caused the application to reload when a new tab was opened.
+- **Frontend**: Aligned the agent thinking panel.
+- **Strands**: Sanitized internal agent tags.
+- **Strands**: Handled observability for normal chat.
+- **API**: Updated published API user context and fixed conversation log message.
+
+## [4.5.0] - 2026-04-01
+### Added
+- **Authentication**: Implemented OIDC role synchronization for Cognito users.
+- **Authentication**: Added mapping of Keycloak Client Roles to a dedicated `custom:kc_roles` attribute.
+- **Session Management**: Implemented automatic session and storage clearing on new tab initialization.
+- **Session Management**: Added functionality to conditionally clear Cognito-related local storage keys and perform sign-out only when a new tab is opened.
+- **Session Management**: Added functionality to clear all browser cookies when clearing local storage on unload.
+- **Agent Framework**: Added RTK agent rules.
+- **Observability**: Added observability integration.
+- **Documentation**: Updated `LOCAL_README` with detailed guides, IAM-OIDC configuration, Cognito setup, backend/API modes, and `launch.json` configuration.
+
+### Changed
+- **Authentication**: Refactored OIDC role synchronization to a dedicated Lambda function to satisfy the Single Responsibility Principle (SRP).
+- **Authentication**: Implemented strict 1:1 sync of OIDC roles by pruning missing Keycloak roles from Cognito and updating IAM permissions.
+- **Session Management**: Refactored storage cleanup hook to verify active user session before triggering global sign-out.
+- **Session Management**: Updated tab initialization logic in `useClearStorageOnUnloadSafe`.
+
+### Fixed
+- **Authentication**: Implemented pure 1:1 Keycloak to Cognito role mapping.
+- **Authentication**: Deployed post-auth lambda for all OIDC clients.
+- **Authentication**: Removed explicit `customAttributes` from CDK configuration.
+- **Authentication**: Added explicit `custom:` prefix to OIDC attribute mapping key.
+- **Authentication**: Imported `json` module globally in OIDC sync lambda to resolve `NameError`.
+- **Session Management**: Removed manual location override and forced global Amplify signOut on new tab detection.
+- **CDK**: Resolved TypeScript compilation error on `AuthProps idp`.
+
 ## [4.4.0] - 2026-02-13
 ### Added
 - **Strands SDK Integration**: Integrated Strands SDK to enhance the agent framework, providing improved reliability, easier tool creation, and better overall performance for agentic interactions.
