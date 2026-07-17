@@ -46,7 +46,6 @@ import {
   RelatedDocument,
 } from '../@types/conversation.ts';
 import { AVAILABLE_MODEL_KEYS } from '../constants/index';
-import usePostMessageStreaming from '../hooks/usePostMessageStreaming.ts';
 import useLoginUser from '../hooks/useLoginUser';
 import useBotPinning from '../hooks/useBotPinning';
 import Skeleton from '../components/Skeleton.tsx';
@@ -157,7 +156,6 @@ const ChatPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { open: openSnackbar } = useSnackbar();
-  const { errorDetail } = usePostMessageStreaming();
   const { isAdmin } = useLoginUser();
   const { pinBot, unpinBot } = useBotPinning();
 
@@ -625,7 +623,7 @@ const ChatPage: React.FC = () => {
                 <div className="mb-12 mt-2 flex flex-col items-center">
                   <div className="flex items-center font-bold text-red">
                     <PiWarningCircleFill className="mr-1 text-2xl" />
-                    {errorDetail ?? t('error.answerResponse')}
+                    Lo sentimos, ha ocurrido un error al enviar el mensaje.
                   </div>
 
                   <Button

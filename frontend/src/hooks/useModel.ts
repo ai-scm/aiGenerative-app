@@ -23,13 +23,6 @@ const NOVA_SUPPORTED_MEDIA_TYPES = [
   'image/webp',
 ];
 
-const LLAMA_SUPPORTED_MEDIA_TYPES = [
-  'image/jpeg',
-  'image/png',
-  'image/gif',
-  'image/webp',
-];
-
 const useModelState = create<{
   modelId: Model | undefined;
   setModelId: (m: Model) => void;
@@ -77,13 +70,6 @@ const useModel = (botId?: string | null, activeModels?: ActiveModels) => {
   const availableModels = useMemo<ModelItem[]>(() => {
     return [
       {
-        modelId: 'claude-v4-opus',
-        label: t('model.claude-v4-opus.label'),
-        description: t('model.claude-v4-opus.description'),
-        supportMediaType: CLAUDE_SUPPORTED_MEDIA_TYPES,
-        supportReasoning: true,
-      },
-      {
         modelId: 'claude-v4.1-opus',
         label: t('model.claude-v4.1-opus.label'),
         description: t('model.claude-v4.1-opus.description'),
@@ -94,13 +80,6 @@ const useModel = (botId?: string | null, activeModels?: ActiveModels) => {
         modelId: 'claude-v4.5-opus',
         label: t('model.claude-v4.5-opus.label'),
         description: t('model.claude-v4.5-opus.description'),
-        supportMediaType: CLAUDE_SUPPORTED_MEDIA_TYPES,
-        supportReasoning: true,
-      },
-      {
-        modelId: 'claude-v4-sonnet',
-        label: t('model.claude-v4-sonnet.label'),
-        description: t('model.claude-v4-sonnet.description'),
         supportMediaType: CLAUDE_SUPPORTED_MEDIA_TYPES,
         supportReasoning: true,
       },
@@ -117,48 +96,6 @@ const useModel = (botId?: string | null, activeModels?: ActiveModels) => {
         description: t('model.claude-v4.5-haiku.description'),
         supportMediaType: CLAUDE_SUPPORTED_MEDIA_TYPES,
         supportReasoning: true,
-      },
-      {
-        modelId: 'claude-v3-haiku',
-        label: t('model.claude-v3-haiku.label'),
-        description: t('model.claude-v3-haiku.description'),
-        supportMediaType: CLAUDE_SUPPORTED_MEDIA_TYPES,
-        supportReasoning: false,
-      },
-      {
-        modelId: 'claude-v3.5-haiku',
-        label: t('model.claude-v3.5-haiku.label'),
-        description: t('model.claude-v3.5-haiku.description'),
-        supportMediaType: CLAUDE_SUPPORTED_MEDIA_TYPES,
-        supportReasoning: false,
-      },
-      {
-        modelId: 'claude-v3.5-sonnet',
-        label: t('model.claude-v3.5-sonnet.label'),
-        description: t('model.claude-v3.5-sonnet.description'),
-        supportMediaType: CLAUDE_SUPPORTED_MEDIA_TYPES,
-        supportReasoning: false,
-      },
-      {
-        modelId: 'claude-v3.5-sonnet-v2',
-        label: t('model.claude-v3.5-sonnet-v2.label'),
-        description: t('model.claude-v3.5-sonnet-v2.description'),
-        supportMediaType: CLAUDE_SUPPORTED_MEDIA_TYPES,
-        supportReasoning: false,
-      },
-      {
-        modelId: 'claude-v3.7-sonnet',
-        label: t('model.claude-v3.7-sonnet.label'),
-        description: t('model.claude-v3.7-sonnet.description'),
-        supportMediaType: CLAUDE_SUPPORTED_MEDIA_TYPES,
-        supportReasoning: true,
-      },
-      {
-        modelId: 'claude-v3-opus',
-        label: t('model.claude-v3-opus.label'),
-        description: t('model.claude-v3-opus.description'),
-        supportMediaType: CLAUDE_SUPPORTED_MEDIA_TYPES,
-        supportReasoning: false,
       },
       // New Amazon Nova models
       {
@@ -199,34 +136,6 @@ const useModel = (botId?: string | null, activeModels?: ActiveModels) => {
         supportMediaType: [],
         supportReasoning: false,
       },
-      {
-        modelId: 'llama3-2-1b-instruct',
-        label: t('model.llama3-2-1b-instruct.label'),
-        description: t('model.llama3-2-1b-instruct.description'),
-        supportMediaType: [],
-        supportReasoning: false,
-      },
-      {
-        modelId: 'llama3-2-3b-instruct',
-        label: t('model.llama3-2-3b-instruct.label'),
-        description: t('model.llama3-2-3b-instruct.description'),
-        supportMediaType: [],
-        supportReasoning: false,
-      },
-      {
-        modelId: 'llama3-2-11b-instruct',
-        label: t('model.llama3-2-11b-instruct.label'),
-        description: t('model.llama3-2-11b-instruct.description'),
-        supportMediaType: LLAMA_SUPPORTED_MEDIA_TYPES,
-        supportReasoning: false,
-      },
-      {
-        modelId: 'llama3-2-90b-instruct',
-        label: t('model.llama3-2-90b-instruct.label'),
-        description: t('model.llama3-2-90b-instruct.description'),
-        supportMediaType: LLAMA_SUPPORTED_MEDIA_TYPES,
-        supportReasoning: false,
-      },
       // OpenAI GPT-OSS models
       {
         modelId: 'gpt-oss-20b',
@@ -253,23 +162,9 @@ const useModel = (botId?: string | null, activeModels?: ActiveModels) => {
         supportReasoning: false,
       },
       {
-        modelId: 'mixtral-8x7b-instruct',
-        label: t('model.mixtral-8x7b-instruct.label'),
-        description: t('model.mixtral-8x7b-instruct.description'),
-        supportMediaType: [],
-        supportReasoning: false,
-      },
-      {
         modelId: 'mistral-large',
         label: t('model.mistral-large.label'),
         description: t('model.mistral-large.description'),
-        supportMediaType: [],
-        supportReasoning: false,
-      },
-      {
-        modelId: 'mistral-large-2',
-        label: t('model.mistral-large-2.label'),
-        description: t('model.mistral-large-2.description'),
         supportMediaType: [],
         supportReasoning: false,
       },
