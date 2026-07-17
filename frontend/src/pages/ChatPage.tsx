@@ -625,7 +625,7 @@ const ChatPage: React.FC = () => {
                 <div className="mb-12 mt-2 flex flex-col items-center">
                   <div className="flex items-center font-bold text-red">
                     <PiWarningCircleFill className="mr-1 text-2xl" />
-                    {errorDetail ?? t('error.answerResponse')}
+                    Lo sentimos, ha ocurrido un error al enviar el mensaje.
                   </div>
 
                   <Button
